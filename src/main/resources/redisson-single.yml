@@ -1,0 +1,54 @@
+#单节点
+singleServerConfig:
+  #发布和订阅连接的最小空闲连接数
+  subscriptionConnectionMinimumIdleSize: 1
+  #发布和订阅连接池大小
+  subscriptionConnectionPoolSize: 16
+  #最小空闲连接数
+  connectionMinimumIdleSize: 8
+  #连接池大小
+  connectionPoolSize: 16
+  #DNS监测时间间隔,单位毫秒
+  dnsMonitoringInterval: 5000
+  #空闲连接超时,单位毫秒
+  idleConnectionTimeout: 10000
+  #连接超时,单位毫秒
+  connectTimeout: 10000
+  #响应超时时间,单位毫秒
+  timeout: 3000
+  #命令失败重试次数,如果尝试达到retryAttempts仍不能将命令发送至某指定节点时,将抛出错误.若尝试在此限制之内发送成功,则开始启用timeout计时
+  retryAttempts: 3
+  #命令重试发送时间间隔,单位:毫秒
+  retryInterval: 1500
+  #节点地址
+  address:
+  #数据库编号
+  database:
+  #密码
+  password:
+  #单个连接最大订阅数量
+  subscriptionsPerConnection: 5
+  #客户端名称
+  clientName: pudge-redisson
+  #是否启用ssl端点标识
+  sslEnableEndpointIdentification: false
+  #ssl提供者
+  sslProvider: JDK
+  #  sslTruststore:
+  #  sslTruststorePassword:
+  #  sslKeystore:
+  #  sslKeystorePassword:
+  #发送ping命令到redis间隔,设为0则禁用此选项,单位毫秒
+  pingConnectionInterval: 30000
+  #为连接启用TCP keepAlive
+  keepAlive: false
+  #为连接启用 TCP noDelay
+  tcpNoDelay: false
+#读写时使用的编码器
+codec: !<org.redisson.codec.JsonJacksonCodec> {}
+#Netty线程池数量, 设置为 默认当前处理核数量*2
+nettyThreads: 16
+transportMode: NIO
+threads: 8
+#看门狗超时时间,单位毫秒,适用于redis宕机或其他导致锁未正确释放的场景, 即另起线程 每过 lockWatchdogTimeout/3 时间检查锁是否存在再续期锁
+lockWatchdogTimeout: 30000

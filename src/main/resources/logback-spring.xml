@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--TRACE < DEBUG < INFO < WARN < ERROR -->
+<configuration debug="true">
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!--服务名称-->
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <!--日志文件-->
+    <springProperty scope="context" name="log.path" source ="easy.escm.log-path"/>
+    <springProperty scope="context" name="log.level" source ="easy.escm.log-level"/>
+    <property name="serverIp" value ="localhost"/>
+    <springProperty scope="context" name="serverPort" source ="server.port"/>
+    <!--文件pattern-->
+    <property name="pattern" value="[${serverIp}:${serverPort}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${springAppName:-},%X{X-B3-TraceId:-}] ${PID:- } %-40.40logger{80} %M : %m%n"/>
+
+    <!-- 控制台 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[${serverIp}:${serverPort}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %clr([${springAppName:-},%X{X-B3-TraceId:-}]){yellow} %clr(${PID:- }){magenta}  %clr(%-40.40logger{80}){cyan} %M : %m%n</pattern>
+            <charset>GBK</charset>
+        </encoder>
+    </appender>
+
+    <!-- DEBUG -->
+    <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 按天回滚 daily -->
+            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}/debug-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 日志最大的历史 -->
+            <maxHistory>720</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 出错日志 appender  -->
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>${pattern}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+        <file>${log.path}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 按天回滚 daily -->
+            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}/error-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 日志最大的历史 -->
+            <maxHistory>720</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- INFO -->
+    <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 按天回滚 daily -->
+            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}/info-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 日志最大的历史 -->
+            <maxHistory>720</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <logger name="org.springframework" level="ERROR" additivity="false">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="ERROR" />
+    </logger>
+
+    <logger name="org.springframework.boot" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="INFO" />
+    </logger>
+
+    <logger name="org.group1418.easy.escm"  additivity="false">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="DEBUG" />
+        <appender-ref ref="INFO" />
+        <appender-ref ref="ERROR" />
+    </logger>
+
+    <!-- 日志输出级别 -->
+    <root level="${log.level}"/>
+</configuration>
