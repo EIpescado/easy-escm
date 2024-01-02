@@ -37,14 +37,9 @@ public class BaseQo implements Serializable {
     private String currentOrganization;
 
     /**
-     * 登录组织的ERP id
+     * 是否主账号
      */
-    private String currentOrganizationErpId;
-
-    /**
-     * 是否不为E链主账号
-     */
-    private Boolean notEscmMaster;
+    private Boolean master;
 
     /**
      * 导出字段

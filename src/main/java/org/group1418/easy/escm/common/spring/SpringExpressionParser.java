@@ -1,11 +1,11 @@
-package org.group1418.easy.escm.common.utils;
+package org.group1418.easy.escm.common.spring;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.slf4j.MDC;
+import org.group1418.easy.escm.common.utils.JSONUtil;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -19,7 +19,7 @@ import java.util.Map;
  * @author yq 2023/10/24 13:48
  * @description CustomSpringExpressionLanguageParser 自定义spring EL转化
  */
-public class CustomSpringExpressionLanguageParser {
+public class SpringExpressionParser {
 
 
     private static final Map<String, Method> JSON_GET_PRO_METHOD_MAP = new HashMap<>();

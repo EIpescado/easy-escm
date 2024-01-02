@@ -2,15 +2,18 @@ package org.group1418.easy.escm.common.utils;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import org.group1418.easy.escm.common.wrapper.R;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BinaryOperator;
@@ -248,8 +251,31 @@ public class StreamUtil {
         return CollUtil.unionAll(c1, c2).stream().filter(distinctByKey(mapper)).collect(Collectors.toList());
     }
 
+    /**
+     * 按指定key去重predicate
+     * @param keyExtractor key获取函数
+     * @param <T> 原始类型
+     * @return predicate
+     */
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+
+
+    /**
+     * 从数组中找出第一个满足条件的对象
+     *
+     * @param array     数组
+     * @param predicate 条件
+     * @param <T>       集合泛型
+     * @return 对象
+     */
+    public static <T> T findFirst(T[] array, Predicate<? super T> predicate) {
+        if (ArrayUtil.isEmpty(array)) {
+            return null;
+        }
+        Optional<T> optionalConfig = Arrays.stream(array).filter(predicate).findFirst();
+        return optionalConfig.orElse(null);
     }
 }

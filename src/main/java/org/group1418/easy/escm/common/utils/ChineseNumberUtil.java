@@ -13,9 +13,9 @@ import java.util.Map;
  * @description 中文数字工具
  * @since V1.0.0
  */
-public class ChineseNumberUtils {
+public class ChineseNumberUtil {
 
-    private ChineseNumberUtils() {
+    private ChineseNumberUtil() {
 
     }
 

@@ -1,4 +1,4 @@
-package org.group1418.easy.escm.config;
+package org.group1418.easy.escm.common.spring;
 
 import cn.hutool.core.map.MapUtil;
 import lombok.extern.slf4j.Slf4j;
