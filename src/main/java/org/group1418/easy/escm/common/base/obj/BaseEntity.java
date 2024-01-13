@@ -1,6 +1,5 @@
 package org.group1418.easy.escm.common.base.obj;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -43,7 +42,6 @@ public class BaseEntity implements Serializable {
      * 最后修改时间
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastUpdated;
 
     @Version

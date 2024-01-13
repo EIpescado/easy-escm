@@ -2,15 +2,12 @@ package org.group1418.easy.escm.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
-import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.group1418.easy.escm.config.properties.CustomConfigProperties;
-import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +53,10 @@ public class CustomMybatisPlusConfig {
         return new MetaObjectHandler() {
             private static final String DATE_CREATED = "dateCreated";
             private static final String LAST_UPDATED = "lastUpdated";
+            private static final String CREATOR_ID = "creatorId";
+            private static final String CREATOR = "creator";
+            private static final String MODIFIER_ID = "modifierId";
+            private static final String MODIFIER = "modifier";
 
             @Override
             public void insertFill(MetaObject metaObject) {
@@ -72,10 +73,7 @@ public class CustomMybatisPlusConfig {
 
             @Override
             public void updateFill(MetaObject metaObject) {
-                //导入数据时打开此值
-//                if (getFieldValByName(LAST_UPDATED, metaObject) == null) {
-                    this.setFieldValByName(LAST_UPDATED, LocalDateTime.now(), metaObject);
-//                }
+                this.setFieldValByName(LAST_UPDATED, LocalDateTime.now(), metaObject);
             }
         };
     }

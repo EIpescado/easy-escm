@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * @author yq 2023/10/24 13:48
- * @description CustomSpringExpressionLanguageParser 自定义spring EL转化
+ * @description SpringExpressionParser 自定义spring EL转化
  */
 public class SpringExpressionParser {
 

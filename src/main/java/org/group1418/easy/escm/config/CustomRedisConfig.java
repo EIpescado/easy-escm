@@ -5,6 +5,8 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.text.StrBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.serializer.CustomGenericFastJsonRedisSerializer;
+import org.group1418.easy.escm.common.service.CustomRedisCacheService;
+import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.spring.starter.RedissonAutoConfigurationCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -41,11 +43,11 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
         return getDefaultRedisTemplate(redisConnectionFactory, new CustomGenericFastJsonRedisSerializer());
     }
 
-//    @Bean
-//    public CustomRedisCacheService customRedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
-//        log.info("注入 customRedisCacheService");
-//        return new CustomRedisCacheService(redisTemplate, redissonClient);
-//    }
+    @Bean
+    public CustomRedisCacheService customRedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
+        log.info("注入 customRedisCacheService");
+        return new CustomRedisCacheService(redisTemplate, redissonClient);
+    }
 
     @Bean
     @Override

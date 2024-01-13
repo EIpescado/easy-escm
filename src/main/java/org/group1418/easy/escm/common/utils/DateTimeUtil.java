@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * @author yq 2023/12/29 11:28
  * @description DateUtil
  */
-public class DateUtil {
+public class DateTimeUtil {
 
     public static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -28,7 +28,7 @@ public class DateUtil {
     private static final Pattern Y_M_D_H_M_S_PATTERN = Pattern.compile("\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}:\\d{1,2}");
 
 
-    private DateUtil() {
+    private DateTimeUtil() {
     }
 
     /**
