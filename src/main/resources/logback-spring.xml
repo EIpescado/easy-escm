@@ -5,20 +5,20 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <!--服务名称-->
-    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <springProperty scope="context" name="appName" source="easy.escm.name"/>
     <!--日志文件-->
     <springProperty scope="context" name="log.path" source ="easy.escm.log-path"/>
     <springProperty scope="context" name="log.level" source ="easy.escm.log-level"/>
-    <property name="serverIp" value ="localhost"/>
+    <conversionRule conversionWord="serverIp" converterClass="org.group1418.easy.escm.common.converter.LogIpConverter" />
+    <define name="serverIp" class="org.group1418.easy.escm.common.utils.LogIpDefiner" />
     <springProperty scope="context" name="serverPort" source ="server.port"/>
     <!--文件pattern-->
-    <property name="pattern" value="[${serverIp}:${serverPort}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${springAppName:-},%X{X-B3-TraceId:-}] ${PID:- } %-40.40logger{80} %M : %m%n"/>
+    <property name="pattern" value="[${serverIp}:${serverPort}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${appName:-},%X{X-B3-TraceId:-}] ${PID:- } %-40.40logger{80} %M : %m%n"/>
 
     <!-- 控制台 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[${serverIp}:${serverPort}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %clr([${springAppName:-},%X{X-B3-TraceId:-}]){yellow} %clr(${PID:- }){magenta}  %clr(%-40.40logger{80}){cyan} %M : %m%n</pattern>
-            <charset>GBK</charset>
+            <pattern>[${serverIp}:${serverPort}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %clr([${appName:-},%X{X-B3-TraceId:-}]){yellow} %clr(${PID:- }){magenta}  %clr(%-40.40logger{80}){cyan} %M : %m%n</pattern>
         </encoder>
     </appender>
 

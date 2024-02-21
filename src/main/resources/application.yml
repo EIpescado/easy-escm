@@ -1,8 +1,6 @@
 spring:
   profiles:
     active: dev
-  application:
-    name: easy-escm
 server:
   port: 39999
   shutdown: graceful
