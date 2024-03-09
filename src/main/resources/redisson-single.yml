@@ -29,7 +29,7 @@ singleServerConfig:
   #单个连接最大订阅数量
   subscriptionsPerConnection: 5
   #客户端名称
-  clientName: pudge-redisson
+  clientName: easy-escm-redisson
   #是否启用ssl端点标识
   sslEnableEndpointIdentification: false
   #ssl提供者

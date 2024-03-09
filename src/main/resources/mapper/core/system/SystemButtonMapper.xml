@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.group1418.easy.escm.core.system.mapper.SystemButtonMapper">
+
+    <select id="batchGetButtonNodes" resultType="org.group1418.easy.escm.common.wrapper.ButtonNode">
+        SELECT * FROM system_button
+        WHERE id in <foreach collection="buttonIds" item="bid" open="(" separator="," close=")">#{bid}</foreach>
+        AND enabled = 1
+        ORDER BY sort_no
+    </select>
+
+    <select id="getAllButtonNodes" resultType="org.group1418.easy.escm.common.wrapper.ButtonNode">
+        SELECT * from system_button where enabled = 1 ORDER BY sort_no
+    </select>
+    <select id="getUserButtonPermission" resultType="java.lang.String">
+        SELECT DISTINCT b.permission from user_role_relation r
+        INNER JOIN system_role sr ON sr.id = r.role_id
+        INNER JOIN role_button_relation br on br.role_id = sr.id
+        INNER JOIN system_button b ON b.id = br.button_id
+        where r.user_id = #{userId} AND b.permission is not null AND b.permission != '' AND sr.enabled = 1 AND b.enabled = 1
+        group by b.id
+    </select>
+    <select id="getAllButtonIds" resultType="java.lang.String">
+        SELECT id from system_button where enabled = 1 ORDER BY sort_no
+    </select>
+    <select id="getUserButtonIds" resultType="java.lang.String">
+        SELECT
+            m.id
+        FROM
+            system_user_role_relation r
+        INNER JOIN system_role sr ON sr.id = r.role_id
+        INNER JOIN system_role_button_relation mr ON mr.role_id = sr.id
+        INNER JOIN system_button m ON m.id = mr.button_id
+        WHERE
+            r.user_id = #{userId}
+        AND sr.enabled = 1
+        AND m.enabled = 1
+        GROUP BY
+            m.id
+        ORDER BY
+            m.sort_no
+    </select>
+</mapper>

@@ -6,9 +6,9 @@ spring:
       add-mappings: false
   #单redis配置
   redis:
-    host:
-    port:
-    password:
+    host: 192.168.0.19
+    port: 6379
+    password: hse059605
     database: 6
     timeout: 5s
     redisson:
@@ -20,14 +20,17 @@ spring:
       datasource:
         master:
           type: com.zaxxer.hikari.HikariDataSource
-          url: jdbc:mysql://xxx:3306/easy_escm?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&allowMultiQueries=true
-          username:
-          password:
+          url: jdbc:mysql://192.168.0.19:3306/easy_escm?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&allowMultiQueries=true
+          username: web
+          password: hse059605
           driver-class-name: com.mysql.cj.jdbc.Driver
   main:
     banner-mode: off
 easy:
   escm:
+    name: easy-escm
     log-level: INFO
     log-path: ./logs
-    user-default-password: 7777
+    token-config:
+      is-log: true
+      not-check-login-paths: /isLogin,/testAsync

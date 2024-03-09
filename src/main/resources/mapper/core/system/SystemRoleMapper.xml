@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.group1418.easy.escm.core.system.mapper.SystemRoleMapper">
+    <select id="list" resultType="org.group1418.easy.escm.core.system.pojo.to.SystemRoleTo">
+      select * from system_role where enabled = 1
+      <if test="qo.keyword != null and qo.keyword != ''">
+        and (role_name like concat('%',#{qo.keyword},'%') or role_code like concat('%',#{qo.keyword},'%') or remark like concat('%',#{qo.keyword},'%'))
+      </if>
+    </select>
+    <select id="getUserRole" resultType="java.lang.String">
+        SELECT DISTINCT sr.role_code from system_user_role_relation r
+        LEFT JOIN system_role sr on sr.id = r.role_id
+        where r.user_id = #{userId} and sr.enabled = 1
+    </select>
+    <select id="select" resultType="org.group1418.easy.escm.common.wrapper.Selector">
+        SELECT id as 'value',role_name as label from system_role where enabled  = 1
+    </select>
+    <select id="getRoleIdsByCode" resultType="java.lang.Long">
+        select distinct id from system_role where role_code in
+        <foreach collection="codeList" open="(" close=")" separator="," item="code">
+            #{code}
+        </foreach>
+    </select>
+
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.group1418.easy.escm.core.system.mapper.SystemUserMapper">
+
+
+    <select id="list" resultType="org.group1418.easy.escm.core.system.pojo.to.SystemUserTo">
+        SELECT u.id, u.username, u.nickname, u.phone, u.date_created, u.state, u.mail,
+        u.be_escm_master,u.be_escm_user,u.be_interface_user,u.internal_user,
+        cu.customer_name, cu.organization,u.whether_Auth
+        from system_user u
+        LEFT JOIN user_customer_relation r on r.user_id = u.id
+        LEFT JOIN customer cu on cu.id = r.customer_id
+        <where>
+            <if test="qo.keyword != null and qo.keyword != ''">
+                and (u.username like concat('%',#{qo.keyword},'%')
+                     or u.nickname like concat('%',#{qo.keyword},'%')
+                     or cu.customer_name like concat('%',#{qo.keyword},'%'))
+            </if>
+            <if test="qo.currentCustomerId != null">
+                and cu.id = #{qo.currentCustomerId}
+            </if>
+            <if test="qo.customerId != null">
+                and cu.id = #{qo.customerId}
+            </if>
+            <if test="qo.beEscmUser != null">
+                and u.be_escm_user= #{qo.beEscmUser}
+            </if>
+            <if test="qo.internalUser != null">
+                and u.internal_user= #{qo.internalUser}
+            </if>
+            <if test="qo.beInterfaceUser != null">
+                and u.be_interface_user= #{beInterfaceUser}
+            </if>
+        </where>
+        order by u.last_updated desc
+    </select>
+    <select id="get" resultType="org.group1418.easy.escm.core.system.pojo.vo.SystemUserVo">
+        select  username,nickname,phone,mail from system_user where id = #{id}
+    </select>
+    <select id="escmList" resultType="org.group1418.easy.escm.core.system.pojo.to.SystemUserTo">
+        SELECT u.id, u.username, u.nickname, u.phone, u.date_created, u.state, u.mail,
+        u.be_escm_master,u.be_escm_user,u.be_interface_user,u.internal_user,
+        cu.customer_name, cu.organization,u.whether_Auth,cc.mail as ccMail
+        from system_user u
+        LEFT JOIN user_customer_relation r on r.user_id = u.id
+        LEFT JOIN customer cu on cu.id = r.customer_id
+        LEFT JOIN system_user_cc_mail cc on cc.user_id = u.id
+        where cu.id = #{qo.currentCustomerId} and  u.be_escm_user= #{qo.beEscmUser}
+        <if test="qo.keyword != null and qo.keyword != ''">
+            and u.username = #{qo.keyword}
+        </if>
+    </select>
+    <select id="mpUserBindCustomerIds" resultType="java.lang.String">
+        SELECT DISTINCT c.eas_customer_id from mp_user_customer_relation r
+        INNER JOIN customer c on c.id = r.customer_id
+        where r.user_id = #{userId}
+    </select>
+    <select id="getUserByErpCustomerId" resultType="org.group1418.easy.escm.core.system.entity.SystemUser">
+        SELECT u.* from user_customer_relation r
+        INNER JOIN system_user u on u.id = r.user_id
+        INNER JOIN customer c on c.id = r.customer_id
+        where  c.eas_customer_id = #{erpCustomerId}
+    </select>
+    <select id="getUserOrg" resultType="org.group1418.easy.escm.common.enums.OrgEnum">
+        SELECT distinct cor.organization
+        from user_customer_relation r
+        INNER JOIN system_user u ON u.id = r.user_id
+        INNER JOIN customer_organization_relation cor on cor.customer_id = r.customer_id
+        where u.username = #{username} AND u.enabled = 1
+    </select>
+    <select id="getUserOrgPro" resultType="org.group1418.easy.escm.core.system.pojo.to.SystemClientTo">
+        SELECT * from system_client c where EXISTS (
+            SELECT distinct cor.organization
+            from user_customer_relation r
+            INNER JOIN system_user u ON u.id = r.user_id
+            INNER JOIN customer_organization_relation cor on cor.customer_id = r.customer_id
+            where u.username = #{username} AND u.enabled = 1 AND c.organization = cor.organization
+        )
+    </select>
+</mapper>
