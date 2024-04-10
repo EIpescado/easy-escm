@@ -3,77 +3,77 @@
 <mapper namespace="org.group1418.easy.escm.core.system.mapper.CoreRelationMapper">
 
     <insert id="batchInsertUserRoleRelation">
-        INSERT into system_user_role_relation(user_id,role_id) VALUES
+        INSERT into relation_system_user_role(user_id,role_id) VALUES
         <foreach collection="roleIds" item="roleId" separator=",">
             (#{userId},#{roleId})
         </foreach>
     </insert>
     <delete id="deleteUserRoleRelationByUserId">
         delete
-        from system_user_role_relation
+        from relation_system_user_role
         where user_id = #{userId}
     </delete>
     <delete id="deleteUserRoleRelationByUserIdAndRoleIdIn">
-        delete from user_role_relation where user_id = #{userId} and role_id in
+        delete from relation_user_role where user_id = #{userId} and role_id in
         <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
             #{roleId}
         </foreach>
     </delete>
     <select id="singleRoleMenu" resultType="java.lang.Long">
         SELECT DISTINCT menu_id
-        from system_role_menu_relation
+        from relation_system_role_menu
         where role_id = #{roleId}
     </select>
     <select id="singleRoleButton" resultType="java.lang.Long">
         SELECT DISTINCT button_id
-        from system_role_button_relation
+        from relation_system_role_button
         where role_id = #{roleId}
     </select>
     <select id="getUserAlreadyBindRoleIds" resultType="java.lang.Long">
         SELECT DISTINCT role_id
-        from system_user_role_relation
+        from relation_system_user_role
         where user_id = #{userId}
     </select>
     <insert id="batchInsertRoleMenuRelation">
-        INSERT into system_role_menu_relation(role_id,menu_id) VALUES
+        INSERT into relation_system_role_menu(role_id,menu_id) VALUES
         <foreach collection="menuIds" item="menuId" separator=",">
             (#{roleId},#{menuId})
         </foreach>
     </insert>
     <insert id="batchInsertRoleButtonRelation">
-        INSERT into system_role_button_relation(role_id,button_id) VALUES
+        INSERT into relation_system_role_button(role_id,button_id) VALUES
         <foreach collection="buttonIds" item="buttonId" separator=",">
             (#{roleId},#{buttonId})
         </foreach>
     </insert>
     <delete id="deleteRoleMenuRelationByRoleId">
         delete
-        from system_role_menu_relation
+        from relation_system_role_menu
         where role_id = #{roleId}
     </delete>
     <delete id="deleteRoleButtonRelationByRoleId">
         delete
-        from system_role_button_relation
+        from relation_system_role_button
         where role_id = #{roleId}
     </delete>
     <select id="countByUserIdAndTenantId" resultType="java.lang.Integer">
         SELECT count(*)
-        from system_user_tenant_relation
+        from relation_system_user_tenant
         where user_id = #{userId}
           and tenant_id = #{tenantId}
     </select>
     <insert id="bindUserTenantRelation">
-        INSERT into system_user_tenant_relation(user_id, tenant_id)
+        INSERT into relation_system_user_tenant(user_id, tenant_id)
         VALUES (#{userId}, #{tenantId})
     </insert>
     <select id="countByTenantIdAndOrganization" resultType="java.lang.Integer">
         SELECT count(*)
-        from system_tenant_org_relation
+        from relation_system_tenant_org
         where tenant_id = #{tenantId}
           and org = #{organization}
     </select>
     <insert id="bindTenantOrganizationRelation">
-        INSERT into system_tenant_org_relation(tenant_id, org)
+        INSERT into relation_system_tenant_org(tenant_id, org)
         VALUES (#{tenantId}, #{organization})
     </insert>
 </mapper>

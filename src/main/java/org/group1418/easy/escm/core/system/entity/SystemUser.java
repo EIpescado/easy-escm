@@ -59,6 +59,10 @@ public class SystemUser extends BaseEntity {
      * 激活时间
      */
     private LocalDateTime activateTime;
+    /**
+     * 注册时间
+     */
+    private LocalDateTime registerTime;
 
     /**
      * 最后登录ID

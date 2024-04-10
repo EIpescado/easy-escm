@@ -2,7 +2,7 @@ package org.group1418.easy.escm.core.system.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.group1418.easy.escm.common.base.obj.BaseEntity;
+import org.group1418.easy.escm.common.base.obj.TenantEntity;
 
 /**
  * @author yq
@@ -12,7 +12,7 @@ import org.group1418.easy.escm.common.base.obj.BaseEntity;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class SystemButton extends BaseEntity {
+public class SystemButton extends TenantEntity {
     private static final long serialVersionUID = 8235439689257212003L;
 
     /**

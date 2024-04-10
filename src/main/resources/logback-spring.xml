@@ -9,7 +9,6 @@
     <!--日志文件-->
     <springProperty scope="context" name="log.path" source ="easy.escm.log-path"/>
     <springProperty scope="context" name="log.level" source ="easy.escm.log-level"/>
-    <conversionRule conversionWord="serverIp" converterClass="org.group1418.easy.escm.common.converter.LogIpConverter" />
     <define name="serverIp" class="org.group1418.easy.escm.common.utils.LogIpDefiner" />
     <springProperty scope="context" name="serverPort" source ="server.port"/>
     <!--文件pattern-->
