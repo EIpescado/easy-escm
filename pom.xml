@@ -6,7 +6,8 @@
 
     <groupId>org.group1418</groupId>
     <artifactId>easy-escm</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <version>1.0</version>
     <description>easy-escm, 供应链</description>
 
     <parent>
@@ -16,38 +17,31 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <modules>
+        <module>easy-escm-common</module>
+        <module>easy-escm-core</module>
+        <module>easy-escm-starter</module>
+    </modules>
+
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
 
-        <common.version>1.0</common.version>
+        <hutool.version>5.8.24</hutool.version>
+        <fastjson.version>1.2.76</fastjson.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <redisson.version>3.25.2</redisson.version>
+        <wechat.version>4.4.0</wechat.version>
+        <javax.mail.version>1.6.2</javax.mail.version>
+        <easyexcel.version>3.0.5</easyexcel.version>
+        <opencc4j.version>1.7.2</opencc4j.version>
+        <hanlp.version>portable-1.8.3</hanlp.version>
+        <dynamic-datasource.version>3.6.1</dynamic-datasource.version>
+        <ttl.version>2.14.2</ttl.version>
+        <sa-token.version>1.37.0</sa-token.version>
+        <mysql.driver.version>8.0.21</mysql.driver.version>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.group1418</groupId>
-            <artifactId>easy-escm-common</artifactId>
-            <version>${common.version}</version>
-        </dependency>
-
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <!-- 打包时跳过测试 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
