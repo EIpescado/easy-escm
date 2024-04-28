@@ -102,7 +102,6 @@ public class EasyEscmGeneratorConfig {
     }
 
     private void initController(TableInfo tableInfo, JSONObject otherJson,  JSONObject packageMap){
-        //controller
         controllerPackages.add(RequestMapping.class.getName());
         controllerAnnotations.add(StrUtil.format("RequestMapping(\"/{}\")",
                 BooleanUtil.isTrue(otherJson.getBoolean("controllerMappingHyphenStyle")) ?
@@ -118,9 +117,6 @@ public class EasyEscmGeneratorConfig {
         }
         controllerAddPackageAndAnnotation(RequiredArgsConstructor.class);
         controllerPackages.add(StrUtil.format("{}.{}", packageMap.get(ConstVal.SERVICE), tableInfo.getServiceName()));
-//        if(BooleanUtil.isTrue(vo)){
-////            controllerPackages.add()
-//        }
         this.serviceImplFieldName = StrUtil.removeSuffix(StrUtil.lowerFirst(tableInfo.getServiceImplName()), "Impl");
     }
 
@@ -147,6 +143,10 @@ public class EasyEscmGeneratorConfig {
     private void controllerAddPackageAndAnnotation(Class<?> clazz) {
         controllerPackages.add(clazz.getName());
         controllerAnnotations.add(clazz.getSimpleName());
+    }
+
+    public void setPojoDirName(String pojoDirName) {
+        this.pojoDirName = pojoDirName;
     }
 
     public EasyEscmGeneratorConfig setVo(Boolean vo) {
