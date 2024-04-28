@@ -5,16 +5,23 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.generator.config.ConstVal;
 import com.baomidou.mybatisplus.generator.config.InjectionConfig;
-import com.baomidou.mybatisplus.generator.config.PackageConfig;
 import com.baomidou.mybatisplus.generator.config.builder.CustomFile;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.group1418.easy.escm.common.base.obj.BaseFo;
 import org.group1418.easy.escm.common.base.obj.BaseQo;
 import org.group1418.easy.escm.common.base.obj.BaseTo;
 import org.group1418.easy.escm.common.base.obj.BaseVo;
+import org.group1418.easy.escm.common.wrapper.PageR;
+import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,6 +54,10 @@ public class EasyEscmGeneratorConfig {
      * 是否生成To  table object
      */
     private Boolean to = true;
+    /**
+     * 是否生成del方法
+     */
+    private Boolean del = true;
 
     /**
      * 实体对应 service 实现类 属性名称, 形如 entityService, 用于自动注入
@@ -81,11 +92,11 @@ public class EasyEscmGeneratorConfig {
     public void init(TableInfo tableInfo, Map<String, Object> otherMap) {
         JSONObject otherJson = new JSONObject(otherMap);
         JSONObject packageMap = otherJson.getJSONObject("package");
-        initPojo(tableInfo,otherJson,packageMap);
-        initController(tableInfo,otherJson,packageMap);
+        initPojo(tableInfo, otherJson, packageMap);
+        initController(tableInfo, otherJson, packageMap);
     }
 
-    private void initPojo(TableInfo tableInfo, JSONObject otherJson,  JSONObject packageMap){
+    private void initPojo(TableInfo tableInfo, JSONObject otherJson, JSONObject packageMap) {
         pojoPackage = packageMap.getString(ConstVal.PARENT) + "." + pojoDirName;
         superFoName = BaseFo.class.getSimpleName();
         superFoClassPackage = BaseFo.class.getName();
@@ -99,9 +110,41 @@ public class EasyEscmGeneratorConfig {
         superVoName = BaseVo.class.getSimpleName();
         superVoClassPackage = BaseVo.class.getName();
         pojoPackages = tableInfo.getImportPackages().stream().filter(s -> s.startsWith("java") && !"java.io.Serializable".equals(s)).collect(Collectors.toSet());
+
+        if (BooleanUtil.isTrue(fo)) {
+            controllerPackages.add(PostMapping.class.getName());
+            controllerPackages.add(RequestBody.class.getName());
+            controllerPackages.add(PathVariable.class.getName());
+            controllerPackages.add(R.class.getName());
+            controllerPackages.add(pojoPackage + ".fo." + buildPojoName(tableInfo, "fo"));
+        }
+        if(BooleanUtil.isTrue(qo)){
+            controllerPackages.add(GetMapping.class.getName());
+            controllerPackages.add(ModelAttribute.class.getName());
+            controllerPackages.add(PageR.class.getName());
+            controllerPackages.add(R.class.getName());
+            controllerPackages.add(pojoPackage + ".qo." + buildPojoName(tableInfo, "qo"));
+        }
+        if (BooleanUtil.isTrue(to)) {
+            controllerPackages.add(GetMapping.class.getName());
+            controllerPackages.add(R.class.getName());
+            controllerPackages.add(pojoPackage + ".to." + buildPojoName(tableInfo, "to"));
+        }
+        if (BooleanUtil.isTrue(vo)) {
+            controllerPackages.add(GetMapping.class.getName());
+            controllerPackages.add(PathVariable.class.getName());
+            controllerPackages.add(R.class.getName());
+            controllerPackages.add(pojoPackage + ".vo." + buildPojoName(tableInfo, "vo"));
+        }
+        if(BooleanUtil.isTrue(del)){
+            controllerPackages.add(PostMapping.class.getName());
+            controllerPackages.add(PathVariable.class.getName());
+            controllerPackages.add(R.class.getName());
+        }
+
     }
 
-    private void initController(TableInfo tableInfo, JSONObject otherJson,  JSONObject packageMap){
+    private void initController(TableInfo tableInfo, JSONObject otherJson, JSONObject packageMap) {
         controllerPackages.add(RequestMapping.class.getName());
         controllerAnnotations.add(StrUtil.format("RequestMapping(\"/{}\")",
                 BooleanUtil.isTrue(otherJson.getBoolean("controllerMappingHyphenStyle")) ?
@@ -120,7 +163,7 @@ public class EasyEscmGeneratorConfig {
         this.serviceImplFieldName = StrUtil.removeSuffix(StrUtil.lowerFirst(tableInfo.getServiceImplName()), "Impl");
     }
 
-    public void otherInject(InjectionConfig.Builder injectionConfigBuilder){
+    public void otherInject(InjectionConfig.Builder injectionConfigBuilder) {
         if (BooleanUtil.isTrue(fo)) {
             injectionConfigBuilder.customFile(buildCustomFile("fo"));
         }
@@ -135,9 +178,13 @@ public class EasyEscmGeneratorConfig {
         }
     }
 
-    private CustomFile buildCustomFile(String secondPack) {
-        return new CustomFile.Builder().templatePath(StrUtil.format("/templates/{}.java.ftl",secondPack)).packageName(pojoDirName + "." + secondPack)
-                .formatNameFunction(ti -> ti.getEntityName() + StrUtil.upperFirst(secondPack)).fileName(".java").build();
+    private CustomFile buildCustomFile(String suffix) {
+        return new CustomFile.Builder().templatePath(StrUtil.format("/templates/{}.java.ftl", suffix)).packageName(pojoDirName + "." + suffix)
+                .formatNameFunction(ti -> buildPojoName(ti, suffix)).fileName(".java").build();
+    }
+
+    private String buildPojoName(TableInfo tableInfo, String suffix) {
+        return tableInfo.getEntityName() + StrUtil.upperFirst(suffix);
     }
 
     private void controllerAddPackageAndAnnotation(Class<?> clazz) {
@@ -169,4 +216,8 @@ public class EasyEscmGeneratorConfig {
         return this;
     }
 
+    public EasyEscmGeneratorConfig setDel(Boolean del) {
+        this.del = del;
+        return this;
+    }
 }

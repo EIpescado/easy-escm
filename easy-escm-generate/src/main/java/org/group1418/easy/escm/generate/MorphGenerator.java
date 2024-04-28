@@ -78,12 +78,13 @@ public class MorphGenerator {
     private void buildInjectionConfig(Consumer<EasyEscmGeneratorConfig> configConsumer) {
         EasyEscmGeneratorConfig config = new EasyEscmGeneratorConfig();
         configConsumer.accept(config);
-        InjectionConfig.Builder injectionConfigBuilder = new InjectionConfig.Builder().beforeOutputFile((tableInfo, objectMap) -> {
+        InjectionConfig.Builder injectionConfigBuilder = new InjectionConfig.Builder();
+        config.otherInject(injectionConfigBuilder);
+        injectionConfigBuilder.beforeOutputFile((tableInfo, objectMap) -> {
             config.init(tableInfo, objectMap);
             //额外模版参数
             objectMap.put("easyEscmConfig", config);
         });
-        config.otherInject(injectionConfigBuilder);
         injectionConfig = injectionConfigBuilder.build();
     }
 
@@ -178,7 +179,7 @@ public class MorphGenerator {
         generator.execute("org.group1418.easy.escm",
                 "easy-escm-generate",
                 "generate",
-                config -> config.setFo(true),
+                config -> config.setFo(false).setVo(false),
                 "system_test");
     }
 }
