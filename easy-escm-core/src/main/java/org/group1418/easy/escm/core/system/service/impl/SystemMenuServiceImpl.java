@@ -17,7 +17,7 @@ import org.group1418.easy.escm.common.utils.StreamUtil;
 import org.group1418.easy.escm.common.wrapper.ButtonNode;
 import org.group1418.easy.escm.common.wrapper.MenuTreeNode;
 import org.group1418.easy.escm.common.wrapper.Tree;
-import org.group1418.easy.escm.core.CacheConstant;
+import org.group1418.easy.escm.core.constant.CacheConstant;
 import org.group1418.easy.escm.core.system.entity.SystemMenu;
 import org.group1418.easy.escm.core.system.mapper.SystemMenuMapper;
 import org.group1418.easy.escm.core.system.pojo.fo.SystemMenuFo;

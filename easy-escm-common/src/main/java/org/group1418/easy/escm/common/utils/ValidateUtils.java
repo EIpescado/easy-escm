@@ -5,7 +5,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.StrCheck;
+import org.group1418.easy.escm.common.validator.StrCheck;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
 import org.group1418.easy.escm.common.wrapper.ValidResult;

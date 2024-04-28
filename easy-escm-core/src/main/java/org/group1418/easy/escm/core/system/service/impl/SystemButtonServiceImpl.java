@@ -6,7 +6,7 @@ import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.service.CustomRedisCacheService;
 import org.group1418.easy.escm.common.utils.DbUtil;
 import org.group1418.easy.escm.common.wrapper.ButtonNode;
-import org.group1418.easy.escm.core.CacheConstant;
+import org.group1418.easy.escm.core.constant.CacheConstant;
 import org.group1418.easy.escm.core.system.entity.SystemButton;
 import org.group1418.easy.escm.core.system.mapper.SystemButtonMapper;
 import org.group1418.easy.escm.core.system.pojo.fo.SystemButtonFo;

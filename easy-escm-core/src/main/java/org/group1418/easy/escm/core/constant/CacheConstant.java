@@ -1,4 +1,4 @@
-package org.group1418.easy.escm.core;
+package org.group1418.easy.escm.core.constant;
 
 /**
  * @author yq

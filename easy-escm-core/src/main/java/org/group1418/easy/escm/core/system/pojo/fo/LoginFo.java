@@ -1,7 +1,7 @@
 package org.group1418.easy.escm.core.system.pojo.fo;
 
 import lombok.Data;
-import org.group1418.easy.escm.common.StrCheck;
+import org.group1418.easy.escm.common.validator.StrCheck;
 
 /**
  * @author yq 2024/3/29 15:32

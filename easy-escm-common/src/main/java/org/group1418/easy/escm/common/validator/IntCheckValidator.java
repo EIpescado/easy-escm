@@ -1,4 +1,4 @@
-package org.group1418.easy.escm.common;
+package org.group1418.easy.escm.common.validator;
 
 
 import cn.hutool.core.util.ArrayUtil;

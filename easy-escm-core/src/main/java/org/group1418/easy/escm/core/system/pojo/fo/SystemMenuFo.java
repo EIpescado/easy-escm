@@ -3,8 +3,8 @@ package org.group1418.easy.escm.core.system.pojo.fo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import org.group1418.easy.escm.common.IntCheck;
-import org.group1418.easy.escm.common.StrCheck;
+import org.group1418.easy.escm.common.validator.IntCheck;
+import org.group1418.easy.escm.common.validator.StrCheck;
 
 import java.io.Serializable;
 

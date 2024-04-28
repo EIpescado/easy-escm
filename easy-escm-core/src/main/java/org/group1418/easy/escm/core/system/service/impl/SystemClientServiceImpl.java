@@ -7,7 +7,7 @@ import org.group1418.easy.escm.common.base.obj.BasePageQo;
 import org.group1418.easy.escm.common.service.CustomRedisCacheService;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
-import org.group1418.easy.escm.core.CacheConstant;
+import org.group1418.easy.escm.core.constant.CacheConstant;
 import org.group1418.easy.escm.core.system.entity.SystemClient;
 import org.group1418.easy.escm.core.system.mapper.SystemClientMapper;
 import org.group1418.easy.escm.core.system.pojo.fo.SystemClientFo;
