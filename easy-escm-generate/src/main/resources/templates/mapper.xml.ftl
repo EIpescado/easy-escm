@@ -36,4 +36,22 @@
     </sql>
 
 </#if>
+    <#if easyEscmConfig.qo>
+    <select id="list" resultType="${easyEscmConfig.pojoPackage}.to.${entity}To">
+        select * from ${table.name} where enabled = 1
+        <#if easyEscmConfig.keywordLikeFields?? && (easyEscmConfig.keywordLikeFields?size > 0)>
+            AND (
+                <#list easyEscmConfig.keywordLikeFields as kf>
+                    <#if kf_index != 0>or </#if>${kf.columnName} like concat('%',<#noparse>#{</#noparse>qo.keyword<#noparse>}</#noparse>,'%')
+                </#list>
+            )
+        </#if>
+    </select>
+    </#if>
+
+    <#if easyEscmConfig.vo>
+    <select id="get" resultType="${easyEscmConfig.pojoPackage}.vo.${entity}Vo">
+        select * from ${table.name} where id = <#noparse>#{</#noparse>id<#noparse>}</#noparse>
+    </select>
+    </#if>
 </mapper>

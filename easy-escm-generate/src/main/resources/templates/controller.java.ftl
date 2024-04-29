@@ -16,8 +16,10 @@ public class ${table.controllerName} extends ${superControllerClass} {
 <#else>
 public class ${table.controllerName} {
 </#if>
+
     private final ${table.serviceName} ${easyEscmConfig.serviceImplFieldName};
     <#if easyEscmConfig.fo && table.commonFields?? && (table.commonFields?size > 0)>
+
     @PostMapping
     public R<#noparse><</#noparse>String<#noparse>></#noparse> create(@RequestBody ${entity}Fo fo){
         ${easyEscmConfig.serviceImplFieldName}.create(fo);

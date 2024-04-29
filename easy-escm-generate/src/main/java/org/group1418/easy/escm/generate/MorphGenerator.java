@@ -179,7 +179,7 @@ public class MorphGenerator {
         generator.execute("org.group1418.easy.escm",
                 "easy-escm-generate",
                 "generate",
-                config -> config.setFo(false).setVo(false),
+                config -> config.setFo(true).setVo(true).addLikeField("username","password"),
                 "system_test");
     }
 }

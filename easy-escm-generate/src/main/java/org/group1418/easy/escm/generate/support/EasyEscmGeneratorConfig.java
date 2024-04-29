@@ -1,22 +1,30 @@
 package org.group1418.easy.escm.generate.support;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.generator.config.ConstVal;
 import com.baomidou.mybatisplus.generator.config.InjectionConfig;
 import com.baomidou.mybatisplus.generator.config.builder.CustomFile;
+import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Param;
 import org.group1418.easy.escm.common.base.obj.BaseFo;
-import org.group1418.easy.escm.common.base.obj.BaseQo;
+import org.group1418.easy.escm.common.base.obj.BasePageQo;
 import org.group1418.easy.escm.common.base.obj.BaseTo;
 import org.group1418.easy.escm.common.base.obj.BaseVo;
+import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
 import org.group1418.easy.escm.common.wrapper.R;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -87,6 +98,16 @@ public class EasyEscmGeneratorConfig {
     private String superVoName;
     private String superVoClassPackage;
     private Set<String> pojoPackages = new TreeSet<>();
+    /**
+     * 关键字查询支持的字段
+     */
+    private List<TableField> keywordLikeFields = new ArrayList<>();
+    private Set<String> keywordLikeFieldList = new TreeSet<>();
+    /**
+     * 时间查询 支持的字段
+     */
+    private List<TableField> dateRangeFields = new ArrayList<>();
+    private Set<String> dateRangeFieldList = new TreeSet<>();
 
     @SuppressWarnings("unchecked")
     public void init(TableInfo tableInfo, Map<String, Object> otherMap) {
@@ -94,6 +115,15 @@ public class EasyEscmGeneratorConfig {
         JSONObject packageMap = otherJson.getJSONObject("package");
         initPojo(tableInfo, otherJson, packageMap);
         initController(tableInfo, otherJson, packageMap);
+        //init fields extra
+        if (CollUtil.isNotEmpty(keywordLikeFieldList)) {
+            List<TableField> fields = tableInfo.getFields();
+            fields.stream().filter(f -> CollUtil.contains(keywordLikeFieldList, f.getColumnName())).forEach(this.keywordLikeFields::add);
+        }
+        if (CollUtil.isNotEmpty(dateRangeFieldList)) {
+            List<TableField> fields = tableInfo.getFields();
+            fields.stream().filter(f -> CollUtil.contains(dateRangeFieldList, f.getColumnName())).forEach(this.dateRangeFields::add);
+        }
     }
 
     private void initPojo(TableInfo tableInfo, JSONObject otherJson, JSONObject packageMap) {
@@ -101,8 +131,8 @@ public class EasyEscmGeneratorConfig {
         superFoName = BaseFo.class.getSimpleName();
         superFoClassPackage = BaseFo.class.getName();
 
-        superQoName = BaseQo.class.getSimpleName();
-        superQoClassPackage = BaseQo.class.getName();
+        superQoName = BasePageQo.class.getSimpleName();
+        superQoClassPackage = BasePageQo.class.getName();
 
         superToName = BaseTo.class.getSimpleName();
         superToClassPackage = BaseTo.class.getName();
@@ -116,30 +146,58 @@ public class EasyEscmGeneratorConfig {
             controllerPackages.add(RequestBody.class.getName());
             controllerPackages.add(PathVariable.class.getName());
             controllerPackages.add(R.class.getName());
-            controllerPackages.add(pojoPackage + ".fo." + buildPojoName(tableInfo, "fo"));
+            String pkg = pojoPackage + ".fo." + buildPojoName(tableInfo, "fo");
+            controllerPackages.add(pkg);
+            servicePackages.add(pkg);
+            serviceImplPackages.add(pkg);
+            serviceImplPackages.add(Transactional.class.getName());
+            serviceImplPackages.add(BeanUtils.class.getName());
+            serviceImplPackages.add(Assert.class.getName());
         }
-        if(BooleanUtil.isTrue(qo)){
+        if (BooleanUtil.isTrue(qo)) {
             controllerPackages.add(GetMapping.class.getName());
             controllerPackages.add(ModelAttribute.class.getName());
             controllerPackages.add(PageR.class.getName());
             controllerPackages.add(R.class.getName());
-            controllerPackages.add(pojoPackage + ".qo." + buildPojoName(tableInfo, "qo"));
+            String pkg = pojoPackage + ".qo." + buildPojoName(tableInfo, "qo");
+            controllerPackages.add(pkg);
+            servicePackages.add(pkg);
+            servicePackages.add(PageR.class.getName());
+            serviceImplPackages.add(pkg);
+            serviceImplPackages.add(PageR.class.getName());
+            serviceImplPackages.add(PageUtil.class.getName());
+            mapperPackages.add(pkg);
+            mapperPackages.add(IPage.class.getName());
+            mapperPackages.add(Page.class.getName());
+            mapperPackages.add(Param.class.getName());
         }
         if (BooleanUtil.isTrue(to)) {
             controllerPackages.add(GetMapping.class.getName());
             controllerPackages.add(R.class.getName());
-            controllerPackages.add(pojoPackage + ".to." + buildPojoName(tableInfo, "to"));
+            String pkg = pojoPackage + ".to." + buildPojoName(tableInfo, "to");
+            controllerPackages.add(pkg);
+            servicePackages.add(pkg);
+            serviceImplPackages.add(pkg);
+            mapperPackages.add(pkg);
         }
         if (BooleanUtil.isTrue(vo)) {
             controllerPackages.add(GetMapping.class.getName());
             controllerPackages.add(PathVariable.class.getName());
             controllerPackages.add(R.class.getName());
-            controllerPackages.add(pojoPackage + ".vo." + buildPojoName(tableInfo, "vo"));
+            String pkg = pojoPackage + ".vo." + buildPojoName(tableInfo, "vo");
+            controllerPackages.add(pkg);
+            servicePackages.add(pkg);
+            serviceImplPackages.add(pkg);
+            mapperPackages.add(pkg);
+            mapperPackages.add(IPage.class.getName());
+            mapperPackages.add(Page.class.getName());
+            mapperPackages.add(Param.class.getName());
         }
-        if(BooleanUtil.isTrue(del)){
+        if (BooleanUtil.isTrue(del)) {
             controllerPackages.add(PostMapping.class.getName());
             controllerPackages.add(PathVariable.class.getName());
             controllerPackages.add(R.class.getName());
+            serviceImplPackages.add(Transactional.class.getName());
         }
 
     }
@@ -218,6 +276,16 @@ public class EasyEscmGeneratorConfig {
 
     public EasyEscmGeneratorConfig setDel(Boolean del) {
         this.del = del;
+        return this;
+    }
+
+    public EasyEscmGeneratorConfig addLikeField(String... fields) {
+        this.keywordLikeFieldList.addAll(Arrays.asList(fields));
+        return this;
+    }
+
+    public EasyEscmGeneratorConfig addDateRangeField(String... fields) {
+        this.dateRangeFieldList.addAll(Arrays.asList(fields));
         return this;
     }
 }
