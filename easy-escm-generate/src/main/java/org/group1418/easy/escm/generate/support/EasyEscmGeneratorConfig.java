@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.generator.config.ConstVal;
@@ -101,13 +101,13 @@ public class EasyEscmGeneratorConfig {
     /**
      * 关键字查询支持的字段
      */
-    private List<TableField> keywordLikeFields = new ArrayList<>();
-    private Set<String> keywordLikeFieldList = new TreeSet<>();
+    private final List<TableField> keywordLikeFields = new ArrayList<>();
+    private final Set<String> keywordLikeFieldList = new TreeSet<>();
     /**
      * 时间查询 支持的字段
      */
-    private List<TableField> dateRangeFields = new ArrayList<>();
-    private Set<String> dateRangeFieldList = new TreeSet<>();
+    private final List<TableField> dateRangeFields = new ArrayList<>();
+    private final Set<String> dateRangeFieldList = new TreeSet<>();
 
     @SuppressWarnings("unchecked")
     public void init(TableInfo tableInfo, Map<String, Object> otherMap) {
@@ -156,7 +156,7 @@ public class EasyEscmGeneratorConfig {
         }
         if (BooleanUtil.isTrue(qo)) {
             controllerPackages.add(GetMapping.class.getName());
-            controllerPackages.add(ModelAttribute.class.getName());
+            controllerPackages.add(RequestBody.class.getName());
             controllerPackages.add(PageR.class.getName());
             controllerPackages.add(R.class.getName());
             String pkg = pojoPackage + ".qo." + buildPojoName(tableInfo, "qo");

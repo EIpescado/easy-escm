@@ -3,11 +3,9 @@ package org.group1418.easy.escm.common.config;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.serializer.ToStringSerializer;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.support.config.FastJsonConfig;
+import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -27,9 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * web上下文配置
  * @author yq
  * @date 2018/04/18 14:05
- * @description web上下文配置
  * @since V1.0.0
  */
 @Configuration
@@ -81,20 +79,17 @@ public class CustomWebMvcConfig extends WebMvcConfigurationSupport {
         });
         //全局配置
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
-        fastJsonConfig.setSerializerFeatures(
+        fastJsonConfig.setWriterFeatures(
                 //是否输出值为null的字段,默认false
-                SerializerFeature.WriteMapNullValue,
-                SerializerFeature.WriteNullListAsEmpty,
-                //全局修改日期格式,默认false,格式为 yyyy-MM-dd
-                SerializerFeature.WriteDateUseDateFormat,
+                JSONWriter.Feature.WriteMapNullValue,
+                JSONWriter.Feature.WriteNullListAsEmpty,
+                //整型转字符串 防止前端精度丢失
+                JSONWriter.Feature.WriteLongAsString,
                 //字符串输出null值
-                SerializerFeature.WriteNullStringAsEmpty
+                JSONWriter.Feature.WriteNullStringAsEmpty,
+                //枚举默认toString
+                JSONWriter.Feature.WriteEnumUsingToString
         );
-        //整型转字符串 防止前端精度丢失
-        SerializeConfig serializeConfig = SerializeConfig.globalInstance;
-        serializeConfig.put(Long.class, ToStringSerializer.instance);
-        serializeConfig.put(Long.TYPE, ToStringSerializer.instance);
-        fastJsonConfig.setSerializeConfig(serializeConfig);
         //全局日期格式
         fastJsonConfig.setDateFormat("yyyy-MM-dd HH:mm:ss");
         fastConverter.setFastJsonConfig(fastJsonConfig);

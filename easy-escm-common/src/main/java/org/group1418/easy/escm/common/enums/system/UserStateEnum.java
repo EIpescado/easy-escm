@@ -11,7 +11,7 @@ public enum UserStateEnum {
     NOT_ACTIVATED("未激活"),
     ;
 
-    String userState;
+    final String userState;
 
     UserStateEnum(String userState) {
         this.userState = userState;

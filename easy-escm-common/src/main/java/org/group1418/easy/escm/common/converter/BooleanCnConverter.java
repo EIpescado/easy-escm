@@ -6,9 +6,9 @@ import com.alibaba.excel.metadata.data.WriteCellData;
 import org.group1418.easy.escm.common.utils.PudgeUtil;
 
 /**
+ * 布尔值转中文 是/否
  * @author yq
  * @date 2020/07/03 14:09
- * @description 布尔值转中文 是/否
  * @since V1.0.0
  */
 public class BooleanCnConverter implements Converter<Boolean> {

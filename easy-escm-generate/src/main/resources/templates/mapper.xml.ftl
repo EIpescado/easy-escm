@@ -37,7 +37,7 @@
 
 </#if>
     <#if easyEscmConfig.qo>
-    <select id="list" resultType="${easyEscmConfig.pojoPackage}.to.${entity}To">
+    <select id="search" resultType="${easyEscmConfig.pojoPackage}.to.${entity}To">
         select * from ${table.name} where enabled = 1
         <#if easyEscmConfig.keywordLikeFields?? && (easyEscmConfig.keywordLikeFields?size > 0)>
             AND (

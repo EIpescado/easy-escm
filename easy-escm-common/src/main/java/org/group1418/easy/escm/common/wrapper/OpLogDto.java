@@ -1,6 +1,6 @@
 package org.group1418.easy.escm.common.wrapper;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.group1418.easy.escm.common.annotation.OpLog;

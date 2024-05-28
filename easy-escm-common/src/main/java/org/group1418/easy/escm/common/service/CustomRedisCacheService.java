@@ -9,9 +9,9 @@ import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.group1418.easy.escm.common.serializer.CustomGenericFastJsonRedisSerializer;
 import org.redisson.RedissonMultiLock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -39,9 +39,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
+ * 自定义redis过期时间缓存配置
  * @author yq
  * @date 2020/10/16 09:07
- * @description 自定义redis过期时间缓存配置
  * @since V1.0.0
  */
 public class CustomRedisCacheService {
@@ -55,7 +55,7 @@ public class CustomRedisCacheService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedissonClient redissonClient;
     private final RedisSerializer<String> keySerializer;
-    private final CustomGenericFastJsonRedisSerializer valueSerializer;
+    private final GenericFastJsonRedisSerializer valueSerializer;
     private static final String REDIS_LOCK_SUFFIX = "_LOCK_HASH";
     private static final String INCREMENT_AND_TTL_LUA = "local errorCount = redis.call('GET',KEYS[1])" +
             "\nif (errorCount == false) then errorCount = 0" +
@@ -69,7 +69,7 @@ public class CustomRedisCacheService {
         this.redisTemplate = redisTemplate;
         this.redissonClient = redissonClient;
         //缓存redis的Serializer 参照RedisConfig中配置
-        this.valueSerializer = (CustomGenericFastJsonRedisSerializer) redisTemplate.getDefaultSerializer();
+        this.valueSerializer = (GenericFastJsonRedisSerializer) redisTemplate.getDefaultSerializer();
         this.keySerializer = (StringRedisSerializer) redisTemplate.getKeySerializer();
     }
 

@@ -8,8 +8,7 @@ import lombok.EqualsAndHashCode;
 import ${easyEscmConfig.superQoClassPackage};
 /**
 * ${table.comment!} Qo
-* @author ${author}
-* @since ${date}
+* @author ${author}  ${date}
 */
 @EqualsAndHashCode(callSuper = true)
 @Data

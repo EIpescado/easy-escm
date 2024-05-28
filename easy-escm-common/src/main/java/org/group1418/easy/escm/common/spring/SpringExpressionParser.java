@@ -4,7 +4,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import org.group1418.easy.escm.common.utils.JSONUtil;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * SpringExpressionParser 自定义spring EL转化
  * @author yq 2023/10/24 13:48
- * @description SpringExpressionParser 自定义spring EL转化
  */
 public class SpringExpressionParser {
 

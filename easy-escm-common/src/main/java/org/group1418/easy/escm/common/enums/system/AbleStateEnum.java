@@ -12,7 +12,7 @@ public enum AbleStateEnum {
     OFF("禁用"),
     ;
 
-    String state;
+    final String state;
 
     AbleStateEnum(String state) {
         this.state = state;

@@ -3,8 +3,8 @@ package org.group1418.easy.escm.common.config;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.text.StrBuilder;
+import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.serializer.CustomGenericFastJsonRedisSerializer;
 import org.group1418.easy.escm.common.service.CustomRedisCacheService;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
@@ -25,9 +25,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.util.List;
 
 /**
+ * redis配置
  * @author yq
  * @date 2020/09/18 14:11
- * @description redis配置
  * @since V1.0.0
  */
 @Slf4j
@@ -40,7 +40,7 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
     @ConditionalOnMissingBean(name = "redisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         log.info("注入自定义 redisTemplate<String,Object>");
-        return getDefaultRedisTemplate(redisConnectionFactory, new CustomGenericFastJsonRedisSerializer());
+        return getDefaultRedisTemplate(redisConnectionFactory, new GenericFastJsonRedisSerializer());
     }
 
     @Bean
@@ -132,7 +132,8 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
         return prefix + node;
     }
 
-    public static RedisTemplate<String, Object> getDefaultRedisTemplate(RedisConnectionFactory connectionFactory, CustomGenericFastJsonRedisSerializer fastJsonRedisSerializer) {
+    public static RedisTemplate<String, Object> getDefaultRedisTemplate(RedisConnectionFactory connectionFactory,
+                                                                        GenericFastJsonRedisSerializer fastJsonRedisSerializer) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         // value值的序列化采用fastJsonRedisSerializer
         template.setValueSerializer(fastJsonRedisSerializer);

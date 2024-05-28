@@ -7,8 +7,7 @@ import ${cp};
 </#list>
 /**
  * ${table.comment!} 服务类
- * @author ${author}
- * @since ${date}
+ * @author ${author} ${date}
  */
 <#if kotlin>
 interface ${table.serviceName} : ${superServiceClass}<${entity}>
@@ -53,7 +52,7 @@ public interface ${table.serviceName} extends ${superServiceClass}<${entity}> {
     * @param qo 查询参数
     * @return 分页对象
     */
-    PageR<#noparse><</#noparse>${entity}To<#noparse>></#noparse> list(${entity}Qo qo);
+    PageR<#noparse><</#noparse>${entity}To<#noparse>></#noparse> search(${entity}Qo qo);
     </#if>
 }
 </#if>

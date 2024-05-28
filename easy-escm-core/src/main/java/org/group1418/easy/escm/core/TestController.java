@@ -4,10 +4,11 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
 import org.group1418.easy.escm.common.wrapper.R;
+import org.group1418.easy.escm.core.system.pojo.fo.LoginFo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,5 +74,12 @@ public class TestController {
     public R<JSONObject> testEncrypt(@RequestBody String body) {
         System.out.println(body);
         return R.ok(new JSONObject().fluentPut("a",1).fluentPut("body",body));
+    }
+
+    @PostMapping("jsonTest")
+    @SaIgnore
+    public R<LoginFo> jsonTest(@RequestBody LoginFo fo) {
+        System.out.println(1);
+        return R.ok(fo);
     }
 }

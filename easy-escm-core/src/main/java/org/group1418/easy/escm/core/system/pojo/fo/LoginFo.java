@@ -4,8 +4,9 @@ import lombok.Data;
 import org.group1418.easy.escm.common.validator.StrCheck;
 
 /**
+ * 登录表单
+ *
  * @author yq 2024/3/29 15:32
- * @description LoginFo 登录表单
  */
 @Data
 public class LoginFo {

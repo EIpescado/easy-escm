@@ -5,10 +5,9 @@ import org.group1418.easy.escm.common.exception.ICustomTipEnum;
 import org.group1418.easy.escm.common.wrapper.CustomTip;
 
 /**
- * @author yq
- * @date 2021年4月13日 16:48:24
- * @description 提示枚举
- * @since V1.0.0
+ * 提示枚举
+ *
+ * @author yq 2021年4月13日 16:48:24
  */
 public enum CustomTipEnum implements ICustomTipEnum {
     /**
@@ -16,9 +15,9 @@ public enum CustomTipEnum implements ICustomTipEnum {
      */
     SUCCESS(0, "success"),
     FAIL(1, "fail"),
-    CREDENTIALS_INVALID(10001,"凭证无效或已过期"),
+    CREDENTIALS_INVALID(10001, "凭证无效或已过期"),
     REFRESH_CREDENTIALS_INVALID(10002, "刷新凭证无效或已过期"),
-    PERMISSION_DENIED(401,"无权访问"),
+    PERMISSION_DENIED(401, "无权访问"),
 
     /**
      * 服务器异常
@@ -29,7 +28,7 @@ public enum CustomTipEnum implements ICustomTipEnum {
     SERVER_ERROR(500, "500,server error"),
     ;
 
-    CustomTip tip;
+    final CustomTip tip;
 
     CustomTipEnum(int code, String msg) {
         this.tip = CustomTip.of(code, msg);

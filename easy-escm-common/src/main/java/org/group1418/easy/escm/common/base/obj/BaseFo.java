@@ -6,9 +6,9 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
+ * base fo 表单对象
  * @author yq
  * @date 2024年4月28日 15:50:09
- * @description base fo 表单对象
  * @since V1.0.0
  */
 @Data

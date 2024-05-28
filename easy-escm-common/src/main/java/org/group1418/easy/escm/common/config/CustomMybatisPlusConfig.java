@@ -17,9 +17,9 @@ import java.time.LocalDateTime;
 
 
 /**
+ * mybatis-plus config
  * @author yq
  * @date 2021年4月14日 11:25:49
- * @description mybatis-plus config
  * @since V1.0.0
  */
 @Configuration
@@ -51,29 +51,30 @@ public class CustomMybatisPlusConfig {
     @ConditionalOnClass(MetaObjectHandler.class)
     public MetaObjectHandler metaObjectHandler() {
         return new MetaObjectHandler() {
-            private static final String DATE_CREATED = "dateCreated";
-            private static final String LAST_UPDATED = "lastUpdated";
+            private static final String CREATE_TIME = "createTime";
+            private static final String UPDATE_TIME = "updateTime";
             private static final String CREATOR_ID = "creatorId";
             private static final String CREATOR = "creator";
-            private static final String MODIFIER_ID = "modifierId";
-            private static final String MODIFIER = "modifier";
+            private static final String UPDATER_ID = "updaterId";
+            private static final String UPDATER = "updater";
+            private static final String ENABLED = "enabled";
 
             @Override
             public void insertFill(MetaObject metaObject) {
                 LocalDateTime now = null;
-                this.setFieldValByName("enabled", true, metaObject);
-                if (getFieldValByName(DATE_CREATED, metaObject) == null) {
+                this.setFieldValByName(ENABLED, true, metaObject);
+                if (getFieldValByName(CREATE_TIME, metaObject) == null) {
                     now = LocalDateTime.now();
-                    this.setFieldValByName(DATE_CREATED, now, metaObject);
+                    this.setFieldValByName(CREATE_TIME, now, metaObject);
                 }
-                if (getFieldValByName(LAST_UPDATED, metaObject) == null) {
-                    this.setFieldValByName(LAST_UPDATED, now != null ? now : LocalDateTime.now(), metaObject);
+                if (getFieldValByName(UPDATE_TIME, metaObject) == null) {
+                    this.setFieldValByName(UPDATE_TIME, now != null ? now : LocalDateTime.now(), metaObject);
                 }
             }
 
             @Override
             public void updateFill(MetaObject metaObject) {
-                this.setFieldValByName(LAST_UPDATED, LocalDateTime.now(), metaObject);
+                this.setFieldValByName(UPDATE_TIME, LocalDateTime.now(), metaObject);
             }
         };
     }

@@ -12,8 +12,9 @@ import org.springframework.context.annotation.Bean;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * easy-escm 入口
+ *
  * @author yq 2023/12/27 16:08
- * @description EasyEscmApp
  */
 @SpringBootApplication
 @MapperScan(basePackages = "org.group1418.easy.escm.*.*.mapper")

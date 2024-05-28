@@ -1,9 +1,9 @@
 package org.group1418.easy.escm.core.system.pojo.fo;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 import org.group1418.easy.escm.common.validator.StrCheck;
-import org.group1418.easy.escm.common.deserializer.StrFull2HalfTrimDeserializer;
+import org.group1418.easy.escm.common.deserializer.StrFull2HalfTrimReader;
 
 import java.io.Serializable;
 
@@ -23,42 +23,42 @@ public class SystemUserRegisterFo implements Serializable {
     /**
      * 客户名称
      */
-    @JSONField(deserializeUsing = StrFull2HalfTrimDeserializer.class)
+    @JSONField(deserializeUsing = StrFull2HalfTrimReader.class)
     @StrCheck(name = "客户名称")
     private String customerName;
 
     /**
      * 用户名
      */
-    @JSONField(deserializeUsing = StrFull2HalfTrimDeserializer.class)
+    @JSONField(deserializeUsing = StrFull2HalfTrimReader.class)
     @StrCheck(name = "用户名")
     private String username;
 
     /***
      * 密码
      */
-    @JSONField(deserializeUsing = StrFull2HalfTrimDeserializer.class)
+    @JSONField(deserializeUsing = StrFull2HalfTrimReader.class)
     @StrCheck(name = "密码")
     private String password;
 
     /**
      * 确认密码
      */
-    @JSONField(deserializeUsing = StrFull2HalfTrimDeserializer.class)
+    @JSONField(deserializeUsing = StrFull2HalfTrimReader.class)
     @StrCheck(name = "确认密码")
     private String confirmPassword;
 
     /**
      * 手机
      */
-    @JSONField(deserializeUsing = StrFull2HalfTrimDeserializer.class)
+    @JSONField(deserializeUsing = StrFull2HalfTrimReader.class)
     @StrCheck(name = "手机")
     private String phone;
 
     /**
      * 授权邮箱
      */
-    @JSONField(deserializeUsing = StrFull2HalfTrimDeserializer.class)
+    @JSONField(deserializeUsing = StrFull2HalfTrimReader.class)
     @StrCheck(name = "邮箱")
     private String mail;
 

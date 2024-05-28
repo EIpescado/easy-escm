@@ -173,7 +173,7 @@ public class MorphGenerator {
     public static void main(String[] args) {
         MorphGenerator generator = MorphGenerator.builder().username("")
                 .password("")
-                .url("")
+                .url("jdbc:mysql://localhost:3306/easy_escm?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&allowMultiQueries=true")
                 .author("yq")
                 .build();
         generator.execute("org.group1418.easy.escm",

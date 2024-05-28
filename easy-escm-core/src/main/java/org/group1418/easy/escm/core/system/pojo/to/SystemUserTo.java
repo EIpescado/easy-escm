@@ -1,7 +1,6 @@
 package org.group1418.easy.escm.core.system.pojo.to;
 
-import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.group1418.easy.escm.common.base.obj.BaseTo;
@@ -34,7 +33,6 @@ public class SystemUserTo extends BaseTo {
     @JSONField(format = "yyyy-MM-dd")
     private LocalDateTime dateCreated;
 
-    @JSONField(serialzeFeatures = SerializerFeature.WriteEnumUsingToString)
     private UserStateEnum state;
 
     /**
@@ -65,7 +63,6 @@ public class SystemUserTo extends BaseTo {
     /**
      * 组织
      */
-    @JSONField(serialzeFeatures = SerializerFeature.WriteEnumUsingToString)
     private OrgEnum organization;
 
     /**

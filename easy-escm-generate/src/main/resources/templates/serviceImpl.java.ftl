@@ -14,8 +14,7 @@ import ${cp};
 </#list>
 /**
  * ${table.comment!} 服务实现类
- * @author ${author}
- * @since ${date}
+ * @author ${author} ${date}
  */
 @Service
 @RequiredArgsConstructor
@@ -63,8 +62,8 @@ public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.m
 
     <#if easyEscmConfig.qo>
     @Override
-    public PageR<#noparse><</#noparse>${entity}To<#noparse>></#noparse> list(${entity}Qo qo) {
-        return PageUtil.select(qo, baseMapper::list);
+    public PageR<#noparse><</#noparse>${entity}To<#noparse>></#noparse> search(${entity}Qo qo) {
+        return PageUtil.select(qo, baseMapper::search);
     }
     </#if>
 }

@@ -22,9 +22,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
+ * spring 异步线程池设置,使用默认可能导致内存溢出,默认实现为 SimpleAsyncTaskExecutor,通过 AsyncExecutionInterceptor 来选择执行器
  * @author yq
  * @date 2020/11/26 16:45
- * @description spring 异步线程池设置,使用默认可能导致内存溢出,默认实现为 SimpleAsyncTaskExecutor,通过 AsyncExecutionInterceptor 来选择执行器
  * @since V1.0.0
  */
 @ConditionalOnClass(ThreadPoolTaskExecutor.class)

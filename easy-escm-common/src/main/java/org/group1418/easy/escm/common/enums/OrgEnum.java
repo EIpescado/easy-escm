@@ -1,6 +1,7 @@
 package org.group1418.easy.escm.common.enums;
 
 import cn.hutool.core.util.StrUtil;
+import lombok.Getter;
 
 import java.util.Arrays;
 
@@ -9,27 +10,21 @@ import java.util.Arrays;
  *
  * @author yq 2021年3月29日 14:49:18
  */
+@Getter
 public enum OrgEnum {
+    HFY_2024("HF三三四四", "2024"),
     /**
      * 1418工作室
      */
     STUDIO_1418("1418工作室", "1418"),
     ;
 
-    String organizationName;
-    String companyId;
+    final String organizationName;
+    final String companyId;
 
     OrgEnum(String organizationName, String companyId) {
         this.organizationName = organizationName;
         this.companyId = companyId;
-    }
-
-    public String getCompanyId() {
-        return companyId;
-    }
-
-    public String getOrganizationName() {
-        return organizationName;
     }
 
     public static OrgEnum parse(String org) {

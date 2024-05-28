@@ -5,12 +5,11 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONAware;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.PropertyFilter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.PropertyFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public class JSONUtil {
      * @param <T>         响应结果类型
      * @return 响应结果
      */
-    public static <T> T getObject(JSONAware jsonOrArray, Class<T> resultClazz, String keyExpress) {
+    public static <T> T getObject(Object jsonOrArray, Class<T> resultClazz, String keyExpress) {
         if (jsonOrArray instanceof JSONObject) {
             return getObjectFromJson((JSONObject) jsonOrArray, resultClazz, keyExpress);
         } else if (jsonOrArray instanceof JSONArray) {
@@ -104,27 +103,27 @@ public class JSONUtil {
     }
 
 
-    public static String getString(JSONAware json, String keyExpress) {
+    public static String getString(Object json, String keyExpress) {
         return getObject(json, String.class, keyExpress);
     }
 
-    public static Boolean notBlank(JSONAware json, String keyExpress){
+    public static Boolean notBlank(Object json, String keyExpress){
         return StrUtil.isNotBlank(getString(json,keyExpress));
     }
 
-    public static Boolean getBoolean(JSONAware json, String keyExpress) {
+    public static Boolean getBoolean(Object json, String keyExpress) {
         return getObject(json, Boolean.class, keyExpress);
     }
 
-    public static Long getLong(JSONAware json, String keyExpress) {
+    public static Long getLong(Object json, String keyExpress) {
         return getObject(json, Long.class, keyExpress);
     }
 
-    public static Integer getInteger(JSONAware json, String keyExpress) {
+    public static Integer getInteger(Object json, String keyExpress) {
         return getObject(json, Integer.class, keyExpress);
     }
 
-    public static Boolean inStr(JSONAware json, String keyExpress, String... array) {
+    public static Boolean inStr(Object json, String keyExpress, String... array) {
         String object = getString(json, keyExpress);
         if (StrUtil.isBlank(object)) {
             return false;
@@ -165,7 +164,7 @@ public class JSONUtil {
      * @param serializerFeatures 序列化配置
      * @return json字符串
      */
-    public static String toJSONStringWithIgnoreProperties(Object object, List<String> ignoreProperties, SerializerFeature... serializerFeatures) {
+    public static String toJSONStringWithIgnoreProperties(Object object, List<String> ignoreProperties, JSONWriter.Feature... serializerFeatures) {
         return JSON.toJSONString(object,
                 (PropertyFilter) (obj, name, value) ->
                         CollectionUtil.isEmpty(ignoreProperties) || !ignoreProperties.contains(name), serializerFeatures);
@@ -184,17 +183,17 @@ public class JSONUtil {
         }
         return null;
     }
-
-    /**
-     * 转化json字符串为json 对象
-     * @param jsonOrArrayStr 数组或对象json字符串
-     * @return 响应
-     */
-    public static JSONAware parse(String jsonOrArrayStr){
-        if(StrUtil.isBlank(jsonOrArrayStr)){
-            return null;
-        }
-        String trim = jsonOrArrayStr.trim();
-        return StrUtil.startWith(trim,"[") ? JSON.parseArray(trim) : JSON.parseObject(trim);
-    }
+//
+//    /**
+//     * 转化json字符串为json 对象
+//     * @param jsonOrArrayStr 数组或对象json字符串
+//     * @return 响应
+//     */
+//    public static JSONAware parse(String jsonOrArrayStr){
+//        if(StrUtil.isBlank(jsonOrArrayStr)){
+//            return null;
+//        }
+//        String trim = jsonOrArrayStr.trim();
+//        return StrUtil.startWith(trim,"[") ? JSON.parseArray(trim) : JSON.parseObject(trim);
+//    }
 }

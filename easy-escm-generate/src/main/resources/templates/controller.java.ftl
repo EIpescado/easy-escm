@@ -5,8 +5,7 @@ import ${cp};
 </#list>
 /**
  * ${table.comment!} controller
- * @author ${author}
- * @since ${date}
+ * @author ${author} ${date}
  */
 <#list easyEscmConfig.controllerAnnotations as ca>
 @${ca}
@@ -49,9 +48,9 @@ public class ${table.controllerName} {
     </#if>
 
     <#if easyEscmConfig.qo>
-    @GetMapping
-    public R<#noparse><PageR</#noparse><#noparse><</#noparse>${entity}To<#noparse>>></#noparse> list(@ModelAttribute ${entity}Qo qo){
-        return R.ok(${easyEscmConfig.serviceImplFieldName}.list(qo));
+    @PostMapping("/search")
+    public R<#noparse><PageR</#noparse><#noparse><</#noparse>${entity}To<#noparse>>></#noparse> search(@RequestBody ${entity}Qo qo){
+        return R.ok(${easyEscmConfig.serviceImplFieldName}.search(qo));
     }
     </#if>
 }

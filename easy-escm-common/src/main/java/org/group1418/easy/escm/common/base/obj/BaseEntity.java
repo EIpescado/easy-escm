@@ -12,10 +12,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
+ * 基础Entity
  * @author yq
  * @date 2021年4月14日 10:42:01
- * @description 基础Entity
- * @since V1.0.0
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -51,22 +50,22 @@ public class BaseEntity implements Serializable {
      * 创建用户ID
      */
     @TableField(fill = FieldFill.INSERT)
-    private Long createUserId;
+    private Long creatorId;
     /**
-     * 创建用户
+     * 创建用户 名称
      */
     @TableField(fill = FieldFill.INSERT)
-    private String createUser;
+    private String creator;
 
     /**
      * 最后修改用户ID
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updateUserId;
+    private Long updaterId;
     /**
-     * 最后修改用户
+     * 最后修改用户 名称
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private String updateUser;
+    private String updater;
 
 }

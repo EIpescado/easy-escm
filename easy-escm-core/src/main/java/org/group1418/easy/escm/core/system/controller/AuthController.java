@@ -1,15 +1,10 @@
 package org.group1418.easy.escm.core.system.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import com.alibaba.fastjson.JSON;
 import lombok.RequiredArgsConstructor;
-import org.group1418.easy.escm.common.annotation.ApiEncrypt;
-import org.group1418.easy.escm.common.utils.ValidateUtils;
 import org.group1418.easy.escm.common.wrapper.R;
-import org.group1418.easy.escm.core.system.pojo.fo.LoginFo;
 import org.group1418.easy.escm.core.system.pojo.vo.LoginVo;
 import org.group1418.easy.escm.core.system.service.IAuthService;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

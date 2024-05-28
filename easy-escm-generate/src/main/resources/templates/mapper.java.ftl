@@ -10,8 +10,7 @@ import ${cp};
 </#list>
 /**
  * ${table.comment!} Mapper 接口
- * @author ${author}
- * @since ${date}
+ * @author ${author} ${date}
  */
 <#if mapperAnnotationClass??>
 @${mapperAnnotationClass.simpleName}
@@ -27,7 +26,7 @@ public interface ${table.mapperName} extends ${superMapperClass}<${entity}> {
     * @param qo 查询参数
     * @return 列表
     */
-    IPage<#noparse><</#noparse>${entity}To<#noparse>></#noparse> list(Page<#noparse><</#noparse>${entity}To<#noparse>></#noparse> page, @Param("qo") ${entity}Qo qo);
+    IPage<#noparse><</#noparse>${entity}To<#noparse>></#noparse> search(Page<#noparse><</#noparse>${entity}To<#noparse>></#noparse> page, @Param("qo") ${entity}Qo qo);
     </#if>
 
     <#if easyEscmConfig.vo && table.commonFields?? && (table.commonFields?size > 0)>
