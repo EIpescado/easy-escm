@@ -23,6 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * spring 异步线程池设置,使用默认可能导致内存溢出,默认实现为 SimpleAsyncTaskExecutor,通过 AsyncExecutionInterceptor 来选择执行器
+ *
  * @author yq
  * @date 2020/11/26 16:45
  * @since V1.0.0
@@ -44,7 +45,7 @@ public class CustomAsyncTaskConfig implements AsyncConfigurer, InitializingBean 
             String message;
             if (throwable instanceof CustomException) {
                 CustomException customException = (CustomException) throwable;
-                message = customException.getTip().getMsg();
+                message = customException.getMessage();
                 log.info("[{}]异步执行异常: [{}]", method.getName(), message);
             } else {
                 message = throwable.getLocalizedMessage();

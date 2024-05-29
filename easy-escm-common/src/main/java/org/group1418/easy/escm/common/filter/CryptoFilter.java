@@ -72,7 +72,7 @@ public class CryptoFilter implements Filter {
                         requestWrapper = new DecryptRequestBodyWrapper(servletRequest, apiDecryptConfig.getRequestPrivateKey(), apiDecryptConfig.getHeaderName());
                     } catch (CryptoException e) {
                         log.error("解密报文失败[{}]", e.getLocalizedMessage());
-                        PudgeUtil.responseJson(servletResponse, R.fail("解密请求参数失败,请确认密钥是否正确", null));
+                        PudgeUtil.responseJson(servletResponse, R.failI18n("params.crypto.error"));
                         return;
                     }
                 }

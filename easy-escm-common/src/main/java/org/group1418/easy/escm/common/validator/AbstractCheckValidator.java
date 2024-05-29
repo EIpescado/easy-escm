@@ -8,8 +8,8 @@ import javax.validation.ConstraintValidatorContext;
 import java.lang.annotation.Annotation;
 
 /**
+ *  AbstractCheckValidator
  * @author yq 2021/4/27 17:34
- * @description AbstractCheckValidator
  */
 public abstract class AbstractCheckValidator<A extends Annotation, T> implements ConstraintValidator<A, T> {
 

@@ -14,8 +14,8 @@ import java.util.List;
 
 
 /**
+ * CustomMybatisPlusConfigProperties 自定义配置
  * @author yq 2021/5/21 20:02
- * @description CustomMybatisPlusConfigProperties
  */
 @ConfigurationProperties(prefix = "easy.escm")
 @Data
@@ -103,6 +103,7 @@ public class CustomConfigProperties {
     @Accessors(chain = true)
     public static class TokenConfig extends SaTokenConfig {
 
+        private static final long serialVersionUID = 8721863946149596295L;
         /**
          * token 名称 （同时也是： cookie 名称、提交 token 时参数的名称、存储 token 时的 key 前缀）
          */
@@ -222,7 +223,7 @@ public class CustomConfigProperties {
         /**
          * Http Basic 认证的默认账号和密码
          */
-        private String basic = "";
+        private String httpBasic = "";
 
         /**
          * 配置当前项目的网络访问地址

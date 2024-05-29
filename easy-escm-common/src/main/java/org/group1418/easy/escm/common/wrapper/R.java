@@ -2,11 +2,12 @@ package org.group1418.easy.escm.common.wrapper;
 
 
 import cn.hutool.core.lang.func.VoidFunc0;
-import cn.hutool.core.text.StrFormatter;
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import org.group1418.easy.escm.common.enums.CustomTipEnum;
 import org.group1418.easy.escm.common.exception.ICustomTipEnum;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.utils.I18nUtil;
 
 import java.io.Serializable;
 import java.util.function.Consumer;
@@ -20,6 +21,7 @@ import java.util.function.Function;
 @Data
 public class R<T> implements Serializable {
 
+    private static final long serialVersionUID = 7285612697346692975L;
     /**
      * 返回结果 编码 0：成功 1：失败
      */
@@ -42,18 +44,6 @@ public class R<T> implements Serializable {
         this.res = res;
     }
 
-    public R(String code, String message) {
-        this.code = code;
-        this.message = message;
-        this.res = null;
-    }
-
-    public R(ICustomTipEnum customTipEnum, T res) {
-        this.code = customTipEnum.getCode();
-        this.message = customTipEnum.getMsg();
-        this.res = res;
-    }
-
     /**
      * 判断返回是否成功
      */
@@ -61,42 +51,32 @@ public class R<T> implements Serializable {
         return code.equals(CustomTipEnum.SUCCESS.getCode());
     }
 
-    /**
-     * 返回成功
-     */
     public static <T> R<T> ok(T res) {
-        return new R<>(CustomTipEnum.SUCCESS, res);
+        return new R<>(CustomTipEnum.SUCCESS.getCode(), CustomTipEnum.SUCCESS.getMsgI18nCode(), res);
     }
 
-    public static <T> R<T> ok() {
-        return new R<>(CustomTipEnum.SUCCESS, null);
+    public static R<String> ok() {
+        return ok(StrUtil.EMPTY);
     }
 
-    /**
-     * 返回失败
-     */
     public static <T> R<T> fail(String message) {
         return new R<>(CustomTipEnum.FAIL.getCode(), message, null);
     }
 
-    public static <T> R<T> fail(String message, T res) {
-        return new R<>(CustomTipEnum.FAIL.getCode(), message, res);
-    }
-
     public static <T> R<T> fail(ICustomTipEnum tip) {
-        return new R<>(tip.getCode(), tip.getMsg());
+        return new R<>(tip.getCode(), I18nUtil.getMessage(tip.getMsgI18nCode()), null);
     }
 
-    public static <T> R<T> fail(CustomTip tip) {
-        return new R<>(tip.getCode(), tip.getMsg());
+    public static <T> R<T> failI18n(String msgI18nCode, Object... args) {
+        return new R<>(CustomTipEnum.FAIL.getCode(), I18nUtil.getMessage(msgI18nCode, args), null);
     }
 
-    public static <T> R<T> fail(Integer code,String msg) {
-        return new R<>(code != null ? code.toString() : CustomTipEnum.FAIL.getCode(), msg);
+    public static <T> R<T> fail(Integer code, String msg) {
+        return new R<>(code != null ? code.toString() : CustomTipEnum.FAIL.getCode(), msg, null);
     }
 
-    public static R<String> formatFail(String format, Object... args) {
-        return new R<>(CustomTipEnum.FAIL.getCode(), StrFormatter.format(format, args));
+    public static <T> R<T> fail(String code, String msg) {
+        return new R<>(code, msg, null);
     }
 
     public void then(Consumer<T> okConsumer, VoidFunc0 catchFun) {

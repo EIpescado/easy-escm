@@ -1,13 +1,19 @@
 package org.group1418.easy.escm.common.wrapper;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.group1418.easy.escm.common.enums.CustomTipEnum;
+import org.group1418.easy.escm.common.utils.I18nUtil;
+
 import java.io.Serializable;
 
 /**
- * @author yq
- * @date 2019/05/21 10:49
- * @description 自定义提示
- * @since V1.0.0
+ * 自定义提示
+ *
+ * @author yq 2019/05/21 10:49
  */
+@NoArgsConstructor
+@Data
 public class CustomTip implements Comparable<CustomTip>, Serializable {
 
     private static final long serialVersionUID = -5682436596474651717L;
@@ -17,50 +23,39 @@ public class CustomTip implements Comparable<CustomTip>, Serializable {
     private String code;
 
     /**
-     * 错误详情
+     * 错误的国际化代码
      */
-    private String msg;
+    private String msgI18nCode;
 
+    /**
+     * 国家化后的消息
+     */
+    private String message;
 
-    public CustomTip(String code, String msg) {
+    /**
+     * 参数
+     */
+    private Object[] args;
+
+    public CustomTip(String code, String msgI18nCode, Object... args) {
         this.code = code;
-        this.msg = msg;
+        this.msgI18nCode = msgI18nCode;
+        this.args = args;
     }
 
-    public CustomTip(int code, String msg) {
+    public CustomTip(int code, String msgI18nCode, Object... args) {
         this.code = Integer.toString(code);
-        this.msg = msg;
+        this.msgI18nCode = msgI18nCode;
+        this.args = args;
     }
 
-    public static CustomTip of(String code, String msg) {
-        return new CustomTip(code, msg);
+    public static CustomTip error(String msgCode) {
+        return new CustomTip(CustomTipEnum.FAIL.getCode(), msgCode);
     }
 
-    public static CustomTip of(int code, String msg) {
-        return new CustomTip(code, msg);
-    }
 
-    public static CustomTip error(String msg) {
-        return new CustomTip(1, msg);
-    }
-
-    public CustomTip() {
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public String getMessage() {
+        return I18nUtil.getMessage(msgI18nCode, args);
     }
 
     @Override

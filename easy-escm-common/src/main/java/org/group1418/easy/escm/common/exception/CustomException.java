@@ -1,30 +1,33 @@
 package org.group1418.easy.escm.common.exception;
 
-import cn.hutool.core.text.StrFormatter;
+import lombok.Getter;
 import org.group1418.easy.escm.common.enums.CustomTipEnum;
 import org.group1418.easy.escm.common.wrapper.CustomTip;
 
 /**
+ * 自定义异常
+ *
  * @author yq
  * @date 2019/05/21 11:34
- * @description 自定义异常
- * @since V1.0.0
  */
+@Getter
 public class CustomException extends RuntimeException {
     private static final long serialVersionUID = -4083494081772087464L;
 
     protected CustomTip tip;
 
     public CustomException(CustomTip customTip) {
-        super(customTip.getMsg());
+        super(customTip.getMessage());
         this.tip = customTip;
     }
 
-    public CustomException(String format, Object... args) {
-        this(CustomTip.of(CustomTipEnum.FAIL.getCode(), StrFormatter.format(format, args)));
+    public CustomException(ICustomTipEnum customTip) {
+        super(customTip.tip().getMessage());
+        this.tip = customTip.tip();
     }
 
-    public CustomTip getTip() {
-        return tip;
+    public CustomException(String msgI18nCode, Object... args) {
+        this(new CustomTip(CustomTipEnum.FAIL.getCode(), msgI18nCode, args));
     }
+
 }

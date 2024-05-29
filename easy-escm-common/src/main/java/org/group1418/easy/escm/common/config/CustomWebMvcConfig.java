@@ -17,12 +17,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import javax.servlet.Servlet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * web上下文配置
@@ -64,6 +67,21 @@ public class CustomWebMvcConfig extends WebMvcConfigurationSupport {
         registry.addInterceptor(new SaInterceptor(handle ->
                 SaRouter.match("/**").notMatch(configProperties.getTokenConfig().getNotCheckLoginPaths()).check(r -> StpUtil.checkLogin()))
         ).addPathPatterns("/**");
+    }
+
+    @Override
+    public LocaleResolver localeResolver() {
+        //根据请求头 Accept-Language 确定语言
+        AcceptHeaderLocaleResolver acceptHeaderLocaleResolver = new AcceptHeaderLocaleResolver();
+        //设置支持的语言
+        List<Locale> locales = new ArrayList<>();
+        locales.add(Locale.SIMPLIFIED_CHINESE);
+        locales.add(Locale.forLanguageTag("zh-HK"));
+        locales.add(Locale.US);
+        acceptHeaderLocaleResolver.setSupportedLocales(locales);
+        //默认简体中文
+        acceptHeaderLocaleResolver.setDefaultLocale(Locale.SIMPLIFIED_CHINESE);
+        return acceptHeaderLocaleResolver;
     }
 
     private FastJsonHttpMessageConverter createDefaultFastJsonHttpMessageConverter() {

@@ -7,9 +7,9 @@ import org.group1418.easy.escm.common.wrapper.ValidResult;
 import java.math.BigDecimal;
 
 /**
+ * BigDecimal 数据校验
  * @author yq
  * @date 2020/08/04 10:59
- * @description 数据校验
  * @since V1.0.0
  */
 public class BigDecimalCheckValidator extends AbstractCheckValidator<BigDecimalCheck, BigDecimal> {

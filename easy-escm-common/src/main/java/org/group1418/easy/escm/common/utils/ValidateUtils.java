@@ -5,9 +5,9 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.validator.StrCheck;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
+import org.group1418.easy.escm.common.validator.StrCheck;
 import org.group1418.easy.escm.common.wrapper.ValidResult;
 
 import javax.validation.ConstraintViolation;
@@ -17,8 +17,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * ValidateUtils 校验工具类
+ *
  * @author yq 2024/2/27 11:23
- * @description ValidateUtils 校验工具类
  */
 @Slf4j
 public class ValidateUtils {
@@ -43,10 +44,9 @@ public class ValidateUtils {
         return checkData(value, fieldName, required, null, maxLength, -1, StrCheck.StringType.NONE);
     }
 
-    public static String maxLengthTrim(String value, String fieldName, boolean required, int maxLength) {
+    public static ValidResult maxLengthTrim(String value, String fieldName, boolean required, int maxLength) {
         String val = PudgeUtil.full2HalfWithTrim(value);
-        checkData(val, fieldName, required, null, maxLength, -1, StrCheck.StringType.NONE).notPassThrow();
-        return val;
+        return checkData(val, fieldName, required, null, maxLength, -1, StrCheck.StringType.NONE);
     }
 
     public static ValidResult in(String value, String fieldName, boolean required, String[] dataArray) {
@@ -64,23 +64,24 @@ public class ValidateUtils {
                                         StrCheck.StringType type) {
         ValidResult result = new ValidResult(fieldName);
         if (StrUtil.isEmpty(value) || StrUtil.isEmpty(value.trim())) {
-            return result.of(!required, "必填");
+            return result.of(!required, "params.required");
         } else {
             //超出最大长度
             if (maxLength != -1 && value.length() > maxLength) {
-                return result.no("最大长度", maxLength);
+                return result.no("params.max.length", maxLength);
             }
             //不为指定长度
             if (fixedLength != -1 && value.length() != fixedLength) {
-                return result.no("固定长度", fixedLength);
+                return result.no("params.fix.length", fixedLength);
             }
             //不在指定范围内
             if (ArrayUtil.isNotEmpty(dataArray) && !ArrayUtil.containsAny(dataArray, value)) {
-                return result.no("无效");
+                return result.no("params.invalid");
             }
+            //校验类型
             if (type != null && StrCheck.StringType.NONE != type) {
                 boolean pass;
-                String tip = "无效";
+                String tip = "params.invalid";
                 switch (type) {
                     case PHONE:
                         pass = RegexUtil.isMobile(value);
@@ -93,7 +94,7 @@ public class ValidateUtils {
                         break;
                     case NO_CHINESE:
                         pass = !RegexUtil.isContainChinese(value);
-                        tip = "不可包含中文";
+                        tip = "params.no.chinese";
                         break;
                     case DATE:
                         pass = DateTimeUtil.isDate(value);
@@ -116,29 +117,28 @@ public class ValidateUtils {
     public static ValidResult checkBigDecimal(BigDecimal value, String fieldName, boolean required, int precision, int scale, boolean gtZero) {
         ValidResult result = new ValidResult(fieldName);
         if (value == null) {
-            return result.of(!required, "必填");
+            return result.of(!required, "params.required");
         } else {
             if (value.precision() > precision) {
-                return result.no("最大长度为", precision);
+                return result.no("params.precision", Integer.toString(precision));
             }
             if (value.scale() > scale) {
-                return result.no("最大小数位为", scale);
+                return result.no("params.scale", Integer.toString(scale));
             }
             if (gtZero && !NumberUtil.isGreater(value, BigDecimal.ZERO)) {
-                return result.no("必须大于0");
+                return result.no("params.gt0");
             }
         }
         return result.pass();
     }
 
-    public static BigDecimal parseBigDecimal(String str, String fieldName, boolean required, int precision, int scale, boolean gtZero) {
-        String strTrim = StrUtil.removeAll(StrUtil.blankToDefault(PudgeUtil.full2HalfWithTrim((str)), ""), ',', '，');
+    public static ValidResult parseBigDecimal(String str, String fieldName, boolean required, int precision, int scale, boolean gtZero) {
+        String strTrim = RegexUtil.removeAllSpecialChar(StrUtil.nullToEmpty(PudgeUtil.full2HalfWithTrim(str)));
         boolean notBlank = StrUtil.isNotBlank(strTrim);
         if (notBlank && !NumberUtil.isNumber(strTrim)) {
             throw new SystemCustomException(fieldName + "无效");
         }
         BigDecimal result = notBlank ? new BigDecimal(strTrim) : null;
-        checkBigDecimal(result, fieldName, required, precision, scale, gtZero).notPassThrow();
-        return result;
+        return checkBigDecimal(result, fieldName, required, precision, scale, gtZero);
     }
 }

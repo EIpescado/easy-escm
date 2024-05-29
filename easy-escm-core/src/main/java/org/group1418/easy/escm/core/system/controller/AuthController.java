@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * 认证
  * @author yq 2024/3/29 15:29
- * @description AuthController
  */
 @RestController
 @RequestMapping("/auth")

@@ -7,13 +7,20 @@ import cn.dev33.satoken.util.SaResult;
 import com.alibaba.fastjson2.JSONObject;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.enums.CustomTipEnum;
+import org.group1418.easy.escm.common.exception.CustomException;
+import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.wrapper.CustomTip;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.group1418.easy.escm.core.system.pojo.fo.LoginFo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author yq 2024/1/13 12:08
@@ -29,7 +36,7 @@ public class TestController {
 
     @GetMapping("test")
     @SaIgnore
-    public R<Object> test(String name, String pwd,String device) {
+    public R<String> test(String name, String pwd,String device) {
         // 第一步：比对前端提交的账号名称、密码
         if ("zhang".equals(name) && "123456".equals(pwd)) {
             // 第二步：根据账号id，进行登录
@@ -63,7 +70,7 @@ public class TestController {
     @GetMapping("testAsync")
 //    @SaCheckRole("super-admin")
 //    @SaCheckPermission(value = "super-admin")
-    public R<Object> testAsync() {
+    public R<String> testAsync() {
         testService.testAsync();
         return R.ok();
     }
@@ -78,8 +85,13 @@ public class TestController {
 
     @PostMapping("jsonTest")
     @SaIgnore
-    public R<LoginFo> jsonTest(@RequestBody LoginFo fo) {
-        System.out.println(1);
+    public R<LoginFo> jsonTest(@RequestBody @Validated  LoginFo fo, @RequestParam Integer abc) {
         return R.ok(fo);
+    }
+
+    @PostMapping("upload")
+    @SaIgnore
+    public R<String> minUpload(@RequestParam("file") MultipartFile file) {
+        return R.ok();
     }
 }

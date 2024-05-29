@@ -1,15 +1,18 @@
 package org.group1418.easy.escm.common.config;
 
 import cn.dev33.satoken.exception.SaTokenException;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.group1418.easy.escm.common.enums.CustomTipEnum;
 import org.group1418.easy.escm.common.exception.CustomException;
 import org.group1418.easy.escm.common.saToken.SaTokenConfig;
+import org.group1418.easy.escm.common.utils.I18nUtil;
 import org.group1418.easy.escm.common.utils.PudgeUtil;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.core.NestedRuntimeException;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -53,7 +57,7 @@ public class GlobalDefaultExceptionHandler {
     public R<String> defaultErrorHandler(Throwable e) {
         Throwable cause = e.getCause();
         if (cause instanceof CustomException) {
-            return R.fail(((CustomException) cause).getTip());
+            return R.fail(cause.getMessage());
         }
         log.error("[{}]未知的异常 [{}]", currentRequestUrl(), StrUtil.removeAllLineBreaks(e.getMessage()), e);
         return R.fail(CustomTipEnum.FAIL);
@@ -73,8 +77,8 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public R<String> missingServletRequestParameterExceptionHandler(MissingServletRequestParameterException e) {
-        log.info("[{}][{}]缺失", currentRequestUrl(), e.getParameterName());
-        return R.fail("[{}]缺失", e.getParameterName());
+        log.error("[{}][{}]缺失", currentRequestUrl(), e.getParameterName());
+        return R.failI18n("params.miss", e.getParameterName());
     }
 
     /**
@@ -90,27 +94,44 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public R<String> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException e) {
-        log.error("[{}]无有效请求体:[{}]", currentRequestUrl(), e.getLocalizedMessage());
-        return R.fail(e.getLocalizedMessage());
+        String exMsg = StrUtil.removeAllLineBreaks(e.getLocalizedMessage());
+        log.error("[{}]无有效请求体:[{}]", currentRequestUrl(), exMsg);
+        Throwable cause = e.getCause();
+        //json转化错误,一般为类型错误
+        if (cause instanceof JSONException) {
+            List<String> errorMsgList = StrUtil.split(exMsg, "fastjson-version");
+            String message = CollUtil.isNotEmpty(errorMsgList) ? errorMsgList.get(0) : StrUtil.EMPTY;
+            cause = cause.getCause();
+            if (cause != null) {
+                return R.fail(StrUtil.format("{},{}", cause.getClass().getSimpleName(), message));
+            } else {
+                return R.fail(message);
+            }
+        }
+        return R.fail(CustomTipEnum.FAIL);
     }
 
 
     /**
-     * 请求体缺失
+     * 文件上传文件过大
      */
     @ExceptionHandler(MultipartException.class)
     public R<String> multipartExceptionExceptionHandler(MultipartException e) {
-        log.error("[{}]无有效请求体:[{}]", currentRequestUrl(), e.getLocalizedMessage());
-        return R.fail(e.getLocalizedMessage());
+        log.error("[{}]multipart exception:[{}]", currentRequestUrl(), e.getLocalizedMessage());
+        if (e instanceof MaxUploadSizeExceededException) {
+            return R.fail(e.getCause().getCause().getLocalizedMessage());
+        }
+        return R.fail(CustomTipEnum.FAIL);
     }
 
     /**
-     * 请求参数类型不匹配
+     * 请求参数类型不匹配, 对@RequestParam有效
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public R<Void> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         log.error("请求参数类型不匹配[{}]", currentRequestUrl());
-        return R.fail(String.format("请求参数类型不匹配，参数[%s]要求类型为：'%s'，但输入值为：'%s'", e.getName(), e.getRequiredType().getName(), e.getValue()));
+        return R.failI18n("params.type.error", e.getName(),
+                e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : StrUtil.EMPTY, e.getValue());
     }
 
     private R<String> getExceptionDefaultMessage(BindingResult bindingResult, Exception e) {
@@ -127,14 +148,14 @@ public class GlobalDefaultExceptionHandler {
                     String rowNumber = ReUtil.getGroup1(PudgeUtil.SQUARE_BRACKETS_PATTERN, field);
                     message = objectError.getDefaultMessage();
                     if (StrUtil.isNotEmpty(rowNumber)) {
-                        message = StrBuilder.create("第[", Integer.toString(Integer.parseInt(rowNumber) + 1), "]条 ", message).toString();
+                        message = StrBuilder.create(I18nUtil.getMessage("params.which.row", Integer.toString(Integer.parseInt(rowNumber) + 1)), StrUtil.SPACE, message).toString();
                     }
                 } else {
                     message = objectError.getDefaultMessage();
                 }
                 log.info("[{}]校验不通过[{}]", currentRequestUrl(), message);
                 return R.<String>fail(message);
-            }).orElseGet(() -> R.fail("校验异常"));
+            }).orElseGet(() -> R.fail(CustomTipEnum.FAIL));
         } else {
             log.error("[{}]自定义校验错误: [{}]", currentRequestUrl(), e.getLocalizedMessage());
             return R.fail(CustomTipEnum.FAIL);
@@ -190,7 +211,7 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler(CustomException.class)
     public R<String> customExceptionHandler(CustomException e) {
-        return R.fail(e.getTip());
+        return R.fail(e.getTip().getCode(), e.getMessage());
     }
 
 

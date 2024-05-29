@@ -25,7 +25,7 @@ public @interface BigDecimalCheck {
     String name();
 
     /**
-     * 提示信息
+     * 提示信息, 国际化代码
      */
     String message() default "";
 

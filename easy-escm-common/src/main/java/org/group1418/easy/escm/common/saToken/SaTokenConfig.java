@@ -2,9 +2,11 @@ package org.group1418.easy.escm.common.saToken;
 
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.SaTokenException;
+import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.wrapper.CustomTip;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +22,19 @@ import java.util.Map;
 @Configuration
 @Slf4j
 public class SaTokenConfig {
+
+    /**
+     * SaTokenException 转自定义代码
+     */
+//    Map<String, CustomTip> notLoginErrorMap = MapBuilder.<String, CustomTip>create()
+//            .put(NotLoginException.NOT_TOKEN, NotLoginException.NOT_TOKEN_MESSAGE)
+//            .put(NotLoginException.INVALID_TOKEN, NotLoginException.INVALID_TOKEN_MESSAGE)
+//            .put(NotLoginException.TOKEN_TIMEOUT, NotLoginException.TOKEN_TIMEOUT_MESSAGE)
+//            .put(NotLoginException.BE_REPLACED, NotLoginException.BE_REPLACED_MESSAGE)
+//            .put(NotLoginException.KICK_OUT, NotLoginException.KICK_OUT_MESSAGE)
+//            .put(NotLoginException.TOKEN_FREEZE, NotLoginException.TOKEN_FREEZE_MESSAGE)
+//            .put(NotLoginException.NO_PREFIX, NotLoginException.NO_PREFIX_MESSAGE)
+//            .build();
 
     @Bean
     @Primary

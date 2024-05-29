@@ -109,7 +109,7 @@ public class CommonAspect {
      */
     @AfterThrowing(pointcut = "logPointcut()", throwing = "throwable")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable throwable) {
-        generateLogAndSend(joinPoint, true, R.fail(throwable.getLocalizedMessage()));
+        generateLogAndSend(joinPoint, true, R.fail(throwable.getMessage()));
     }
 
     private void setParamsLocal(JoinPoint joinPoint) {

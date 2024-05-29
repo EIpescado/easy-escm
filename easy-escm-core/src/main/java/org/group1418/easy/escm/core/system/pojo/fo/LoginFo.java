@@ -1,7 +1,12 @@
 package org.group1418.easy.escm.core.system.pojo.fo;
 
 import lombok.Data;
+import org.group1418.easy.escm.common.validator.BigDecimalCheck;
 import org.group1418.easy.escm.common.validator.StrCheck;
+
+import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 登录表单
@@ -35,4 +40,16 @@ public class LoginFo {
      * 唯一标识, 验证码id
      */
     private String uuid;
+
+    @BigDecimalCheck(name = "测试",precision = 2,scale = 1)
+    private BigDecimal a;
+
+    @Valid
+    private List<Entry> list;
+
+    @Data
+    public static class Entry{
+        @StrCheck(name = "时间",type = StrCheck.StringType.DATE)
+        private String c;
+    }
 }
