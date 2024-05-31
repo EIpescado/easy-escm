@@ -1,7 +1,6 @@
 package org.group1418.easy.escm.common.enums;
 
 
-import org.group1418.easy.escm.common.exception.ICustomTipEnum;
 import org.group1418.easy.escm.common.wrapper.CustomTip;
 
 /**
@@ -15,8 +14,13 @@ public enum CustomTipEnum implements ICustomTipEnum {
      */
     SUCCESS(0, "success"),
     FAIL(1, "fail"),
-    CREDENTIALS_INVALID(10001, "token.invalid"),
-    REFRESH_CREDENTIALS_INVALID(10002, "refresh.token.invalid"),
+    TOKEN_INVALID(10001, "token.invalid"),
+    TOKEN_TIMEOUT(10005, "token.timeout"),
+    BE_REPLACED(10010, "token.be.replaced"),
+    KICK_OUT(10015, "token.kick.out"),
+    TOKEN_FREEZE(10020, "token.freeze"),
+    TOKEN_PREFIX_ERROR(10025, "token.prefix.error"),
+    REFRESH_TOKEN_INVALID(10002, "refresh.token.invalid"),
     PERMISSION_DENIED(401, "permission.denied"),
 
     /**

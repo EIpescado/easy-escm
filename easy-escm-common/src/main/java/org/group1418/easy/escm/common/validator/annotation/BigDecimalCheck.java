@@ -1,6 +1,8 @@
-package org.group1418.easy.escm.common.validator;
+package org.group1418.easy.escm.common.validator.annotation;
 
 
+
+import org.group1418.easy.escm.common.validator.BigDecimalCheckValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

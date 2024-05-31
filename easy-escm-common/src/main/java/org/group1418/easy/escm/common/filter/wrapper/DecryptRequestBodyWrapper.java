@@ -2,7 +2,7 @@ package org.group1418.easy.escm.common.filter.wrapper;
 
 import cn.hutool.core.io.IoUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.utils.EncryptUtils;
+import org.group1418.easy.escm.common.utils.CryptUtils;
 import org.springframework.http.MediaType;
 
 import javax.servlet.ReadListener;
@@ -29,14 +29,14 @@ public class DecryptRequestBodyWrapper extends HttpServletRequestWrapper {
         super(request);
         // 前端随机生成AES密钥,经base64后用RAS公钥加密
         String headerAesRsa = request.getHeader(headerFlag);
-        String decryptAes = EncryptUtils.decryptRsa(headerAesRsa, privateKey);
+        String decryptAes = CryptUtils.decryptRsa(headerAesRsa, privateKey);
         // 解密AES密钥
-        String aesPassword = EncryptUtils.decryptBase64(decryptAes);
+        String aesPassword = CryptUtils.decryptBase64(decryptAes);
         request.setCharacterEncoding(StandardCharsets.UTF_8.toString());
         byte[] readBytes = IoUtil.readBytes(request.getInputStream(), false);
         String requestBody = new String(readBytes, StandardCharsets.UTF_8);
         // 解密 body 采用 AES 加密
-        String decryptBody = EncryptUtils.decryptAes(requestBody, aesPassword);
+        String decryptBody = CryptUtils.decryptAes(requestBody, aesPassword);
         body = decryptBody.getBytes(StandardCharsets.UTF_8);
     }
 

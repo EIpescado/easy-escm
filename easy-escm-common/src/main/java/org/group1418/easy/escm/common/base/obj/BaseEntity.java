@@ -1,5 +1,7 @@
 package org.group1418.easy.escm.common.base.obj;
 
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -35,6 +37,8 @@ public class BaseEntity implements Serializable {
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
+    @ExcelProperty(value = "创建时间")
+    @DateTimeFormat("yyyy-MM-dd HH")
     private LocalDateTime createTime;
 
     /**

@@ -23,7 +23,7 @@ import org.group1418.easy.escm.common.base.obj.BasePageQo;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
 import org.group1418.easy.escm.common.spring.SpringExpressionParser;
 import org.group1418.easy.escm.common.utils.PudgeUtil;
-import org.group1418.easy.escm.common.wrapper.OpLogDto;
+import org.group1418.easy.escm.common.wrapper.OpLogData;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -135,7 +135,7 @@ public class CommonAspect {
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             final Method method = signature.getMethod();
             OpLog annotation = method.getAnnotation(OpLog.class);
-            OpLogDto dto = OpLogDto.buildByAnnotation(annotation, Long.valueOf(timeCost).intValue(), annotation.hadLogin(), fail);
+            OpLogData dto = OpLogData.buildByAnnotation(annotation, Long.valueOf(timeCost).intValue(), annotation.hadLogin(), fail);
             String paramsStr = CURRENT_PARAMS.get();
             if (annotation.saveParams()) {
                 dto.setParams(paramsStr);

@@ -2,6 +2,7 @@ package org.group1418.easy.escm.common.validator;
 
 
 import org.group1418.easy.escm.common.utils.ValidateUtils;
+import org.group1418.easy.escm.common.validator.annotation.BigDecimalCheck;
 import org.group1418.easy.escm.common.wrapper.ValidResult;
 
 import java.math.BigDecimal;

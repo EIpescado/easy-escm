@@ -1,7 +1,7 @@
 package org.group1418.easy.escm.common.filter.wrapper;
 
 import cn.hutool.core.util.RandomUtil;
-import org.group1418.easy.escm.common.utils.EncryptUtils;
+import org.group1418.easy.escm.common.utils.CryptUtils;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
@@ -74,9 +74,9 @@ public class EncryptResponseBodyWrapper extends HttpServletResponseWrapper {
         // 生成秘钥
         String aesPassword = RandomUtil.randomString(32);
         // 秘钥使用 Base64 编码
-        String encryptAes = EncryptUtils.encryptBase64(aesPassword);
+        String encryptAes = CryptUtils.encryptBase64(aesPassword);
         // Rsa 公钥加密 Base64 编码
-        String encryptPassword = EncryptUtils.encryptRsa(encryptAes, publicKey);
+        String encryptPassword = CryptUtils.encryptRsa(encryptAes, publicKey);
 
         // 设置响应头
         servletResponse.setHeader(headerFlag, encryptPassword);
@@ -87,7 +87,7 @@ public class EncryptResponseBodyWrapper extends HttpServletResponseWrapper {
         // 获取原始内容
         String originalBody = this.getContent();
         // 对内容进行加密
-        return EncryptUtils.encryptAes(originalBody, aesPassword);
+        return CryptUtils.encryptAes(originalBody, aesPassword);
     }
 
     @Override

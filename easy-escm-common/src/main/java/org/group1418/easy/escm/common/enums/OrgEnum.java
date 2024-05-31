@@ -3,6 +3,7 @@ package org.group1418.easy.escm.common.enums;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**

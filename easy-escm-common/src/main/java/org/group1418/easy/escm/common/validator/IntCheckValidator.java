@@ -2,6 +2,7 @@ package org.group1418.easy.escm.common.validator;
 
 
 import cn.hutool.core.util.ArrayUtil;
+import org.group1418.easy.escm.common.validator.annotation.IntCheck;
 import org.group1418.easy.escm.common.wrapper.ValidResult;
 
 import java.util.Arrays;

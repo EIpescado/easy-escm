@@ -10,11 +10,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
+ * 操作日志 数据
  * @author yq 2022/10/12 17:29
- * @description OpLogData 操作日志
  */
 @Data
-public class OpLogDto implements Serializable {
+public class OpLogData implements Serializable {
     private static final long serialVersionUID = -17388513313461536L;
 
     /**
@@ -66,8 +66,8 @@ public class OpLogDto implements Serializable {
      */
     private Boolean outer;
 
-    public static OpLogDto buildByAnnotation(OpLog opLog, int timeCost, boolean hadLogin, boolean fail) {
-        OpLogDto dto = new OpLogDto();
+    public static OpLogData buildByAnnotation(OpLog opLog, int timeCost, boolean hadLogin, boolean fail) {
+        OpLogData dto = new OpLogData();
         dto.setName(opLog.value());
         dto.setTimeCost(timeCost);
         if (hadLogin) {

@@ -53,7 +53,7 @@ public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, Sys
         //判断用户名是否存在
         if (super.haveFieldValueEq(SystemUser::getUsername, fo.getUsername())) {
             //用户名已被使用
-            throw new SystemCustomException("用户名已被使用");
+            throw SystemCustomException.i18n("user.username.used");
         }
         log.info("新增用户: [{}]", fo.getUsername());
         SystemUser user = new SystemUser();
@@ -77,7 +77,7 @@ public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, Sys
         //判断用户名是否存在
         if (oldUser != null && !oldUser.getId().equals(id)) {
             //用户名已被使用
-            throw new SystemCustomException("用户名已被使用");
+            throw SystemCustomException.i18n("user.username.used");
         }
         log.info("修改用户: [{}]", user.getUsername());
         BeanUtils.copyProperties(fo, user);

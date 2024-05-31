@@ -3,21 +3,20 @@ package org.group1418.easy.escm.common.saToken;
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.SaTokenException;
 import cn.hutool.core.map.MapBuilder;
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
-import org.group1418.easy.escm.common.wrapper.CustomTip;
+import org.group1418.easy.escm.common.enums.CustomTipEnum;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * SaTokenConfig
+ *
  * @author yq 2024/2/21 15:17
- * @description SaTokenConfig
  */
 @Configuration
 @Slf4j
@@ -26,15 +25,15 @@ public class SaTokenConfig {
     /**
      * SaTokenException 转自定义代码
      */
-//    Map<String, CustomTip> notLoginErrorMap = MapBuilder.<String, CustomTip>create()
-//            .put(NotLoginException.NOT_TOKEN, NotLoginException.NOT_TOKEN_MESSAGE)
-//            .put(NotLoginException.INVALID_TOKEN, NotLoginException.INVALID_TOKEN_MESSAGE)
-//            .put(NotLoginException.TOKEN_TIMEOUT, NotLoginException.TOKEN_TIMEOUT_MESSAGE)
-//            .put(NotLoginException.BE_REPLACED, NotLoginException.BE_REPLACED_MESSAGE)
-//            .put(NotLoginException.KICK_OUT, NotLoginException.KICK_OUT_MESSAGE)
-//            .put(NotLoginException.TOKEN_FREEZE, NotLoginException.TOKEN_FREEZE_MESSAGE)
-//            .put(NotLoginException.NO_PREFIX, NotLoginException.NO_PREFIX_MESSAGE)
-//            .build();
+    public static final Map<String, CustomTipEnum> SA_LOGIN_CODE_MAP = MapBuilder.<String, CustomTipEnum>create()
+            .put(NotLoginException.NOT_TOKEN, CustomTipEnum.TOKEN_INVALID)
+            .put(NotLoginException.INVALID_TOKEN, CustomTipEnum.TOKEN_INVALID)
+            .put(NotLoginException.TOKEN_TIMEOUT, CustomTipEnum.TOKEN_TIMEOUT)
+            .put(NotLoginException.BE_REPLACED, CustomTipEnum.BE_REPLACED)
+            .put(NotLoginException.KICK_OUT, CustomTipEnum.KICK_OUT)
+            .put(NotLoginException.TOKEN_FREEZE, CustomTipEnum.TOKEN_FREEZE)
+            .put(NotLoginException.NO_PREFIX, CustomTipEnum.TOKEN_PREFIX_ERROR)
+            .build();
 
     @Bean
     @Primary
@@ -43,25 +42,17 @@ public class SaTokenConfig {
     }
 
     public static R<String> saTokenExceptionHandler(SaTokenException e) {
+        //sa-token 的异常码
+        int code = e.getCode();
+        CustomTipEnum customTipEnum = CustomTipEnum.FAIL;
         if (e instanceof NotLoginException) {
             NotLoginException nle = (NotLoginException) e;
             String type = nle.getType();
-            Map<String, String> notLoginErrorMap = new HashMap<>(8);
-            notLoginErrorMap.put(NotLoginException.NOT_TOKEN, NotLoginException.NOT_TOKEN_MESSAGE);
-            notLoginErrorMap.put(NotLoginException.INVALID_TOKEN, NotLoginException.INVALID_TOKEN_MESSAGE);
-            notLoginErrorMap.put(NotLoginException.TOKEN_TIMEOUT, NotLoginException.TOKEN_TIMEOUT_MESSAGE);
-
-            notLoginErrorMap.put(NotLoginException.BE_REPLACED, NotLoginException.BE_REPLACED_MESSAGE);
-            notLoginErrorMap.put(NotLoginException.KICK_OUT, NotLoginException.KICK_OUT_MESSAGE);
-            notLoginErrorMap.put(NotLoginException.TOKEN_FREEZE, NotLoginException.TOKEN_FREEZE_MESSAGE);
-            notLoginErrorMap.put(NotLoginException.NO_PREFIX, NotLoginException.NO_PREFIX_MESSAGE);
-            String message = notLoginErrorMap.get(type);
-            if (StrUtil.isBlank(message)) {
-                message = "当前会话未登录";
-            }
-            return R.fail(e.getCode(), message);
+            customTipEnum = SA_LOGIN_CODE_MAP.get(type);
+            customTipEnum = customTipEnum != null ? customTipEnum : CustomTipEnum.FAIL;
         }
-        return R.fail(e.getCode(), e.getMessage());
+        log.error("sa-token异常码[{}]",code);
+        return R.fail(customTipEnum);
     }
 
 }

@@ -2,6 +2,7 @@ package org.group1418.easy.escm.common.exception;
 
 import lombok.Getter;
 import org.group1418.easy.escm.common.enums.CustomTipEnum;
+import org.group1418.easy.escm.common.enums.ICustomTipEnum;
 import org.group1418.easy.escm.common.wrapper.CustomTip;
 
 /**
@@ -30,4 +31,7 @@ public class CustomException extends RuntimeException {
         this(new CustomTip(CustomTipEnum.FAIL.getCode(), msgI18nCode, args));
     }
 
+    public CustomException(String message) {
+        this(CustomTip.error(message));
+    }
 }

@@ -5,7 +5,7 @@ import cn.hutool.core.lang.func.VoidFunc0;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import org.group1418.easy.escm.common.enums.CustomTipEnum;
-import org.group1418.easy.escm.common.exception.ICustomTipEnum;
+import org.group1418.easy.escm.common.enums.ICustomTipEnum;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
 import org.group1418.easy.escm.common.utils.I18nUtil;
 
@@ -91,7 +91,7 @@ public class R<T> implements Serializable {
         if (succeed()) {
             okConsumer.accept(this.res);
         } else {
-            throw new SystemCustomException(this.message);
+            throw SystemCustomException.simple(this.message);
         }
     }
 
@@ -107,7 +107,7 @@ public class R<T> implements Serializable {
         if (succeed()) {
             return okFunction.apply(this.res);
         } else {
-            throw new SystemCustomException(this.message);
+            throw SystemCustomException.simple(this.message);
         }
     }
 }

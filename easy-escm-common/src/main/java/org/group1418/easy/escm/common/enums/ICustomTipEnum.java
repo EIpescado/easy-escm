@@ -1,4 +1,4 @@
-package org.group1418.easy.escm.common.exception;
+package org.group1418.easy.escm.common.enums;
 
 
 import org.group1418.easy.escm.common.wrapper.CustomTip;

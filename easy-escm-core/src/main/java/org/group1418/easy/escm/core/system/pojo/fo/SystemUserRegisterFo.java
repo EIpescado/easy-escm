@@ -2,7 +2,7 @@ package org.group1418.easy.escm.core.system.pojo.fo;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
-import org.group1418.easy.escm.common.validator.StrCheck;
+import org.group1418.easy.escm.common.validator.annotation.StrCheck;
 import org.group1418.easy.escm.common.deserializer.StrFull2HalfTrimReader;
 
 import java.io.Serializable;

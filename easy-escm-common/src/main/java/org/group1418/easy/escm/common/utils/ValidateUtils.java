@@ -7,7 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
-import org.group1418.easy.escm.common.validator.StrCheck;
+import org.group1418.easy.escm.common.validator.annotation.StrCheck;
 import org.group1418.easy.escm.common.wrapper.ValidResult;
 
 import javax.validation.ConstraintViolation;
@@ -26,17 +26,32 @@ public class ValidateUtils {
 
     private static final Validator VALIDATOR = SpringContextHolder.getBean(Validator.class);
 
+    /**
+     * 校验参数
+     *
+     * @param object 待校验对象
+     * @param groups 校验组别
+     * @param <T>    待校验类型
+     */
     public static <T> void validate(T object, Class<?>... groups) {
         validate(null, object, groups);
     }
 
+    /**
+     * 校验参数
+     *
+     * @param tipPrefix 提示前缀
+     * @param object    待校验对象
+     * @param groups    校验组别
+     * @param <T>       待校验类型
+     */
     public static <T> void validate(String tipPrefix, T object, Class<?>... groups) {
         Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(object, groups);
         if (CollUtil.isNotEmpty(constraintViolations)) {
             String message = constraintViolations.stream()
                     .map(ConstraintViolation::getMessage)
                     .collect(Collectors.joining(StrUtil.COMMA));
-            throw new SystemCustomException(StrUtil.nullToEmpty(tipPrefix) + message);
+            throw SystemCustomException.simple(StrUtil.nullToEmpty(tipPrefix) + message);
         }
     }
 
@@ -136,7 +151,7 @@ public class ValidateUtils {
         String strTrim = RegexUtil.removeAllSpecialChar(StrUtil.nullToEmpty(PudgeUtil.full2HalfWithTrim(str)));
         boolean notBlank = StrUtil.isNotBlank(strTrim);
         if (notBlank && !NumberUtil.isNumber(strTrim)) {
-            throw new SystemCustomException(fieldName + "无效");
+            throw SystemCustomException.i18n("params.invalid", fieldName);
         }
         BigDecimal result = notBlank ? new BigDecimal(strTrim) : null;
         return checkBigDecimal(result, fieldName, required, precision, scale, gtZero);

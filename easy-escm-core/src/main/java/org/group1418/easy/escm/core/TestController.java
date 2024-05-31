@@ -4,15 +4,20 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
+import cn.hutool.core.collection.ListUtil;
 import com.alibaba.fastjson2.JSONObject;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
 import org.group1418.easy.escm.common.enums.CustomTipEnum;
 import org.group1418.easy.escm.common.exception.CustomException;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.utils.ExcelUtil;
 import org.group1418.easy.escm.common.wrapper.CustomTip;
 import org.group1418.easy.escm.common.wrapper.R;
+import org.group1418.easy.escm.core.system.entity.SystemClient;
 import org.group1418.easy.escm.core.system.pojo.fo.LoginFo;
+import org.group1418.easy.escm.core.system.service.ISystemClientService;
+import org.group1418.easy.escm.core.system.service.ISystemUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +26,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yq 2024/1/13 12:08
@@ -33,6 +42,8 @@ public class TestController {
     private CustomConfigProperties customConfigProperties;
     @Autowired
     private TestService testService;
+    @Autowired
+    private ISystemClientService systemClientService;
 
     @GetMapping("test")
     @SaIgnore
@@ -93,5 +104,23 @@ public class TestController {
     @SaIgnore
     public R<String> minUpload(@RequestParam("file") MultipartFile file) {
         return R.ok();
+    }
+
+    @GetMapping("exportTest")
+    @SaIgnore
+    public void exportTest(HttpServletResponse response) {
+        ExcelUtil.exportXlsx(systemClientService.list(), SystemClient.class,"test.xlsx",
+                null, response);
+    }
+
+    @PostMapping("importTest")
+    @SaIgnore
+    public R<List<SystemClient>> importTest(@RequestParam("file") MultipartFile file) {
+        List<SystemClient> exoList = new ArrayList<>();
+        ExcelUtil.importFile(file.getOriginalFilename(), 1, file::getInputStream, SystemClient.class, (data, context, noText) -> {
+            int x= 1/0;
+            exoList.add(data);
+        });
+        return R.ok(exoList);
     }
 }

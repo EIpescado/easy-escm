@@ -1,7 +1,7 @@
 package org.group1418.easy.escm;
 
 import org.group1418.easy.escm.common.base.IMQService;
-import org.group1418.easy.escm.common.wrapper.OpLogDto;
+import org.group1418.easy.escm.common.wrapper.OpLogData;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,7 +37,7 @@ public class EasyEscmApp {
             }
 
             @Override
-            public void sendOpLogMessage(OpLogDto object) {
+            public void sendOpLogMessage(OpLogData object) {
 
             }
 

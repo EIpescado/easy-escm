@@ -1,10 +1,11 @@
 package org.group1418.easy.escm.core.system.pojo.fo;
 
 import lombok.Data;
-import org.group1418.easy.escm.common.validator.BigDecimalCheck;
-import org.group1418.easy.escm.common.validator.StrCheck;
+import org.group1418.easy.escm.common.validator.annotation.BigDecimalCheck;
+import org.group1418.easy.escm.common.validator.annotation.StrCheck;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class LoginFo {
     /**
      * 验证码
      */
+    @NotBlank()
     private String code;
 
     /**

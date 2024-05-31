@@ -33,10 +33,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @author yq
- * @date 2020-09-21 15:33:47
- * @description 菜单
- * @since V1.0.0
+ * 菜单
+ *
+ * @author yq 2020-09-21 15:33:47
  */
 @Service
 @RequiredArgsConstructor
@@ -58,7 +57,7 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
     @Transactional(rollbackFor = Exception.class)
     public void update(Long id, SystemMenuFo fo) {
         if (id.equals(fo.getPid())) {
-            throw new SystemCustomException("上级不能为自己");
+            throw SystemCustomException.i18n("permission.menu.parent.can.not.be.self");
         }
         commonCheck(fo);
         SystemMenu systemMenu = baseMapper.selectById(id);
@@ -72,12 +71,12 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
         //菜单若为iFrame  path必须以http/https开头
         if (fo.getIFrame()) {
             if (!HttpUtil.isHttp(fo.getPath()) && HttpUtil.isHttps(fo.getPath())) {
-                throw new SystemCustomException("iFrame菜单路由地址必须以http/https开头");
+                throw SystemCustomException.i18n("menu.iframe.must.start.with.http");
             }
         }
         //非根节点 component 不可为空
         if (fo.getPid() != null && StrUtil.isEmpty(fo.getComponent())) {
-            throw new SystemCustomException("菜单component不可为空");
+            throw SystemCustomException.i18n("menu.component.can.not.blank");
         }
     }
 

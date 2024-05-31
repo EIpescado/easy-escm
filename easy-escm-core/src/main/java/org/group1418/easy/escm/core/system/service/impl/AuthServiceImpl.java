@@ -37,12 +37,12 @@ public class AuthServiceImpl implements IAuthService {
         //客户端存在 且 授权类型包含
         if(client == null || !StrUtil.contains(client.getGrantType(),grantType)){
             log.info("客户端[{}]授权类型[{}]不匹配", clientId, grantType);
-            throw new SystemCustomException("客户端不存在或授权类型不匹配");
+            throw SystemCustomException.i18n("auth.client.not.exist.or.grant.type.not.match");
         }
         //客户端禁用
         if(AbleStateEnum.OFF == client.getState()){
             log.info("客户端[{}]已被禁用", clientId);
-            throw new SystemCustomException("客户端已禁用");
+            throw SystemCustomException.i18n("auth.client.disabled");
         }
         //校验租户
         return null;

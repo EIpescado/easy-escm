@@ -9,6 +9,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -581,5 +582,9 @@ public class PudgeUtil {
             return null;
         }
         return sra.getRequest();
+    }
+
+    public static void main(String[] args) {
+
     }
 }

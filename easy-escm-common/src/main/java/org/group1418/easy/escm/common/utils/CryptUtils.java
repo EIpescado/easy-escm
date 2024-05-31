@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * @author yuqian 2024年4月8日 10:07:02
  */
-public class EncryptUtils {
+public class CryptUtils {
     /**
      * 公钥
      */
@@ -67,7 +67,7 @@ public class EncryptUtils {
 
     private static void checkLength(String password) {
         if (!ArrayUtil.contains(AES_LENGTH_ARRAY, password.length())) {
-            throw new SystemCustomException("AES秘钥长度要求为16位、24位、32位");
+            throw SystemCustomException.i18n("params.aes.private.key.length.limit");
         }
     }
 
@@ -120,7 +120,7 @@ public class EncryptUtils {
      */
     public static String encryptByRsaHex(String data, String publicKey) {
         if (StrUtil.isBlank(publicKey)) {
-            throw new IllegalArgumentException("RSA需要传入公钥进行加密");
+            throw SystemCustomException.i18n("rsa.need.public.key");
         }
         RSA rsa = SecureUtil.rsa(null, publicKey);
         return rsa.encryptHex(data, StandardCharsets.UTF_8, KeyType.PublicKey);
@@ -135,7 +135,7 @@ public class EncryptUtils {
      */
     public static String decryptRsa(String data, String privateKey) {
         if (StrUtil.isBlank(privateKey)) {
-            throw new IllegalArgumentException("RSA需要传入私钥进行解密");
+            throw SystemCustomException.i18n("rsa.need.private.key");
         }
         RSA rsa = SecureUtil.rsa(privateKey, null);
         return rsa.decryptStr(data, KeyType.PrivateKey, StandardCharsets.UTF_8);

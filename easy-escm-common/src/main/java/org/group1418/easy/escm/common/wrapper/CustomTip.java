@@ -1,5 +1,6 @@
 package org.group1418.easy.escm.common.wrapper;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.group1418.easy.escm.common.enums.CustomTipEnum;
@@ -49,13 +50,20 @@ public class CustomTip implements Comparable<CustomTip>, Serializable {
         this.args = args;
     }
 
-    public static CustomTip error(String msgCode) {
-        return new CustomTip(CustomTipEnum.FAIL.getCode(), msgCode);
+    public static CustomTip error(String message) {
+        return error(null,message);
+    }
+
+    public static CustomTip error(String code, String message) {
+        CustomTip customTip = new CustomTip();
+        customTip.setCode(StrUtil.isNotBlank(code) ? code : CustomTipEnum.FAIL.getCode());
+        customTip.setMessage(message);
+        return customTip;
     }
 
 
     public String getMessage() {
-        return I18nUtil.getMessage(msgI18nCode, args);
+        return StrUtil.isNotBlank(message) ? message : I18nUtil.getMessage(msgI18nCode, args);
     }
 
     @Override
