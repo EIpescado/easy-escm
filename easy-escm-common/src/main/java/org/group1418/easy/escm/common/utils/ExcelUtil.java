@@ -27,6 +27,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.converter.BaseEnumConverter;
 import org.group1418.easy.escm.common.converter.BooleanCnConverter;
+import org.group1418.easy.escm.common.converter.LocalDateConverter;
 import org.group1418.easy.escm.common.enums.IBaseEnum;
 import org.group1418.easy.escm.common.exception.CustomException;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
@@ -63,7 +64,7 @@ public class ExcelUtil {
     /**
      * 内置的一些额外 converter
      */
-    private static final List<Converter<?>> INNER_EXTRA_CONVERTER_LIST = ListUtil.of(new BooleanCnConverter());
+    private static final List<Converter<?>> INNER_EXTRA_CONVERTER_LIST = ListUtil.of(new BooleanCnConverter(),new LocalDateConverter());
 
     /**
      * 导出xlsx
