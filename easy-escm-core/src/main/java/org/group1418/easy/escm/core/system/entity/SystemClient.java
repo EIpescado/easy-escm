@@ -7,12 +7,12 @@ import lombok.EqualsAndHashCode;
 import org.group1418.easy.escm.common.base.obj.BaseEntity;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
-import org.group1418.easy.escm.common.validator.annotation.IntCheck;
 
 import java.time.LocalDate;
 
 /**
  * SystemClient 系统客户端,即本身系统授权的客户端
+ *
  * @author yq 2021/4/22 15:03
  */
 @EqualsAndHashCode(callSuper = true)
@@ -56,7 +56,7 @@ public class SystemClient extends BaseEntity {
     private String remark;
 
     @TableField(exist = false)
-    private UserStateEnum userState;
+    private UserStateEnum userState = UserStateEnum.NORMAL;
 
     @TableField(exist = false)
     private LocalDate hh = LocalDate.now();

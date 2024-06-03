@@ -110,7 +110,7 @@ public class TestController {
     @SaIgnore
     public void exportTest(HttpServletResponse response) {
         ExcelUtil.exportXlsx(systemClientService.list(), SystemClient.class,"test.xlsx",
-                null, response);
+                ListUtil.of("clientId","timeout","state","userState","hh","createTime","enabled"), response);
     }
 
     @PostMapping("importTest")

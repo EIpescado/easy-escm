@@ -14,9 +14,7 @@ import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.converters.AutoConverter;
 import com.alibaba.excel.converters.Converter;
-import com.alibaba.excel.converters.WriteConverterContext;
 import com.alibaba.excel.exception.ExcelDataConvertException;
-import com.alibaba.excel.metadata.data.WriteCellData;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
@@ -45,6 +43,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +63,7 @@ public class ExcelUtil {
     /**
      * 内置的一些额外 converter
      */
-    private static final List<Converter<?>> INNER_EXTRA_CONVERTER_LIST = ListUtil.of(new BooleanCnConverter(),new LocalDateConverter());
+    private static final List<Converter<?>> INNER_EXTRA_CONVERTER_LIST = ListUtil.of(new BooleanCnConverter(), new LocalDateConverter());
 
     /**
      * 导出xlsx
@@ -139,15 +138,19 @@ public class ExcelUtil {
     /**
      * 导出xlsx
      *
-     * @param headList     表头
-     * @param data         数据
-     * @param outputStream 输出流
+     * @param headList        表头
+     * @param data            数据
+     * @param outputStream    输出流
+     * @param extraConverters 额外的转化器
      */
-    private static void exportXlsx(List<List<String>> headList, List<List<Object>> data, OutputStream outputStream) {
+    private static void exportXlsx(List<List<String>> headList, List<List<Object>> data, OutputStream outputStream, Collection<Converter<?>> extraConverters) {
         ExcelWriterBuilder excelWriterBuilder = EasyExcel.write(outputStream).autoCloseStream(false);
         //注入自定义的转化
         if (CollUtil.isNotEmpty(INNER_EXTRA_CONVERTER_LIST)) {
             INNER_EXTRA_CONVERTER_LIST.forEach(excelWriterBuilder::registerConverter);
+        }
+        if (CollUtil.isNotEmpty(extraConverters)) {
+            extraConverters.forEach(excelWriterBuilder::registerConverter);
         }
         ExcelWriterSheetBuilder sheet1 = excelWriterBuilder.sheet(DEFAULT_SHEET_NAME);
         if (CollUtil.isNotEmpty(headList)) {
@@ -164,7 +167,7 @@ public class ExcelUtil {
      * @param realFileName 文件名,可不带后缀
      * @param exportCols   需要导出的字段,按此顺序
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("uncheck")
     public static <T> void exportXlsx(List<T> data, Class<T> clazz, String realFileName, List<String> exportCols, HttpServletResponse response) {
         log.info("导出[{}],自定义字段[{}]个", clazz.getSimpleName(), CollUtil.size(exportCols));
         if (CollUtil.isEmpty(exportCols)) {
@@ -187,14 +190,13 @@ public class ExcelUtil {
             exportCols.forEach(col -> {
                 Field field = dataFieldMap.get(col);
                 if (field != null) {
-                    Class<?> type = field.getType();
                     ExcelProperty annotation = field.getAnnotation(ExcelProperty.class);
                     boolean ignoreField = field.getAnnotation(ExcelIgnore.class) != null;
                     if (annotation != null) {
                         if (ignoreField) {
                             return;
                         }
-                        if (!innerConverter(field, type, col, timeFormatMap, converterMap, converterClassMap)) {
+                        if (timeFormatSupport(field, field.getType(), col, timeFormatMap)) {
                             //配置了 @ExcelProperty 的converter,即自定义转化类
                             Class<? extends Converter<?>> converter = annotation.converter();
                             if (!converter.equals(AutoConverter.class)) {
@@ -208,7 +210,7 @@ public class ExcelUtil {
                     } else {
                         //不过滤未被注解的 使用属性名做header
                         if (!ignoreUnannotated && !ignoreField) {
-                            innerConverter(field, type, col, timeFormatMap, converterMap, converterClassMap);
+                            timeFormatSupport(field, field.getType(), col, timeFormatMap);
                             headList.add(ListUtil.of(field.getName()));
                             exportFieldList.add(field);
                         }
@@ -217,14 +219,14 @@ public class ExcelUtil {
 
             });
             if (CollUtil.isEmpty(data)) {
-                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, new ArrayList<>(), outputStream));
+                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, new ArrayList<>(), outputStream, null));
             } else {
                 //动态数据
                 final List<List<Object>> newDataList = data.stream().map(row -> {
                     List<Object> rowDataList = new ArrayList<>(exportFieldList.size());
                     exportFieldList.forEach(field -> {
-                        DateTimeFormatter dateTimeFormatter = timeFormatMap.get(field.getName());
                         Object fieldValue = ReflectUtil.getFieldValue(row, field);
+                        DateTimeFormatter dateTimeFormatter = timeFormatMap.get(field.getName());
                         if (dateTimeFormatter != null) {
                             if (fieldValue == null) {
                                 rowDataList.add(null);
@@ -234,38 +236,23 @@ public class ExcelUtil {
                                 rowDataList.add(LocalDateTimeUtil.format((LocalDate) fieldValue, dateTimeFormatter));
                             }
                         } else {
-                            //支持自定义converter 和 BaseEnumConverter
-                            Converter<Object> converter = (Converter<Object>) converterMap.get(field.getName());
-                            if (converter != null) {
-                                WriteConverterContext<Object> writeConverterContext = new WriteConverterContext<>(fieldValue, null, null);
-                                try {
-                                    WriteCellData<?> writeCellData = converter.convertToExcelData(writeConverterContext);
-                                    rowDataList.add(writeCellData.getStringValue());
-                                } catch (Exception e) {
-                                    log.info("[{}]自定义converter转化异常,使用原值", field.getName());
-                                    rowDataList.add(fieldValue);
-                                }
+                            // 其他枚举默认使用toString
+                            if (fieldValue instanceof Enum) {
+                                rowDataList.add(fieldValue.toString());
                             } else {
-                                // 其他枚举默认使用toString
-                                if (fieldValue instanceof Enum) {
-                                    rowDataList.add(fieldValue.toString());
-                                } else {
-                                    rowDataList.add(fieldValue);
-                                }
+                                rowDataList.add(fieldValue);
                             }
                         }
                     });
                     return rowDataList;
                 }).collect(Collectors.toList());
-                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, newDataList, outputStream));
+                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, newDataList, outputStream, converterMap.values()));
             }
         }
     }
 
-    private static boolean innerConverter(Field field, Class<?> type, String col,
-                                          Map<String, DateTimeFormatter> timeFormatMap,
-                                          Map<String, Converter<?>> converterMap,
-                                          Map<String, Converter<?>> converterClassMap) {
+    private static boolean timeFormatSupport(Field field, Class<?> type, String col,
+                                             Map<String, DateTimeFormatter> timeFormatMap) {
         //日期类型 额外转化,可能配了注解
         if (type.equals(LocalDateTime.class) || type.equals(LocalDate.class)) {
             //日期类型 额外转化,可能配了注解,未配置给默认
@@ -275,17 +262,12 @@ public class ExcelUtil {
             } else {
                 if (type.equals(LocalDate.class)) {
                     //默认日期格式化
-                    timeFormatMap.put(col, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    timeFormatMap.put(col, DateTimeUtil.YYYY_MM_DD_FORMATTER);
                 } else {
                     //默认日期格式化
-                    timeFormatMap.put(col, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    timeFormatMap.put(col, DateTimeUtil.DEFAULT_FORMATTER);
                 }
             }
-            return true;
-        } else if (IBaseEnum.class.isAssignableFrom(type)) {
-            //通用枚举类型
-            converterMap.put(col, PudgeUtil.getAndPutIfNotExist(converterClassMap, type.getName() + "Converter",
-                    converterName -> new BaseEnumConverter(type)));
             return true;
         }
         return false;
