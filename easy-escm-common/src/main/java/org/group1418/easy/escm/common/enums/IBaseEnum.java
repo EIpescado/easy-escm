@@ -8,9 +8,6 @@ package org.group1418.easy.escm.common.enums;
  */
 public interface IBaseEnum {
 
-
-    default IBaseEnum get() {
-        return this;
-    }
+    String name();
 
 }

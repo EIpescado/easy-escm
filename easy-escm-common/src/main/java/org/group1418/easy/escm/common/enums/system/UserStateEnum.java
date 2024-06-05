@@ -11,9 +11,7 @@ public enum UserStateEnum implements IBaseEnum {
     /**
      * 状态
      */
-    NORMAL("正常"),
-    FORBIDDEN("禁用"),
-    NOT_ACTIVATED("未激活"),
+    NORMAL("正常"), FORBIDDEN("禁用"), NOT_ACTIVATED("未激活"),
     ;
 
     final String userState;
@@ -27,8 +25,4 @@ public enum UserStateEnum implements IBaseEnum {
         return userState;
     }
 
-//    @Override
-//    public Class<?> getEnumClass() {
-//        return UserStateEnum.class;
-//    }
 }

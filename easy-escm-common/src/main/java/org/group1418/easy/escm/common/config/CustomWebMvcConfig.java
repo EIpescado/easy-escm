@@ -3,11 +3,19 @@ package org.group1418.easy.escm.common.config;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ClassUtil;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.record.DVALRecord;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.enums.IBaseEnum;
+import org.group1418.easy.escm.common.enums.system.UserStateEnum;
+import org.group1418.easy.escm.common.serializer.BaseEnum2KeyWriter;
+import org.group1418.easy.escm.common.serializer.LocalDateWriter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -23,12 +31,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import javax.servlet.Servlet;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * web上下文配置
+ *
  * @author yq
  * @date 2018/04/18 14:05
  * @since V1.0.0
@@ -87,14 +98,7 @@ public class CustomWebMvcConfig extends WebMvcConfigurationSupport {
     private FastJsonHttpMessageConverter createDefaultFastJsonHttpMessageConverter() {
         FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
         //不可使用*/*,强制用户自己定义支持的MediaTypes
-        fastConverter.setSupportedMediaTypes(new ArrayList<MediaType>() {
-            private static final long serialVersionUID = 2644645137309978808L;
-
-            {
-                add(MediaType.APPLICATION_JSON);
-                add(MediaType.TEXT_PLAIN);
-            }
-        });
+        fastConverter.setSupportedMediaTypes(CollUtil.toList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
         //全局配置
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
         fastJsonConfig.setWriterFeatures(
@@ -111,6 +115,14 @@ public class CustomWebMvcConfig extends WebMvcConfigurationSupport {
         //全局日期格式
         fastJsonConfig.setDateFormat("yyyy-MM-dd HH:mm:ss");
         fastConverter.setFastJsonConfig(fastJsonConfig);
+        //对一些类型注入默认的writer
+        JSON.register(LocalDate.class, new LocalDateWriter());
+        //注入所有IBaseEnum的writer
+        Set<Class<?>> classes = ClassUtil.scanPackageBySuper("org.group1418.easy.escm",IBaseEnum.class);
+        BaseEnum2KeyWriter baseEnum2KeyWriter = new BaseEnum2KeyWriter();
+        if(CollUtil.isNotEmpty(classes)){
+            classes.forEach(c -> JSON.register(c, baseEnum2KeyWriter));
+        }
         return fastConverter;
     }
 }

@@ -5,7 +5,6 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
@@ -15,6 +14,7 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.converters.AutoConverter;
 import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.exception.ExcelDataConvertException;
+import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
@@ -119,19 +119,7 @@ public class ExcelUtil {
      */
     private static <T> void exportXlsx(List<T> data, Class<T> clazz, OutputStream outputStream) {
         ExcelWriterBuilder excelWriterBuilder = EasyExcel.write(outputStream, clazz).autoCloseStream(false);
-        //注入自定义的转化
-        if (CollUtil.isNotEmpty(INNER_EXTRA_CONVERTER_LIST)) {
-            INNER_EXTRA_CONVERTER_LIST.forEach(excelWriterBuilder::registerConverter);
-        }
-        //注入通用枚举的转化,如需要
-        List<Class<? extends IBaseEnum>> baseEnums = Arrays.stream(ReflectUtil.getFields(clazz))
-                .filter(f -> IBaseEnum.class.isAssignableFrom(f.getType()))
-                .map(f -> (Class<? extends IBaseEnum>) f.getType())
-                .distinct()
-                .collect(Collectors.toList());
-        if (CollUtil.isNotEmpty(baseEnums)) {
-            baseEnums.forEach(c -> excelWriterBuilder.registerConverter(new BaseEnumConverter(c)));
-        }
+        registerCommonConverter(null, excelWriterBuilder, clazz);
         excelWriterBuilder.sheet(DEFAULT_SHEET_NAME).doWrite(data);
     }
 
@@ -143,12 +131,10 @@ public class ExcelUtil {
      * @param outputStream    输出流
      * @param extraConverters 额外的转化器
      */
-    private static void exportXlsx(List<List<String>> headList, List<List<Object>> data, OutputStream outputStream, Collection<Converter<?>> extraConverters) {
+    private static <T> void exportXlsx(List<List<String>> headList, List<List<Object>> data, OutputStream outputStream,
+                                       Collection<Converter<?>> extraConverters, Class<T> clazz) {
         ExcelWriterBuilder excelWriterBuilder = EasyExcel.write(outputStream).autoCloseStream(false);
-        //注入自定义的转化
-        if (CollUtil.isNotEmpty(INNER_EXTRA_CONVERTER_LIST)) {
-            INNER_EXTRA_CONVERTER_LIST.forEach(excelWriterBuilder::registerConverter);
-        }
+        registerCommonConverter(null, excelWriterBuilder, clazz);
         if (CollUtil.isNotEmpty(extraConverters)) {
             extraConverters.forEach(excelWriterBuilder::registerConverter);
         }
@@ -167,7 +153,6 @@ public class ExcelUtil {
      * @param realFileName 文件名,可不带后缀
      * @param exportCols   需要导出的字段,按此顺序
      */
-    @SuppressWarnings("uncheck")
     public static <T> void exportXlsx(List<T> data, Class<T> clazz, String realFileName, List<String> exportCols, HttpServletResponse response) {
         log.info("导出[{}],自定义字段[{}]个", clazz.getSimpleName(), CollUtil.size(exportCols));
         if (CollUtil.isEmpty(exportCols)) {
@@ -200,8 +185,7 @@ public class ExcelUtil {
                             //配置了 @ExcelProperty 的converter,即自定义转化类
                             Class<? extends Converter<?>> converter = annotation.converter();
                             if (!converter.equals(AutoConverter.class)) {
-                                converterMap.put(col, PudgeUtil.getAndPutIfNotExist(converterClassMap, converter.getName(),
-                                        converterName -> ReflectUtil.newInstance(converter)));
+                                converterMap.put(col, PudgeUtil.getAndPutIfNotExist(converterClassMap, converter.getName(), converterName -> ReflectUtil.newInstance(converter)));
                             }
                         }
                         //表头描述
@@ -219,7 +203,7 @@ public class ExcelUtil {
 
             });
             if (CollUtil.isEmpty(data)) {
-                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, new ArrayList<>(), outputStream, null));
+                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, new ArrayList<>(), outputStream, null, clazz));
             } else {
                 //动态数据
                 final List<List<Object>> newDataList = data.stream().map(row -> {
@@ -237,7 +221,9 @@ public class ExcelUtil {
                             }
                         } else {
                             // 其他枚举默认使用toString
-                            if (fieldValue instanceof Enum) {
+                            if (fieldValue instanceof IBaseEnum) {
+                                rowDataList.add(fieldValue.toString());
+                            } else if (fieldValue instanceof Enum) {
                                 rowDataList.add(fieldValue.toString());
                             } else {
                                 rowDataList.add(fieldValue);
@@ -246,13 +232,12 @@ public class ExcelUtil {
                     });
                     return rowDataList;
                 }).collect(Collectors.toList());
-                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, newDataList, outputStream, converterMap.values()));
+                exportXlsx(realFileName, response, outputStream -> exportXlsx(headList, newDataList, outputStream, converterMap.values(), clazz));
             }
         }
     }
 
-    private static boolean timeFormatSupport(Field field, Class<?> type, String col,
-                                             Map<String, DateTimeFormatter> timeFormatMap) {
+    private static boolean timeFormatSupport(Field field, Class<?> type, String col, Map<String, DateTimeFormatter> timeFormatMap) {
         //日期类型 额外转化,可能配了注解
         if (type.equals(LocalDateTime.class) || type.equals(LocalDate.class)) {
             //日期类型 额外转化,可能配了注解,未配置给默认
@@ -299,10 +284,10 @@ public class ExcelUtil {
         try {
             log.info("导入文件[{}]开始", fileName);
             inputStream = inputStreamSupplier.get();
-            EasyExcel.read(inputStream, clazz, new ReadListener<T>() {
+            ExcelReaderBuilder readerBuilder = EasyExcel.read(inputStream, clazz, new ReadListener<T>() {
                 @Override
                 public void invoke(T data, AnalysisContext context) {
-                    rowDataConsumer.accept(data, context, StrUtil.format("第[{}]行", context.readRowHolder().getRowIndex() + 1));
+                    rowDataConsumer.accept(data, context, I18nUtil.getMessage("excel.import.row.no", context.readRowHolder().getRowIndex() + 1));
                 }
 
                 @Override
@@ -319,19 +304,59 @@ public class ExcelUtil {
                         ExcelDataConvertException excelDataConvertException = (ExcelDataConvertException) exception;
                         int row = excelDataConvertException.getRowIndex() + 1;
                         int column = excelDataConvertException.getColumnIndex() + 1;
-                        log.error("第[{}]行第[{}]列解析异常，数据为:[{}]", row, column, excelDataConvertException.getCellData());
+                        log.error("第[{}]行第[{}]列解析异常，数据为:[{}]", row, column, excelDataConvertException.getCellData().getStringValue());
                         throw SystemCustomException.i18n("excel.import.which.row.error", row, column);
                     } else {
                         log.error("文件解析异常:[{}]", exception.getLocalizedMessage());
                         throw SystemCustomException.i18n("excel.import.error");
                     }
                 }
-            }).sheet().headRowNumber(headRowNumber).doRead();
+            });
+            registerCommonConverter(readerBuilder, null, clazz);
+            readerBuilder.sheet().headRowNumber(headRowNumber).doRead();
         } catch (IOException e) {
             log.error("文件解析异常IO:[{}]", e.getLocalizedMessage());
             throw SystemCustomException.i18n("excel.import.error");
         } finally {
             IoUtil.close(inputStream);
+        }
+    }
+
+
+    /**
+     * 注册 默认的converter
+     *
+     * @param readerBuilder 读
+     * @param writerBuilder 写
+     * @param clazz         类型
+     * @param <T>           类型
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> void registerCommonConverter(ExcelReaderBuilder readerBuilder, ExcelWriterBuilder writerBuilder,
+                                                    Class<T> clazz) {
+        //注入自定义的转化
+        if (CollUtil.isNotEmpty(INNER_EXTRA_CONVERTER_LIST)) {
+            if (readerBuilder != null) {
+                INNER_EXTRA_CONVERTER_LIST.forEach(readerBuilder::registerConverter);
+            }
+            if (writerBuilder != null) {
+                INNER_EXTRA_CONVERTER_LIST.forEach(writerBuilder::registerConverter);
+            }
+        }
+        //注入通用枚举的转化,如需要
+        List<Class<? extends IBaseEnum>> baseEnums = Arrays.stream(ReflectUtil.getFields(clazz))
+                .filter(f -> IBaseEnum.class.isAssignableFrom(f.getType()))
+                .map(f -> (Class<? extends IBaseEnum>) f.getType())
+                .distinct().collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(baseEnums)) {
+            baseEnums.forEach(c -> {
+                if (readerBuilder != null) {
+                    readerBuilder.registerConverter(new BaseEnumConverter(c));
+                }
+                if (writerBuilder != null) {
+                    writerBuilder.registerConverter(new BaseEnumConverter(c));
+                }
+            });
         }
     }
 

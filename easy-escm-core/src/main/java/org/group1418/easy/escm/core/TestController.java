@@ -109,8 +109,7 @@ public class TestController {
     @GetMapping("exportTest")
     @SaIgnore
     public void exportTest(HttpServletResponse response) {
-        ExcelUtil.exportXlsx(systemClientService.list(), SystemClient.class,"test.xlsx",
-                ListUtil.of("clientId","timeout","state","userState","hh","createTime","enabled"), response);
+        ExcelUtil.exportXlsx(systemClientService.list(), SystemClient.class,"test.xlsx",null, response);
     }
 
     @PostMapping("importTest")
@@ -118,7 +117,6 @@ public class TestController {
     public R<List<SystemClient>> importTest(@RequestParam("file") MultipartFile file) {
         List<SystemClient> exoList = new ArrayList<>();
         ExcelUtil.importFile(file.getOriginalFilename(), 1, file::getInputStream, SystemClient.class, (data, context, noText) -> {
-            int x= 1/0;
             exoList.add(data);
         });
         return R.ok(exoList);

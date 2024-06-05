@@ -26,8 +26,4 @@ public enum AbleStateEnum implements IBaseEnum {
         return state;
     }
 
-//    @Override
-//    public Class<?> getEnumClass() {
-//        return AbleStateEnum.class;
-//    }
 }

@@ -1,14 +1,9 @@
 package org.group1418.easy.escm.core.system.entity;
 
-import com.alibaba.excel.annotation.ExcelProperty;
-import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.group1418.easy.escm.common.base.obj.BaseEntity;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
-import org.group1418.easy.escm.common.enums.system.UserStateEnum;
-
-import java.time.LocalDate;
 
 /**
  * SystemClient 系统客户端,即本身系统授权的客户端
@@ -23,12 +18,10 @@ public class SystemClient extends BaseEntity {
     /**
      * 客户端标识
      */
-    @ExcelProperty(value = "clientId")
     private String clientId;
     /**
      * 客户端密钥
      */
-    @ExcelProperty(value = "clientSecret")
     private String clientSecret;
     /**
      * 支持的授权类型,多个逗号相隔
@@ -55,9 +48,4 @@ public class SystemClient extends BaseEntity {
      */
     private String remark;
 
-    @TableField(exist = false)
-    private UserStateEnum userState = UserStateEnum.NORMAL;
-
-    @TableField(exist = false)
-    private LocalDate hh = LocalDate.now();
 }
