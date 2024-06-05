@@ -26,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
+ * SystemUserServiceImpl
  * @author yq 2024/3/4 15:51
- * @description SystemUserServiceImpl
  */
 @Slf4j
 @Service

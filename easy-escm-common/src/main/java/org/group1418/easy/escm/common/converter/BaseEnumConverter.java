@@ -36,12 +36,13 @@ public class BaseEnumConverter implements Converter<IBaseEnum> {
     @Override
     public IBaseEnum convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         String enumVal = cellData.getStringValue();
+        //todo 导入
         return null;
     }
 
     @Override
     public WriteCellData<?> convertToExcelData(IBaseEnum value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        return new WriteCellData(value != null ? value.toString() : StrUtil.EMPTY);
+        return new WriteCellData<>(value != null ? value.toString() : StrUtil.EMPTY);
     }
 
     @Override

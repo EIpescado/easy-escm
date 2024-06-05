@@ -5,10 +5,9 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
+ * 查询对象基类
  * @author yq
  * @date 2021年4月14日 10:42:31
- * @description 查询对象基类
- * @since V1.0.0
  */
 @Data
 public class BaseQo implements Serializable {

@@ -5,10 +5,9 @@ import lombok.EqualsAndHashCode;
 
 
 /**
+ * 分页查询对象 基类
  * @author yq
  * @date 2021年4月14日 10:42:23
- * @description 分页查询对象 基类
- * @since V1.0.0
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

@@ -7,10 +7,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
+ * base Vo 展示对象
  * @author yq
  * @date 2024年4月28日 15:50:09
- * @description base Vo 展示对象
- * @since V1.0.0
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
