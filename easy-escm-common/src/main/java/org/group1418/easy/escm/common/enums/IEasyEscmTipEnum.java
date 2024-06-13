@@ -9,7 +9,7 @@ import org.group1418.easy.escm.common.wrapper.CustomTip;
  * @author yq
  * @date 2019/01/30 16:53
  */
-public interface ICustomTipEnum {
+public interface IEasyEscmTipEnum {
 
     /**
      * 提示

@@ -8,7 +8,7 @@ import org.group1418.easy.escm.common.wrapper.CustomTip;
  *
  * @author yq 2021年4月13日 16:48:24
  */
-public enum CustomTipEnum implements ICustomTipEnum {
+public enum EasyEscmTipEnum implements IEasyEscmTipEnum {
     /**
      * 通用异常
      */
@@ -34,7 +34,7 @@ public enum CustomTipEnum implements ICustomTipEnum {
 
     final CustomTip tip;
 
-    CustomTipEnum(int code, String msgI18nCode) {
+    EasyEscmTipEnum(int code, String msgI18nCode) {
         this.tip = new CustomTip(code, msgI18nCode);
     }
 

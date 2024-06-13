@@ -4,8 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
-import org.group1418.easy.escm.common.exception.CustomException;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.exception.BaseEasyEscmException;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,9 +33,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 @EnableAsync
 @RequiredArgsConstructor
-public class CustomAsyncTaskConfig implements AsyncConfigurer, InitializingBean {
+public class EasyEscmAsyncTaskConfig implements AsyncConfigurer, InitializingBean {
 
-    private final CustomConfigProperties configProperties;
+    private final EasyEscmConfigProperties configProperties;
     public static final String TASK_EXECUTOR_SUFFIX = "-TaskExecutor";
 
 
@@ -43,9 +43,9 @@ public class CustomAsyncTaskConfig implements AsyncConfigurer, InitializingBean 
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (throwable, method, objects) -> {
             String message;
-            if (throwable instanceof CustomException) {
-                CustomException customException = (CustomException) throwable;
-                message = customException.getMessage();
+            if (throwable instanceof BaseEasyEscmException) {
+                BaseEasyEscmException baseEasyEscmException = (BaseEasyEscmException) throwable;
+                message = baseEasyEscmException.getMessage();
                 log.info("[{}]异步执行异常: [{}]", method.getName(), message);
             } else {
                 message = throwable.getLocalizedMessage();
@@ -60,7 +60,7 @@ public class CustomAsyncTaskConfig implements AsyncConfigurer, InitializingBean 
     @Bean(name = {TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME, AsyncAnnotationBeanPostProcessor.DEFAULT_TASK_EXECUTOR_BEAN_NAME})
     @Primary
     public ThreadPoolTaskExecutor applicationTaskExecutor() {
-        CustomConfigProperties.AsyncConfig asyncExecutorConfigEntry = new CustomConfigProperties.AsyncConfig();
+        EasyEscmConfigProperties.AsyncConfig asyncExecutorConfigEntry = new EasyEscmConfigProperties.AsyncConfig();
         String taskExecutor = configProperties.getName() + TASK_EXECUTOR_SUFFIX;
         log.info("注入[{}]", taskExecutor);
         return this.createExecutor(taskExecutor, asyncExecutorConfigEntry);
@@ -73,7 +73,7 @@ public class CustomAsyncTaskConfig implements AsyncConfigurer, InitializingBean 
      * @param asyncExecutorConfigEntry 线程池配置
      * @return Executor
      */
-    private ThreadPoolTaskExecutor createExecutor(String prefix, CustomConfigProperties.AsyncConfig asyncExecutorConfigEntry) {
+    private ThreadPoolTaskExecutor createExecutor(String prefix, EasyEscmConfigProperties.AsyncConfig asyncExecutorConfigEntry) {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.initialize();
         taskExecutor.setCorePoolSize(asyncExecutorConfigEntry.getCoreSize());

@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.group1418.easy.escm.common.annotation.OpLog;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -76,7 +76,7 @@ public class OpLogData implements Serializable {
 //                dto.setUserId(customUserDetails.getUserId());
 //                dto.setCustomerId(customUserDetails.getCustomerId());
 //                dto.setClientType(customUserDetails.getClientType().name());
-            } catch (SystemCustomException customException) {
+            } catch (EasyEscmException customException) {
                 //可能登陆过期 获取不到
             }
         }

@@ -5,6 +5,7 @@ package org.group1418.easy.escm.core.system.service;
 import org.group1418.easy.escm.common.base.BaseService;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
+import org.group1418.easy.escm.common.saToken.obj.CurrentUser;
 import org.group1418.easy.escm.common.wrapper.PageR;
 import org.group1418.easy.escm.core.system.entity.SystemUser;
 import org.group1418.easy.escm.core.system.pojo.fo.SystemUserFo;
@@ -13,10 +14,8 @@ import org.group1418.easy.escm.core.system.pojo.vo.SystemUserVo;
 
 
 /**
+ * 用户service 2024年6月13日 14:15:29
  * @author yq
- * @date 2020/09/21 11:36
- * @description 用户service
- * @since V1.0.0
  */
 public interface ISystemUserService extends BaseService<SystemUser> {
 
@@ -75,6 +74,11 @@ public interface ISystemUserService extends BaseService<SystemUser> {
      */
     void switchState(Long id, UserStateEnum state);
 
-
+    /**
+     * 构建当前用户对象
+     * @param user 用户
+     * @return 当前用户
+     */
+    CurrentUser buildCurrentUser(SystemUser user);
 
 }

@@ -6,9 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
-import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
+import org.group1418.easy.escm.common.saToken.obj.CurrentUser;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.utils.PudgeUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
@@ -34,7 +35,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, SystemUser> implements ISystemUserService {
 
-    private final CustomConfigProperties customConfigProperties;
+    private final EasyEscmConfigProperties easyEscmConfigProperties;
     private final ICoreRelationService coreRelationService;
 
     @Override
@@ -53,13 +54,13 @@ public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, Sys
         //判断用户名是否存在
         if (super.haveFieldValueEq(SystemUser::getUsername, fo.getUsername())) {
             //用户名已被使用
-            throw SystemCustomException.i18n("user.username.used");
+            throw EasyEscmException.i18n("user.username.used");
         }
         log.info("新增用户: [{}]", fo.getUsername());
         SystemUser user = new SystemUser();
         BeanUtils.copyProperties(fo, user);
         //给予初始密码
-        user.setPassword(PudgeUtil.encodePwd(customConfigProperties.getUserDefaultPassword()));
+        user.setPassword(PudgeUtil.encodePwd(easyEscmConfigProperties.getUserDefaultPassword()));
         //正常
         user.setState(UserStateEnum.NORMAL);
         baseMapper.insert(user);
@@ -77,7 +78,7 @@ public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, Sys
         //判断用户名是否存在
         if (oldUser != null && !oldUser.getId().equals(id)) {
             //用户名已被使用
-            throw SystemCustomException.i18n("user.username.used");
+            throw EasyEscmException.i18n("user.username.used");
         }
         log.info("修改用户: [{}]", user.getUsername());
         BeanUtils.copyProperties(fo, user);
@@ -117,7 +118,22 @@ public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, Sys
                 .eq(SystemUser::getId, id));
     }
 
+    @Override
+    public CurrentUser buildCurrentUser(SystemUser user) {
+        if (user == null) {
+            return null;
+        }
+        CurrentUser currentUser = new CurrentUser();
+        currentUser.setNickname(user.getNickname());
+        currentUser.setAvatar(user.getAvatar());
+        currentUser.setPhone(user.getPhone());
+        currentUser.setMail(user.getMail());
+        currentUser.setTenantId(user.getTenantId());
+        currentUser.setId(user.getId());
+        return currentUser;
+    }
+
     private String getDefaultPassword() {
-        return PudgeUtil.encodePwd(customConfigProperties.getUserDefaultPassword());
+        return PudgeUtil.encodePwd(easyEscmConfigProperties.getUserDefaultPassword());
     }
 }

@@ -27,8 +27,8 @@ import org.group1418.easy.escm.common.converter.BaseEnumConverter;
 import org.group1418.easy.escm.common.converter.BooleanCnConverter;
 import org.group1418.easy.escm.common.converter.LocalDateConverter;
 import org.group1418.easy.escm.common.enums.IBaseEnum;
-import org.group1418.easy.escm.common.exception.CustomException;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.BaseEasyEscmException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.http.HttpStatus;
 
@@ -297,7 +297,7 @@ public class ExcelUtil {
 
                 @Override
                 public void onException(Exception exception, AnalysisContext context) throws Exception {
-                    if (exception instanceof CustomException) {
+                    if (exception instanceof BaseEasyEscmException) {
                         log.info("解析导入文件[{}]异常[{}]", fileName, exception.getLocalizedMessage());
                         throw exception;
                     } else if (exception instanceof ExcelDataConvertException) {
@@ -305,10 +305,10 @@ public class ExcelUtil {
                         int row = excelDataConvertException.getRowIndex() + 1;
                         int column = excelDataConvertException.getColumnIndex() + 1;
                         log.error("第[{}]行第[{}]列解析异常，数据为:[{}]", row, column, excelDataConvertException.getCellData().getStringValue());
-                        throw SystemCustomException.i18n("excel.import.which.row.error", row, column);
+                        throw EasyEscmException.i18n("excel.import.which.row.error", row, column);
                     } else {
                         log.error("文件解析异常:[{}]", exception.getLocalizedMessage());
-                        throw SystemCustomException.i18n("excel.import.error");
+                        throw EasyEscmException.i18n("excel.import.error");
                     }
                 }
             });
@@ -316,7 +316,7 @@ public class ExcelUtil {
             readerBuilder.sheet().headRowNumber(headRowNumber).doRead();
         } catch (IOException e) {
             log.error("文件解析异常IO:[{}]", e.getLocalizedMessage());
-            throw SystemCustomException.i18n("excel.import.error");
+            throw EasyEscmException.i18n("excel.import.error");
         } finally {
             IoUtil.close(inputStream);
         }

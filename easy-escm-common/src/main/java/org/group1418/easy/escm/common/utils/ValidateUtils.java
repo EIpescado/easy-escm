@@ -5,7 +5,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
 import org.group1418.easy.escm.common.validator.annotation.StrCheck;
 import org.group1418.easy.escm.common.wrapper.ValidResult;
@@ -51,7 +51,7 @@ public class ValidateUtils {
             String message = constraintViolations.stream()
                     .map(ConstraintViolation::getMessage)
                     .collect(Collectors.joining(StrUtil.COMMA));
-            throw SystemCustomException.simple(StrUtil.nullToEmpty(tipPrefix) + message);
+            throw EasyEscmException.simple(StrUtil.nullToEmpty(tipPrefix) + message);
         }
     }
 
@@ -151,7 +151,7 @@ public class ValidateUtils {
         String strTrim = RegexUtil.removeAllSpecialChar(StrUtil.nullToEmpty(PudgeUtil.full2HalfWithTrim(str)));
         boolean notBlank = StrUtil.isNotBlank(strTrim);
         if (notBlank && !NumberUtil.isNumber(strTrim)) {
-            throw SystemCustomException.i18n("params.invalid", fieldName);
+            throw EasyEscmException.i18n("params.invalid", fieldName);
         }
         BigDecimal result = notBlank ? new BigDecimal(strTrim) : null;
         return checkBigDecimal(result, fieldName, required, precision, scale, gtZero);

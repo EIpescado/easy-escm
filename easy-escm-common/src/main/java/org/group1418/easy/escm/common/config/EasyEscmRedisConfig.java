@@ -5,9 +5,9 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.cache.TenantRedisKeyPrefixNameMapper;
-import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
 import org.group1418.easy.escm.common.serializer.FastJson2JsonRedissonCodec;
-import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.spring.starter.RedissonAutoConfigurationCustomizer;
@@ -35,11 +35,11 @@ import java.util.List;
 @Configuration
 @EnableCaching
 @EnableConfigurationProperties({RedisProperties.class})
-public class CustomRedisConfig extends CachingConfigurerSupport {
+public class EasyEscmRedisConfig extends CachingConfigurerSupport {
 
-    private final CustomConfigProperties configProperties;
+    private final EasyEscmConfigProperties configProperties;
 
-    public CustomRedisConfig(CustomConfigProperties configProperties) {
+    public EasyEscmRedisConfig(EasyEscmConfigProperties configProperties) {
         this.configProperties = configProperties;
     }
 
@@ -51,9 +51,9 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
     }
 
     @Bean
-    public CustomRedisCacheService customRedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
+    public RedisCacheService customRedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
         log.info("注入 customRedisCacheService");
-        return new CustomRedisCacheService(redisTemplate, redissonClient);
+        return new RedisCacheService(redisTemplate, redissonClient);
     }
 
     @Bean
@@ -94,7 +94,7 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
     @Bean
     public RedissonAutoConfigurationCustomizer redissonAutoConfigurationCustomizers(RedisProperties redisProperties) {
         log.info("注入 redissonAutoConfigurationCustomizers [{}]", redisProperties.getHost());
-        CustomConfigProperties.RedissonConfig redissonProperties = configProperties.getRedissonConfig();
+        EasyEscmConfigProperties.RedissonConfig redissonProperties = configProperties.getRedissonConfig();
         return config -> {
             //数据序列化和反序列化
             config.setCodec(FastJson2JsonRedissonCodec.INSTANCE)
@@ -123,7 +123,7 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
                         .setSubscriptionMode(clusterServersConfig.getSubscriptionMode());
 
             } else {
-                CustomConfigProperties.RedissonConfig.SingleServerConfig singleServerConfig = redissonProperties.getSingleServerConfig();
+                EasyEscmConfigProperties.RedissonConfig.SingleServerConfig singleServerConfig = redissonProperties.getSingleServerConfig();
                 //单节点
                 config.useSingleServer()
                         .setAddress(buildNodeAddress(redisProperties.getHost(), redisProperties.getPort(), redisProperties.isSsl()))

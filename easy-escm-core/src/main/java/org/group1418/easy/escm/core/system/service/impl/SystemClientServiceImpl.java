@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import lombok.RequiredArgsConstructor;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
-import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
 import org.group1418.easy.escm.core.constant.CacheConstant;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SystemClientServiceImpl extends BaseServiceImpl<SystemClientMapper, SystemClient> implements ISystemClientService {
 
-    private final CustomRedisCacheService customRedisCacheService;
+    private final RedisCacheService redisCacheService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -57,7 +57,7 @@ public class SystemClientServiceImpl extends BaseServiceImpl<SystemClientMapper,
 
     @Override
     public SystemClientVo getByClientId(String clientId) {
-        return customRedisCacheService.hashRound(CacheConstant.Hashs.SYSTEM_CLIENT, clientId, () -> baseMapper.getByClientId(clientId), null);
+        return redisCacheService.hashRound(CacheConstant.Hashs.SYSTEM_CLIENT, clientId, () -> baseMapper.getByClientId(clientId), null);
     }
 
 }

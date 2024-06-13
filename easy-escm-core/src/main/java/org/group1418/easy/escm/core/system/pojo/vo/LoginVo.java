@@ -1,13 +1,12 @@
 package org.group1418.easy.escm.core.system.pojo.vo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
+ * LoginVo 登录后返回
  * @author yq 2024/4/10 14:53
- * @description LoginVo 登录后返回
  */
 @Data
 public class LoginVo implements Serializable {

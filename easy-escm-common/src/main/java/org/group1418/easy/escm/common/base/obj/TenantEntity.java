@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 基础租户Entity
+ *
  * @author yq
  * @date 2024年3月8日 14:36:47
  * @since V1.0.0
@@ -18,6 +19,6 @@ public class TenantEntity extends BaseEntity {
     /**
      * 租户ID
      */
-    private String tenantId;
+    private Long tenantId;
 
 }

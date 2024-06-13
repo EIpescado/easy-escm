@@ -7,7 +7,7 @@ server:
 #mybatis-plus
 mybatis-plus:
   mapper-package: org.group1418.**.mapper
-  mapper-locations: classpath*:mapper/*/*Mapper.xml
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
   global-config:
     #不打印mybatis-plus logo
     banner: false

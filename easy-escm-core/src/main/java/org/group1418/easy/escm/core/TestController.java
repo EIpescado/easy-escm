@@ -4,15 +4,11 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
-import cn.hutool.core.collection.ListUtil;
 import com.alibaba.fastjson2.JSONObject;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
-import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
-import org.group1418.easy.escm.common.enums.CustomTipEnum;
-import org.group1418.easy.escm.common.exception.CustomException;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.saToken.CurrentUserHelper;
 import org.group1418.easy.escm.common.utils.ExcelUtil;
-import org.group1418.easy.escm.common.wrapper.CustomTip;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.group1418.easy.escm.core.system.entity.SystemClient;
 import org.group1418.easy.escm.core.system.pojo.fo.LoginFo;
@@ -38,7 +34,7 @@ import java.util.List;
 public class TestController {
 
     @Autowired
-    private CustomConfigProperties customConfigProperties;
+    private EasyEscmConfigProperties easyEscmConfigProperties;
     @Autowired
     private TestService testService;
     @Autowired
@@ -67,7 +63,7 @@ public class TestController {
     // 查询 Token 信息  ---- http://localhost:8081/acc/tokenInfo
     @GetMapping("tokenInfo")
     public SaResult tokenInfo() {
-        return SaResult.data(StpUtil.getTokenInfo());
+        return SaResult.data(CurrentUserHelper.currentUser());
     }
 
     // 测试注销  ---- http://localhost:8081/acc/logout

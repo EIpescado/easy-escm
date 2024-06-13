@@ -9,9 +9,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import lombok.RequiredArgsConstructor;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.saToken.obj.CurrentUser;
-import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.utils.DbUtil;
 import org.group1418.easy.escm.common.utils.StreamUtil;
 import org.group1418.easy.escm.common.wrapper.ButtonNode;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, SystemMenu> implements ISystemMenuService {
 
     private final ISystemButtonService systemButtonService;
-    private final CustomRedisCacheService customRedisCacheService;
+    private final RedisCacheService redisCacheService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -57,26 +57,26 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
     @Transactional(rollbackFor = Exception.class)
     public void update(Long id, SystemMenuFo fo) {
         if (id.equals(fo.getPid())) {
-            throw SystemCustomException.i18n("permission.menu.parent.can.not.be.self");
+            throw EasyEscmException.i18n("permission.menu.parent.can.not.be.self");
         }
         commonCheck(fo);
         SystemMenu systemMenu = baseMapper.selectById(id);
         Assert.notNull(systemMenu);
         BeanUtils.copyProperties(fo, systemMenu);
         baseMapper.updateById(systemMenu);
-        DbUtil.afterTransactionCommit(() -> customRedisCacheService.hDel(CacheConstant.Hashs.SYSTEM_MENU, id));
+        DbUtil.afterTransactionCommit(() -> redisCacheService.hDel(CacheConstant.Hashs.SYSTEM_MENU, id));
     }
 
     private void commonCheck(SystemMenuFo fo) {
         //菜单若为iFrame  path必须以http/https开头
         if (fo.getIFrame()) {
             if (!HttpUtil.isHttp(fo.getPath()) && HttpUtil.isHttps(fo.getPath())) {
-                throw SystemCustomException.i18n("menu.iframe.must.start.with.http");
+                throw EasyEscmException.i18n("menu.iframe.must.start.with.http");
             }
         }
         //非根节点 component 不可为空
         if (fo.getPid() != null && StrUtil.isEmpty(fo.getComponent())) {
-            throw SystemCustomException.i18n("menu.component.can.not.blank");
+            throw EasyEscmException.i18n("menu.component.can.not.blank");
         }
     }
 
@@ -107,7 +107,7 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
         if (CollectionUtil.isEmpty(menuIds)) {
             return null;
         }
-        menuTreeNodeList = CollUtil.defaultIfEmpty(customRedisCacheService.hMGet(CacheConstant.Hashs.SYSTEM_MENU, menuIds), new ArrayList<>(menuIds.size()));
+        menuTreeNodeList = CollUtil.defaultIfEmpty(redisCacheService.hMGet(CacheConstant.Hashs.SYSTEM_MENU, menuIds), new ArrayList<>(menuIds.size()));
         //缓存中未包含全部,则查数据库并存入缓存
         if (CollUtil.size(menuIds) > CollUtil.size(menuTreeNodeList)) {
             List<String> noCacheMenuIds = CollUtil.subtractToList(menuIds, menuTreeNodeList.stream().map(n -> n.getId().toString()).collect(Collectors.toList()));
@@ -118,10 +118,10 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
                     menuTreeNodeList.add(menuTreeNode);
                     return menuTreeNode;
                 });
-                customRedisCacheService.hMSet(CacheConstant.Hashs.SYSTEM_MENU, noCacheMenuMap);
+                redisCacheService.hMSet(CacheConstant.Hashs.SYSTEM_MENU, noCacheMenuMap);
             }
         }
-        buttonNodeList = CollUtil.defaultIfEmpty(customRedisCacheService.hMGet(CacheConstant.Hashs.SYSTEM_BUTTON, buttonIds), new ArrayList<>(buttonIds.size()));
+        buttonNodeList = CollUtil.defaultIfEmpty(redisCacheService.hMGet(CacheConstant.Hashs.SYSTEM_BUTTON, buttonIds), new ArrayList<>(buttonIds.size()));
         //缓存中未包含全部,则查数据库并存入缓存
         if (CollUtil.size(buttonIds) > CollUtil.size(buttonNodeList)) {
             List<String> noCacheButtonIds = CollUtil.subtractToList(buttonIds, buttonNodeList.stream().map(n -> n.getId().toString()).collect(Collectors.toList()));
@@ -131,7 +131,7 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
                     buttonNodeList.add(sb);
                     return sb;
                 });
-                customRedisCacheService.hMSet(CacheConstant.Hashs.SYSTEM_BUTTON, noCacheButtonMap);
+                redisCacheService.hMSet(CacheConstant.Hashs.SYSTEM_BUTTON, noCacheButtonMap);
             }
         }
         //构建树
@@ -213,10 +213,10 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
             }
             DbUtil.afterTransactionCommit(() -> {
                 if (CollUtil.isNotEmpty(menuIds)) {
-                    customRedisCacheService.hDel(CacheConstant.Hashs.SYSTEM_MENU, menuIds);
+                    redisCacheService.hDel(CacheConstant.Hashs.SYSTEM_MENU, menuIds);
                 }
                 if (CollUtil.isNotEmpty(buttonIds)) {
-                    customRedisCacheService.hDel(CacheConstant.Hashs.SYSTEM_BUTTON, buttonIds);
+                    redisCacheService.hDel(CacheConstant.Hashs.SYSTEM_BUTTON, buttonIds);
                 }
             });
         }

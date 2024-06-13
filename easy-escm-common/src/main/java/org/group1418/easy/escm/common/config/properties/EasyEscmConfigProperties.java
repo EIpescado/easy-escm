@@ -25,7 +25,7 @@ import java.util.List;
 @Data
 @Component
 @Slf4j
-public class CustomConfigProperties {
+public class EasyEscmConfigProperties {
 
     /**
      * 系统名称
@@ -50,6 +50,16 @@ public class CustomConfigProperties {
      * 新增用户的默认密码
      */
     private String userDefaultPassword = "123456";
+
+    /**
+     * 登录失败 最大错误次数
+     */
+    private Integer loginMaxRetryCount = 5;
+
+    /**
+     * 登录失败 超过最大错误次数 锁定时间,单位分钟
+     */
+    private Integer loginLockTime = 10;
 
     /**
      * 异步线程池配置, 自动注入spring上下文,系统中止自动关闭, 注入使用需配合@Lazy
@@ -116,7 +126,7 @@ public class CustomConfigProperties {
         /**
          * token 名称 （同时也是： cookie 名称、提交 token 时参数的名称、存储 token 时的 key 前缀）
          */
-        private String tokenName = "easy-escm-token";
+        private String tokenName = "easy-auth";
 
         /**
          * token 有效期（单位：秒） 默认30天，-1 代表永久有效
@@ -132,7 +142,7 @@ public class CustomConfigProperties {
         /**
          * 是否启用动态 activeTimeout 功能，如不需要请设置为 false，节省缓存请求次数
          */
-        private Boolean dynamicActiveTimeout = false;
+        private Boolean dynamicActiveTimeout = true;
 
         /**
          * 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
@@ -157,7 +167,7 @@ public class CustomConfigProperties {
         /**
          * 是否尝试从请求体里读取 token
          */
-        private Boolean isReadBody = true;
+        private Boolean isReadBody = false;
 
         /**
          * 是否尝试从 header 里读取 token
@@ -167,7 +177,7 @@ public class CustomConfigProperties {
         /**
          * 是否尝试从 cookie 里读取 token
          */
-        private Boolean isReadCookie = true;
+        private Boolean isReadCookie = false;
 
         /**
          * 是否在登录后将 token 写入到响应头

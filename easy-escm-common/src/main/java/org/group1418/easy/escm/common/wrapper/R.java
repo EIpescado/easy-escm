@@ -4,9 +4,9 @@ package org.group1418.easy.escm.common.wrapper;
 import cn.hutool.core.lang.func.VoidFunc0;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
-import org.group1418.easy.escm.common.enums.CustomTipEnum;
-import org.group1418.easy.escm.common.enums.ICustomTipEnum;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
+import org.group1418.easy.escm.common.enums.IEasyEscmTipEnum;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.utils.I18nUtil;
 
 import java.io.Serializable;
@@ -48,11 +48,11 @@ public class R<T> implements Serializable {
      * 判断返回是否成功
      */
     public boolean succeed() {
-        return code.equals(CustomTipEnum.SUCCESS.getCode());
+        return code.equals(EasyEscmTipEnum.SUCCESS.getCode());
     }
 
     public static <T> R<T> ok(T res) {
-        return new R<>(CustomTipEnum.SUCCESS.getCode(), CustomTipEnum.SUCCESS.getMsgI18nCode(), res);
+        return new R<>(EasyEscmTipEnum.SUCCESS.getCode(), EasyEscmTipEnum.SUCCESS.getMsgI18nCode(), res);
     }
 
     public static R<String> ok() {
@@ -60,19 +60,19 @@ public class R<T> implements Serializable {
     }
 
     public static <T> R<T> fail(String message) {
-        return new R<>(CustomTipEnum.FAIL.getCode(), message, null);
+        return new R<>(EasyEscmTipEnum.FAIL.getCode(), message, null);
     }
 
-    public static <T> R<T> fail(ICustomTipEnum tip) {
+    public static <T> R<T> fail(IEasyEscmTipEnum tip) {
         return new R<>(tip.getCode(), I18nUtil.getMessage(tip.getMsgI18nCode()), null);
     }
 
     public static <T> R<T> failI18n(String msgI18nCode, Object... args) {
-        return new R<>(CustomTipEnum.FAIL.getCode(), I18nUtil.getMessage(msgI18nCode, args), null);
+        return new R<>(EasyEscmTipEnum.FAIL.getCode(), I18nUtil.getMessage(msgI18nCode, args), null);
     }
 
     public static <T> R<T> fail(Integer code, String msg) {
-        return new R<>(code != null ? code.toString() : CustomTipEnum.FAIL.getCode(), msg, null);
+        return new R<>(code != null ? code.toString() : EasyEscmTipEnum.FAIL.getCode(), msg, null);
     }
 
     public static <T> R<T> fail(String code, String msg) {
@@ -91,7 +91,7 @@ public class R<T> implements Serializable {
         if (succeed()) {
             okConsumer.accept(this.res);
         } else {
-            throw SystemCustomException.simple(this.message);
+            throw EasyEscmException.simple(this.message);
         }
     }
 
@@ -107,7 +107,7 @@ public class R<T> implements Serializable {
         if (succeed()) {
             return okFunction.apply(this.res);
         } else {
-            throw SystemCustomException.simple(this.message);
+            throw EasyEscmException.simple(this.message);
         }
     }
 }

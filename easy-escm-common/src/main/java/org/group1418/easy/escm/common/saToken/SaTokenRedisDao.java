@@ -6,7 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,20 +22,20 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class SaTokenRedisDao implements SaTokenDao {
 
-    private final CustomRedisCacheService customRedisCacheService;
+    private final RedisCacheService redisCacheService;
 
     @Override
     public String get(String key) {
-        return customRedisCacheService.get(key);
+        return redisCacheService.get(key);
     }
 
     @Override
     public void set(String key, String value, long timeout) {
         if (timeout != 0L && timeout > -2L) {
             if (timeout == -1L) {
-                this.customRedisCacheService.template().opsForValue().set(key, value);
+                this.redisCacheService.template().opsForValue().set(key, value);
             } else {
-                this.customRedisCacheService.template().opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+                this.redisCacheService.template().opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
             }
         }
     }
@@ -50,12 +50,12 @@ public class SaTokenRedisDao implements SaTokenDao {
 
     @Override
     public void delete(String key) {
-        customRedisCacheService.del(key);
+        redisCacheService.del(key);
     }
 
     @Override
     public long getTimeout(String key) {
-        return customRedisCacheService.ttl(key);
+        return redisCacheService.ttl(key);
     }
 
     @Override
@@ -66,22 +66,22 @@ public class SaTokenRedisDao implements SaTokenDao {
                 this.set(key, this.get(key), timeout);
             }
         } else {
-            customRedisCacheService.expire(key, timeout, TimeUnit.SECONDS);
+            redisCacheService.expire(key, timeout, TimeUnit.SECONDS);
         }
     }
 
     @Override
     public Object getObject(String key) {
-        return customRedisCacheService.template().opsForValue().get(key);
+        return redisCacheService.template().opsForValue().get(key);
     }
 
     @Override
     public void setObject(String key, Object object, long timeout) {
         if (timeout != 0L && timeout > -2L) {
             if (timeout == -1L) {
-                this.customRedisCacheService.template().opsForValue().set(key, object);
+                this.redisCacheService.template().opsForValue().set(key, object);
             } else {
-                this.customRedisCacheService.template().opsForValue().set(key, object, timeout, TimeUnit.SECONDS);
+                this.redisCacheService.template().opsForValue().set(key, object, timeout, TimeUnit.SECONDS);
             }
 
         }
@@ -97,12 +97,12 @@ public class SaTokenRedisDao implements SaTokenDao {
 
     @Override
     public void deleteObject(String key) {
-        customRedisCacheService.del(key);
+        redisCacheService.del(key);
     }
 
     @Override
     public long getObjectTimeout(String key) {
-        return customRedisCacheService.ttl(key);
+        return redisCacheService.ttl(key);
     }
 
     @Override
@@ -113,13 +113,13 @@ public class SaTokenRedisDao implements SaTokenDao {
                 this.setObject(key, this.getObject(key), timeout);
             }
         } else {
-            customRedisCacheService.expire(key, timeout, TimeUnit.SECONDS);
+            redisCacheService.expire(key, timeout, TimeUnit.SECONDS);
         }
     }
 
     @Override
     public List<String> searchData(String prefix, String keyword, int start, int size, boolean sortType) {
-        Set<String> keys = customRedisCacheService.template().keys(prefix + "*" + keyword + "*");
+        Set<String> keys = redisCacheService.template().keys(prefix + "*" + keyword + "*");
         if (CollUtil.isEmpty(keys)) {
             return ListUtil.empty();
         }

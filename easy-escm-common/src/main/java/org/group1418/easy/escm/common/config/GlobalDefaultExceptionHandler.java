@@ -9,8 +9,8 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
-import org.group1418.easy.escm.common.enums.CustomTipEnum;
-import org.group1418.easy.escm.common.exception.CustomException;
+import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
+import org.group1418.easy.escm.common.exception.BaseEasyEscmException;
 import org.group1418.easy.escm.common.saToken.SaTokenConfig;
 import org.group1418.easy.escm.common.utils.I18nUtil;
 import org.group1418.easy.escm.common.utils.PudgeUtil;
@@ -56,11 +56,11 @@ public class GlobalDefaultExceptionHandler {
     @ExceptionHandler(Throwable.class)
     public R<String> defaultErrorHandler(Throwable e) {
         Throwable cause = e.getCause();
-        if (cause instanceof CustomException) {
+        if (cause instanceof BaseEasyEscmException) {
             return R.fail(cause.getMessage());
         }
         log.error("[{}]未知的异常 [{}]", currentRequestUrl(), StrUtil.removeAllLineBreaks(e.getMessage()), e);
-        return R.fail(CustomTipEnum.FAIL);
+        return R.fail(EasyEscmTipEnum.FAIL);
     }
 
     /**
@@ -69,7 +69,7 @@ public class GlobalDefaultExceptionHandler {
     @ExceptionHandler(ClientAbortException.class)
     public R<String> clientAbortExceptionHandler(ClientAbortException e) {
         log.error("[{}]连接被终止:[{}]", currentRequestUrl(), e.getLocalizedMessage());
-        return R.fail(CustomTipEnum.FAIL);
+        return R.fail(EasyEscmTipEnum.FAIL);
     }
 
     /**
@@ -108,7 +108,7 @@ public class GlobalDefaultExceptionHandler {
                 return R.fail(message);
             }
         }
-        return R.fail(CustomTipEnum.FAIL);
+        return R.fail(EasyEscmTipEnum.FAIL);
     }
 
 
@@ -121,7 +121,7 @@ public class GlobalDefaultExceptionHandler {
         if (e instanceof MaxUploadSizeExceededException) {
             return R.fail(e.getCause().getCause().getLocalizedMessage());
         }
-        return R.fail(CustomTipEnum.FAIL);
+        return R.fail(EasyEscmTipEnum.FAIL);
     }
 
     /**
@@ -155,10 +155,10 @@ public class GlobalDefaultExceptionHandler {
                 }
                 log.info("[{}]校验不通过[{}]", currentRequestUrl(), message);
                 return R.<String>fail(message);
-            }).orElseGet(() -> R.fail(CustomTipEnum.FAIL));
+            }).orElseGet(() -> R.fail(EasyEscmTipEnum.FAIL));
         } else {
             log.error("[{}]自定义校验错误: [{}]", currentRequestUrl(), e.getLocalizedMessage());
-            return R.fail(CustomTipEnum.FAIL);
+            return R.fail(EasyEscmTipEnum.FAIL);
         }
     }
 
@@ -168,7 +168,7 @@ public class GlobalDefaultExceptionHandler {
     @ExceptionHandler(NestedRuntimeException.class)
     public R<String> nestedRuntimeExceptionHandler(NestedRuntimeException e) {
         log.info("[{}] spring 异常 [{}]", currentRequestUrl(), StrUtil.removeAllLineBreaks(e.getLocalizedMessage()));
-        return R.fail(CustomTipEnum.FAIL);
+        return R.fail(EasyEscmTipEnum.FAIL);
     }
 
     /**
@@ -177,7 +177,7 @@ public class GlobalDefaultExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public R<String> httpRequestMethodNotSupportedExceptionHandle(HttpRequestMethodNotSupportedException e) {
         log.info("[{}] method [{}] not allow", currentRequestUrl(), e.getMethod());
-        return R.fail(CustomTipEnum.METHOD_NOT_ALLOWED);
+        return R.fail(EasyEscmTipEnum.METHOD_NOT_ALLOWED);
     }
 
     /**
@@ -186,7 +186,7 @@ public class GlobalDefaultExceptionHandler {
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public R<String> httpMediaTypeNotSupportedExceptionHandle(HttpMediaTypeNotSupportedException e) {
         log.info("[{}] not support [{}]", currentRequestUrl(), e.getContentType());
-        return R.fail(CustomTipEnum.UNSUPPORTED_MEDIA_TYPE);
+        return R.fail(EasyEscmTipEnum.UNSUPPORTED_MEDIA_TYPE);
     }
 
     /**
@@ -195,7 +195,7 @@ public class GlobalDefaultExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public R<String> noHandlerFoundExceptionHandle(NoHandlerFoundException e) {
         log.info("[{}] not found [{}]", currentRequestUrl(), e.getRequestURL());
-        return R.fail(CustomTipEnum.NOT_FOUND);
+        return R.fail(EasyEscmTipEnum.NOT_FOUND);
     }
 
     /**
@@ -209,8 +209,8 @@ public class GlobalDefaultExceptionHandler {
     /**
      * 自定义异常回调
      */
-    @ExceptionHandler(CustomException.class)
-    public R<String> customExceptionHandler(CustomException e) {
+    @ExceptionHandler(BaseEasyEscmException.class)
+    public R<String> customExceptionHandler(BaseEasyEscmException e) {
         return R.fail(e.getTip().getCode(), e.getMessage());
     }
 

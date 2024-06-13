@@ -10,10 +10,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.record.DVALRecord;
-import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
 import org.group1418.easy.escm.common.enums.IBaseEnum;
-import org.group1418.easy.escm.common.enums.system.UserStateEnum;
 import org.group1418.easy.escm.common.serializer.BaseEnum2KeyWriter;
 import org.group1418.easy.escm.common.serializer.LocalDateWriter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -48,12 +46,12 @@ import java.util.Set;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurationSupport.class})
 @Slf4j
-public class CustomWebMvcConfig extends WebMvcConfigurationSupport {
+public class EasyEscmWebMvcConfig extends WebMvcConfigurationSupport {
 
     private final FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
-    private final CustomConfigProperties configProperties;
+    private final EasyEscmConfigProperties configProperties;
 
-    public CustomWebMvcConfig(CustomConfigProperties configProperties) {
+    public EasyEscmWebMvcConfig(EasyEscmConfigProperties configProperties) {
         this.fastJsonHttpMessageConverter = createDefaultFastJsonHttpMessageConverter();
         this.configProperties = configProperties;
     }
@@ -123,9 +121,9 @@ public class CustomWebMvcConfig extends WebMvcConfigurationSupport {
         //对一些类型注入默认的writer
         JSON.register(LocalDate.class, new LocalDateWriter());
         //注入所有IBaseEnum的writer
-        Set<Class<?>> classes = ClassUtil.scanPackageBySuper("org.group1418.easy.escm",IBaseEnum.class);
+        Set<Class<?>> classes = ClassUtil.scanPackageBySuper("org.group1418.easy.escm", IBaseEnum.class);
         BaseEnum2KeyWriter baseEnum2KeyWriter = new BaseEnum2KeyWriter();
-        if(CollUtil.isNotEmpty(classes)){
+        if (CollUtil.isNotEmpty(classes)) {
             classes.forEach(c -> JSON.register(c, baseEnum2KeyWriter));
         }
         return fastConverter;

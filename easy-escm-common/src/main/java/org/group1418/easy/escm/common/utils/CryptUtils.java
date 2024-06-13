@@ -7,7 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class CryptUtils {
 
     private static void checkLength(String password) {
         if (!ArrayUtil.contains(AES_LENGTH_ARRAY, password.length())) {
-            throw SystemCustomException.i18n("params.aes.private.key.length.limit");
+            throw EasyEscmException.i18n("params.aes.private.key.length.limit");
         }
     }
 
@@ -120,7 +120,7 @@ public class CryptUtils {
      */
     public static String encryptByRsaHex(String data, String publicKey) {
         if (StrUtil.isBlank(publicKey)) {
-            throw SystemCustomException.i18n("rsa.need.public.key");
+            throw EasyEscmException.i18n("rsa.need.public.key");
         }
         RSA rsa = SecureUtil.rsa(null, publicKey);
         return rsa.encryptHex(data, StandardCharsets.UTF_8, KeyType.PublicKey);
@@ -135,7 +135,7 @@ public class CryptUtils {
      */
     public static String decryptRsa(String data, String privateKey) {
         if (StrUtil.isBlank(privateKey)) {
-            throw SystemCustomException.i18n("rsa.need.private.key");
+            throw EasyEscmException.i18n("rsa.need.private.key");
         }
         RSA rsa = SecureUtil.rsa(privateKey, null);
         return rsa.decryptStr(data, KeyType.PrivateKey, StandardCharsets.UTF_8);

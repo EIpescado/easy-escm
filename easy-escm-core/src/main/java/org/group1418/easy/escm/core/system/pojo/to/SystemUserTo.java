@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.group1418.easy.escm.common.base.obj.BaseTo;
-import org.group1418.easy.escm.common.enums.OrgEnum;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
 
 import java.time.LocalDateTime;
@@ -59,11 +58,6 @@ public class SystemUserTo extends BaseTo {
      * 客户名称
      */
     private String customerName;
-
-    /**
-     * 组织
-     */
-    private OrgEnum organization;
 
     /**
      * 是否授权邮箱

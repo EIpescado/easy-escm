@@ -3,7 +3,7 @@ package org.group1418.easy.escm.common.spring;
 import cn.hutool.core.exceptions.UtilException;
 import cn.hutool.core.util.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -188,7 +188,7 @@ public class SpringContextHolder implements BeanFactoryPostProcessor, Applicatio
             factory = beanFactory;
         } else {
             if (!(applicationContext instanceof ConfigurableApplicationContext)) {
-                throw SystemCustomException.simple("No ConfigurableListableBeanFactory from context!");
+                throw EasyEscmException.simple("No ConfigurableListableBeanFactory from context!");
             }
             factory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
         }
@@ -242,7 +242,7 @@ public class SpringContextHolder implements BeanFactoryPostProcessor, Applicatio
             log.info("移除注入bean [{}]",beanName);
         } else {
             log.info("移除bean [{}] 失败",beanName);
-            throw SystemCustomException.simple("Can not unregister bean, the factory is not a DefaultSingletonBeanRegistry!");
+            throw EasyEscmException.simple("Can not unregister bean, the factory is not a DefaultSingletonBeanRegistry!");
         }
     }
 

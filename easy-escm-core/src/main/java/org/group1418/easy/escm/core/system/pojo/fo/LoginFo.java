@@ -44,10 +44,12 @@ public class LoginFo {
         /**
          * 用户名
          */
+        @StrCheck(name = "用户名")
         private String username;
         /**
          * 密码
          */
+        @StrCheck(name = "密码")
         private String password;
     }
 

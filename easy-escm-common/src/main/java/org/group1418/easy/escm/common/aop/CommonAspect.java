@@ -20,7 +20,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.group1418.easy.escm.common.annotation.OpLog;
 import org.group1418.easy.escm.common.mq.IMQService;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.spring.SpringExpressionParser;
 import org.group1418.easy.escm.common.utils.PudgeUtil;
 import org.group1418.easy.escm.common.wrapper.OpLogData;
@@ -76,7 +76,7 @@ public class CommonAspect {
 //                    notEscmMaster = !customUserDetails.getCurrentUser().getBeEscmMaster();
 //                }
 //                qo.setNotEscmMaster(notEscmMaster);
-            } catch (SystemCustomException systemCustomException) {
+            } catch (EasyEscmException systemCustomException) {
                 //部分列表不登录也可访问
             }
         }

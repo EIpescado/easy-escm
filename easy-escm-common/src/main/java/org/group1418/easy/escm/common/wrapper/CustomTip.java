@@ -3,7 +3,7 @@ package org.group1418.easy.escm.common.wrapper;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.group1418.easy.escm.common.enums.CustomTipEnum;
+import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
 import org.group1418.easy.escm.common.utils.I18nUtil;
 
 import java.io.Serializable;
@@ -56,7 +56,7 @@ public class CustomTip implements Comparable<CustomTip>, Serializable {
 
     public static CustomTip error(String code, String message) {
         CustomTip customTip = new CustomTip();
-        customTip.setCode(StrUtil.isNotBlank(code) ? code : CustomTipEnum.FAIL.getCode());
+        customTip.setCode(StrUtil.isNotBlank(code) ? code : EasyEscmTipEnum.FAIL.getCode());
         customTip.setMessage(message);
         return customTip;
     }

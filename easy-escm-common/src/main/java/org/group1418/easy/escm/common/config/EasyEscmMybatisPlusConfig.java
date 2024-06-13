@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
-import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.BeansException;
@@ -32,10 +32,10 @@ import java.time.LocalDateTime;
 @EnableTransactionManagement(proxyTargetClass = true)
 @MapperScan("${mybatis-plus.mapper-package}")
 @Configuration
-public class CustomMybatisPlusConfig {
+public class EasyEscmMybatisPlusConfig {
 
 
-    public CustomMybatisPlusConfig() {
+    public EasyEscmMybatisPlusConfig() {
         log.info("注入 mybatisPlusInterceptor, metaObjectHandler");
     }
 
@@ -44,7 +44,7 @@ public class CustomMybatisPlusConfig {
      */
     @Bean
     @ConditionalOnClass(MybatisPlusInterceptor.class)
-    public MybatisPlusInterceptor mybatisPlusInterceptor(CustomConfigProperties plusConfigProperties) {
+    public MybatisPlusInterceptor mybatisPlusInterceptor(EasyEscmConfigProperties plusConfigProperties) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         // 多租户插件 必须放到第一位
         try {

@@ -6,8 +6,8 @@ import cn.hutool.crypto.CryptoException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
-import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
-import org.group1418.easy.escm.common.enums.CustomTipEnum;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
 import org.group1418.easy.escm.common.filter.wrapper.DecryptRequestBodyWrapper;
 import org.group1418.easy.escm.common.filter.wrapper.EncryptResponseBodyWrapper;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
@@ -38,7 +38,7 @@ import java.io.IOException;
 @Slf4j
 public class CryptoFilter implements Filter {
 
-    private final CustomConfigProperties properties;
+    private final EasyEscmConfigProperties properties;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -48,7 +48,7 @@ public class CryptoFilter implements Filter {
         boolean responseFlag = false;
         ServletRequest requestWrapper = null;
         EncryptResponseBodyWrapper responseBodyWrapper = null;
-        CustomConfigProperties.ApiDecryptConfig apiDecryptConfig = properties.getApiDecryptConfig();
+        EasyEscmConfigProperties.ApiDecryptConfig apiDecryptConfig = properties.getApiDecryptConfig();
 
         // 是否为 json 请求
         if (StrUtil.startWithIgnoreCase(request.getContentType(), MediaType.APPLICATION_JSON_VALUE)) {
@@ -62,7 +62,7 @@ public class CryptoFilter implements Filter {
                 if (StrUtil.isBlank(headerValue) && apiEncrypt != null) {
                     log.warn("[{}]api[{}]加密未传有效标识", PudgeUtil.getIp(servletRequest), servletRequest.getRequestURI());
                     //直接返回401
-                    PudgeUtil.responseJson(servletResponse, R.<String>fail(CustomTipEnum.PERMISSION_DENIED));
+                    PudgeUtil.responseJson(servletResponse, R.<String>fail(EasyEscmTipEnum.PERMISSION_DENIED));
                     return;
                 }
                 responseFlag = apiEncrypt != null && apiEncrypt.response();

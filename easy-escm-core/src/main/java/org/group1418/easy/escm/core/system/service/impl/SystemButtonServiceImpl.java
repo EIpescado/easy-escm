@@ -3,7 +3,7 @@ package org.group1418.easy.escm.core.system.service.impl;
 import cn.hutool.core.lang.Assert;
 import lombok.RequiredArgsConstructor;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
-import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.utils.DbUtil;
 import org.group1418.easy.escm.common.wrapper.ButtonNode;
 import org.group1418.easy.escm.core.constant.CacheConstant;
@@ -27,7 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SystemButtonServiceImpl extends BaseServiceImpl<SystemButtonMapper, SystemButton> implements ISystemButtonService {
 
-    private final CustomRedisCacheService customRedisCacheService;
+    private final RedisCacheService redisCacheService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -44,7 +44,7 @@ public class SystemButtonServiceImpl extends BaseServiceImpl<SystemButtonMapper,
         Assert.notNull(systemButton);
         BeanUtils.copyProperties(fo, systemButton);
         baseMapper.updateById(systemButton);
-        DbUtil.afterTransactionCommit(() -> customRedisCacheService.hDel(CacheConstant.Hashs.SYSTEM_BUTTON,id.toString()));
+        DbUtil.afterTransactionCommit(() -> redisCacheService.hDel(CacheConstant.Hashs.SYSTEM_BUTTON,id.toString()));
     }
 
     @Override

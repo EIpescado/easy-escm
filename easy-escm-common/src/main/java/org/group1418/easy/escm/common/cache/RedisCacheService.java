@@ -47,9 +47,9 @@ import java.util.function.Supplier;
  * @date 2020/10/16 09:07
  * @since V1.0.0
  */
-public class CustomRedisCacheService {
+public class RedisCacheService {
 
-    private final static Logger logger = LoggerFactory.getLogger(CustomRedisCacheService.class);
+    private final static Logger logger = LoggerFactory.getLogger(RedisCacheService.class);
     /**
      * 缓存过期配置
      */
@@ -68,7 +68,7 @@ public class CustomRedisCacheService {
             "\nreturn errorCount";
     private static final String AUTO_INC_SN = "auto_inc_sn";
 
-    public CustomRedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
+    public RedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
         this.redisTemplate = redisTemplate;
         this.redissonClient = redissonClient;
         //缓存redis的Serializer 参照RedisConfig中配置

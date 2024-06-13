@@ -13,7 +13,6 @@ import java.util.Arrays;
  */
 @Getter
 public enum OrgEnum {
-    HFY_2024("HF三三四四", "2024"),
     /**
      * 1418工作室
      */

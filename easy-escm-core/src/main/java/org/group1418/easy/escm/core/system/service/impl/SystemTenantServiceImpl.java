@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
-import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.utils.DateTimeUtil;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
@@ -35,20 +35,20 @@ public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper,
     @Override
     public void check(Long tenantId) {
         if (tenantId == null) {
-            throw SystemCustomException.i18n("tenant.required");
+            throw EasyEscmException.i18n("tenant.required");
         }
         //租户不存在
         SystemTenantVo tenant = get(tenantId);
         if (tenant == null) {
-            throw SystemCustomException.i18n("tenant.invalid");
+            throw EasyEscmException.i18n("tenant.invalid");
         }
         //租户被禁用
         if (AbleStateEnum.OFF == tenant.getState()) {
-            throw SystemCustomException.i18n("tenant.disabled");
+            throw EasyEscmException.i18n("tenant.disabled");
         }
         //租户是否在有效期
         if (!DateTimeUtil.timeValid(LocalDateTime.now(), null, tenant.getExpireTime())) {
-            throw SystemCustomException.i18n("tenant.expired");
+            throw EasyEscmException.i18n("tenant.expired");
         }
     }
 

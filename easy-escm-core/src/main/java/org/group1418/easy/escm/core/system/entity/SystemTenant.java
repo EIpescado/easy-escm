@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import org.group1418.easy.escm.common.base.obj.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
+import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 
 import java.time.LocalDateTime;
 
@@ -35,7 +36,7 @@ public class SystemTenant extends BaseEntity {
      * 租户状态
      */
     @TableField("state")
-    private String state;
+    private AbleStateEnum state;
 
     /**
      * 租户备注

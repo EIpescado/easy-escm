@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.group1418.easy.escm.common.base.obj.BaseEntity;
+import org.group1418.easy.escm.common.base.obj.TenantEntity;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class SystemUser extends BaseEntity {
+public class SystemUser extends TenantEntity {
 
     private static final long serialVersionUID = 8411371755246793866L;
     /**
