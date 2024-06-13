@@ -1,4 +1,4 @@
-package org.group1418.easy.escm.common.base;
+package org.group1418.easy.escm.common.mq;
 
 import org.group1418.easy.escm.common.wrapper.OpLogData;
 

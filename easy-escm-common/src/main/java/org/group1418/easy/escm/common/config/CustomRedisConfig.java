@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.cache.TenantRedisKeyPrefixNameMapper;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
 import org.group1418.easy.escm.common.serializer.FastJson2JsonRedissonCodec;
-import org.group1418.easy.escm.common.service.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.spring.starter.RedissonAutoConfigurationCustomizer;

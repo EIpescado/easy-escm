@@ -8,8 +8,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
+ * LogIpConverter 日志属性定义
  * @author yq 2024/2/21 11:17
- * @description LogIpConverter
  */
 @Slf4j
 public class LogIpDefiner extends PropertyDefinerBase {

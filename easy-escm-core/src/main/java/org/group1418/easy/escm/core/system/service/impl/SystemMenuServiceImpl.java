@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
 import org.group1418.easy.escm.common.saToken.obj.CurrentUser;
-import org.group1418.easy.escm.common.service.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
 import org.group1418.easy.escm.common.utils.DbUtil;
 import org.group1418.easy.escm.common.utils.StreamUtil;
 import org.group1418.easy.escm.common.wrapper.ButtonNode;

@@ -1,6 +1,6 @@
 package org.group1418.easy.escm;
 
-import org.group1418.easy.escm.common.base.IMQService;
+import org.group1418.easy.escm.common.mq.IMQService;
 import org.group1418.easy.escm.common.wrapper.OpLogData;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

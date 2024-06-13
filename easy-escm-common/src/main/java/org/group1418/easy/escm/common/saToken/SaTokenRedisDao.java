@@ -6,7 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.service.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

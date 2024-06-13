@@ -1,4 +1,4 @@
-package org.group1418.easy.escm.common.service;
+package org.group1418.easy.escm.common.cache;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -35,11 +35,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * 自定义redis过期时间缓存配置
+ *
  * @author yq
  * @date 2020/10/16 09:07
  * @since V1.0.0
@@ -93,7 +96,7 @@ public class CustomRedisCacheService {
      * @param lockKey    锁键值 使得同一时间只有一条线程去设置缓存,防止缓存击穿
      * @return 需要的数据
      */
-    public <T> T set(String redisKey, long ttlSeconds, RealDataGetter<T> getter, String lockKey) {
+    public <T> T set(String redisKey, long ttlSeconds, Supplier<T> getter, String lockKey) {
         if (getter == null) {
             return null;
         }
@@ -139,7 +142,7 @@ public class CustomRedisCacheService {
      * @param <T>      数据类型
      * @return 是否设置成功
      */
-    public <T> boolean setNx(String name, String key, long ttl, TimeUnit timeUnit, RealDataGetter<T> getter) {
+    public <T> boolean setNx(String name, String key, long ttl, TimeUnit timeUnit, Supplier<T> getter) {
         String redisKey = buildKey(name, key);
         if (StrUtil.isEmpty(redisKey)) {
             return false;
@@ -157,7 +160,7 @@ public class CustomRedisCacheService {
      * @param lockKey 锁标识
      * @return 需要的数据
      */
-    public <T> T set(String name, String key, RealDataGetter<T> getter, String lockKey) {
+    public <T> T set(String name, String key, Supplier<T> getter, String lockKey) {
         String redisKey = buildKey(name, key);
         long ttlSeconds = getCacheExpireSeconds(name);
         return set(redisKey, ttlSeconds, getter, lockKey);
@@ -173,7 +176,7 @@ public class CustomRedisCacheService {
      * @param lockKey    锁键值
      * @return 需要的数据
      */
-    public <T> T set(String name, String key, long ttlSeconds, RealDataGetter<T> getter, String lockKey) {
+    public <T> T set(String name, String key, long ttlSeconds, Supplier<T> getter, String lockKey) {
         String redisKey = buildKey(name, key);
         return set(redisKey, ttlSeconds, getter, lockKey);
     }
@@ -256,8 +259,7 @@ public class CustomRedisCacheService {
      * @param lockKey    锁键值,为空则在设置缓存时不加锁
      * @return T
      */
-    @SuppressWarnings("unchecked")
-    public <T> T round(String redisKey, long ttlSeconds, RealDataGetter<T> getter, String lockKey) {
+    public <T> T round(String redisKey, long ttlSeconds, Supplier<T> getter, String lockKey) {
         //从缓存中提取数据
         T result = get(redisKey);
         if (result != null) {
@@ -279,8 +281,7 @@ public class CustomRedisCacheService {
      * @param lockKey      锁键值,为空则在设置缓存时不加锁
      * @return T
      */
-    @SuppressWarnings("unchecked")
-    public <T> T round(String redisKey, long ttlSeconds, Predicate<T> resultCanUse, RealDataGetter<T> getter, String lockKey) {
+    public <T> T round(String redisKey, long ttlSeconds, Predicate<T> resultCanUse, Supplier<T> getter, String lockKey) {
         //从缓存中提取数据
         T result = get(redisKey);
         if (result != null) {
@@ -305,7 +306,7 @@ public class CustomRedisCacheService {
      * @param lockKey  锁键值
      * @return 需要的数据
      */
-    public <T> T round(String redisKey, RealDataGetter<T> getter, String lockKey) {
+    public <T> T round(String redisKey, Supplier<T> getter, String lockKey) {
         return round(redisKey, getCacheExpireSeconds(redisKey), getter, lockKey);
     }
 
@@ -316,11 +317,10 @@ public class CustomRedisCacheService {
      * @param handler  数据处理
      * @return 缓存处理后的数据
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getAndDel(String redisKey, CacheHandler<T> handler) {
+    public <T> T getAndDel(String redisKey, Consumer<T> handler) {
         T result = get(redisKey);
         if (handler != null) {
-            handler.handle(result);
+            handler.accept(result);
         }
         if (result != null) {
             redisTemplate.delete(redisKey);
@@ -335,7 +335,6 @@ public class CustomRedisCacheService {
      * @param function 数据处理
      * @return 缓存处理后的数据
      */
-    @SuppressWarnings("unchecked")
     public <T, R> R getAndDelWithBack(String redisKey, Function<T, R> function) {
         T result = get(redisKey);
         R r = null;
@@ -356,7 +355,7 @@ public class CustomRedisCacheService {
      * @param handler 缓存处理
      * @return 处理后的缓存数据
      */
-    public <T> T getAndDel(String name, String key, CacheHandler<T> handler) {
+    public <T> T getAndDel(String name, String key, Consumer<T> handler) {
         String redisKey = buildKey(name, key);
         return getAndDel(redisKey, handler);
     }
@@ -370,7 +369,7 @@ public class CustomRedisCacheService {
      * @param lockKey 锁键值 使得同一时间只有一条线程去设置缓存,防止缓存击穿
      * @return 需要的数据
      */
-    public <T> T hSet(String hash, String hk, RealDataGetter<T> getter, String lockKey) {
+    public <T> T hSet(String hash, String hk, Supplier<T> getter, String lockKey) {
         T result = null;
         if (getter != null) {
             //有锁则加锁
@@ -411,7 +410,7 @@ public class CustomRedisCacheService {
      * @return 需要的数据
      */
     @SuppressWarnings("unchecked")
-    public <T> T hashRound(String hashKey, String redisKey, RealDataGetter<T> getter, String lockKey) {
+    public <T> T hashRound(String hashKey, String redisKey, Supplier<T> getter, String lockKey) {
         //从缓存中提取数据
         T result = (T) redisTemplate.opsForHash().get(hashKey, redisKey);
         if (result != null) {
@@ -526,7 +525,7 @@ public class CustomRedisCacheService {
      * @param getter  获取数据函数
      * @param <T>     类型
      */
-    public <T> void hashNxThenPut(String hashKey, Object key, RealDataGetter<T> getter) {
+    public <T> void hashNxThenPut(String hashKey, Object key, Supplier<T> getter) {
         if (!hExists(hashKey, key) && getter != null) {
             redisTemplate.opsForHash().put(hashKey, key, getter.get());
         }
@@ -540,10 +539,10 @@ public class CustomRedisCacheService {
      * @param handler 缓存处理
      * @return 处理后的缓存数据
      */
-    public <T> T hGetAndDel(String hash, String hk, CacheHandler<T> handler) {
+    public <T> T hGetAndDel(String hash, String hk, Consumer<T> handler) {
         T result = hGet(hash, hk);
         if (handler != null) {
-            handler.handle(result);
+            handler.accept(result);
         }
         hDel(hash, hk);
         return result;
@@ -567,8 +566,8 @@ public class CustomRedisCacheService {
      * 设置key过期时间
      *
      * @param redisKey 缓存key
-     * @param ttl  过期时间
-     * @param unit 时间单位
+     * @param ttl      过期时间
+     * @param unit     时间单位
      */
     public void expire(String redisKey, long ttl, TimeUnit unit) {
         redisTemplate.expire(redisKey, ttl, unit);
@@ -826,7 +825,7 @@ public class CustomRedisCacheService {
      * @param getter 获取数据的函数
      * @return 结果
      */
-    public <T> byte[] serializeValue(RealDataGetter<T> getter) {
+    public <T> byte[] serializeValue(Supplier<T> getter) {
         return valueSerializer.serialize(getter.get());
     }
 
@@ -919,16 +918,15 @@ public class CustomRedisCacheService {
     }
 
     /**
+     * 自定义缓存名称 2020/10/15 17:51
+     *
      * @author yq
-     * @date 2020/10/15 17:51
-     * @description 自定义缓存名称
-     * @since V1.0.0
      */
     @Data
     @AllArgsConstructor
     public static class CustomCacheConfig {
         /**
-         * cache name, 等同于@Cacheable cacheName
+         * cache name
          */
         private String name;
         /**
@@ -937,29 +935,4 @@ public class CustomRedisCacheService {
         private Long seconds;
     }
 
-    /**
-     * 实际数据获取
-     *
-     * @param <T> 获取的数据类型
-     */
-    public interface RealDataGetter<T extends Object> {
-        /**
-         * 调用接口或sql获取实际数据
-         *
-         * @return 实际数据
-         */
-        T get();
-    }
-
-    /**
-     * 获取缓存后的处理
-     */
-    public interface CacheHandler<T extends Object> {
-        /**
-         * 处理数据
-         *
-         * @param t 缓存数据
-         */
-        void handle(T t);
-    }
 }

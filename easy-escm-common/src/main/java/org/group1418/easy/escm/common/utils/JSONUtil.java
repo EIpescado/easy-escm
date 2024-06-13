@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * JsonUtil
  * @author yq 2023/10/24 17:08
- * @description JsonUtil
  */
 public class JSONUtil {
 
@@ -138,7 +138,7 @@ public class JSONUtil {
      * @param size  分组大小
      * @return 拆分后的集合
      */
-    public static List<List<JSONObject>> splitJSONArray(JSONArray array, int size) {
+    public static List<List<JSONObject>> splitJsonArray(JSONArray array, int size) {
         final List<List<JSONObject>> result = new ArrayList<>();
         if (CollUtil.isEmpty(array)) {
             return result;
@@ -164,7 +164,7 @@ public class JSONUtil {
      * @param serializerFeatures 序列化配置
      * @return json字符串
      */
-    public static String toJSONStringWithIgnoreProperties(Object object, List<String> ignoreProperties, JSONWriter.Feature... serializerFeatures) {
+    public static String toJsonString(Object object, List<String> ignoreProperties, JSONWriter.Feature... serializerFeatures) {
         return JSON.toJSONString(object,
                 (PropertyFilter) (obj, name, value) ->
                         CollectionUtil.isEmpty(ignoreProperties) || !ignoreProperties.contains(name), serializerFeatures);
@@ -183,17 +183,17 @@ public class JSONUtil {
         }
         return null;
     }
-//
-//    /**
-//     * 转化json字符串为json 对象
-//     * @param jsonOrArrayStr 数组或对象json字符串
-//     * @return 响应
-//     */
-//    public static JSONAware parse(String jsonOrArrayStr){
-//        if(StrUtil.isBlank(jsonOrArrayStr)){
-//            return null;
-//        }
-//        String trim = jsonOrArrayStr.trim();
-//        return StrUtil.startWith(trim,"[") ? JSON.parseArray(trim) : JSON.parseObject(trim);
-//    }
+
+    /**
+     * 转化json字符串为json 对象
+     * @param jsonOrArrayStr 数组或对象json字符串
+     * @return 响应
+     */
+    public static Object parse(String jsonOrArrayStr){
+        if(StrUtil.isBlank(jsonOrArrayStr)){
+            return null;
+        }
+        String trim = jsonOrArrayStr.trim();
+        return StrUtil.startWith(trim,"[") ? JSON.parseArray(trim) : JSON.parseObject(trim);
+    }
 }

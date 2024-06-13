@@ -18,7 +18,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.group1418.easy.escm.common.annotation.OpLog;
-import org.group1418.easy.escm.common.base.IMQService;
+import org.group1418.easy.escm.common.mq.IMQService;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
 import org.group1418.easy.escm.common.exception.SystemCustomException;
 import org.group1418.easy.escm.common.spring.SpringExpressionParser;

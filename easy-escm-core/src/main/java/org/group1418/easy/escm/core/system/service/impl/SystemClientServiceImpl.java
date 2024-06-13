@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import lombok.RequiredArgsConstructor;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
-import org.group1418.easy.escm.common.service.CustomRedisCacheService;
+import org.group1418.easy.escm.common.cache.CustomRedisCacheService;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
 import org.group1418.easy.escm.core.constant.CacheConstant;
