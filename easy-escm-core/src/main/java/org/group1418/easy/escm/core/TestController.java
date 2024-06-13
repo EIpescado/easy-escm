@@ -17,7 +17,6 @@ import org.group1418.easy.escm.common.wrapper.R;
 import org.group1418.easy.escm.core.system.entity.SystemClient;
 import org.group1418.easy.escm.core.system.pojo.fo.LoginFo;
 import org.group1418.easy.escm.core.system.service.ISystemClientService;
-import org.group1418.easy.escm.core.system.service.ISystemUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -121,4 +120,5 @@ public class TestController {
         });
         return R.ok(exoList);
     }
+
 }

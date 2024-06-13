@@ -76,7 +76,12 @@ public class CustomWebMvcConfig extends WebMvcConfigurationSupport {
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册 Sa-Token 拦截器，打开注解式鉴权功能,除开 @SaIgnore 标识和 配置所有接口需登录,
         registry.addInterceptor(new SaInterceptor(handle ->
-                SaRouter.match("/**").notMatch(configProperties.getTokenConfig().getNotCheckLoginPaths()).check(r -> StpUtil.checkLogin()))
+                SaRouter.match("/**")
+                        .notMatch(configProperties.getTokenConfig().getNotCheckLoginPaths())
+                        .check(r -> {
+                            StpUtil.checkLogin();
+                            //todo 检查header或参数中的clientId与token一致
+                        }))
         ).addPathPatterns("/**");
     }
 

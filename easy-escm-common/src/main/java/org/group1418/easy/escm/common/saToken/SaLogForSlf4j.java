@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
+ * SaLogForSlf4j, 覆盖sa-token默认日志
  * @author yq 2024/2/21 15:13
- * @description SaLogForSlf4j, 覆盖sa-token默认日志
  */
 @Component
 @Slf4j

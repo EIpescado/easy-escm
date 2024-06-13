@@ -10,10 +10,8 @@ import org.group1418.easy.escm.core.system.pojo.to.SystemClientTo;
 import org.group1418.easy.escm.core.system.pojo.vo.SystemClientVo;
 
 /**
- * @author yq
- * @date 2021-04-22 15:09:29
- * @description system client
- * @since V1.0.0
+ * system client
+ * @author yq 2021-04-22 15:09:29
  */
 public interface ISystemClientService extends BaseService<SystemClient> {
 

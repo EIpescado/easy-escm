@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TestService {
 
-    @Async
+    @Async()
     public void testAsync() {
         log.info("ceshi");
     }

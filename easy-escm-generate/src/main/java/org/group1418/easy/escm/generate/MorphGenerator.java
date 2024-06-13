@@ -1,7 +1,5 @@
 package org.group1418.easy.escm.generate;
 
-import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
@@ -11,7 +9,6 @@ import com.baomidou.mybatisplus.generator.config.InjectionConfig;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.config.PackageConfig;
 import com.baomidou.mybatisplus.generator.config.StrategyConfig;
-import com.baomidou.mybatisplus.generator.config.builder.CustomFile;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
@@ -31,10 +28,8 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 /**
- * @author yq
- * @date 2019/07/10 16:19
- * @description
- * @since V1.0.0
+ * 自动生成类
+ * @author yq 2019/07/10 16:19
  */
 @Data
 @Builder
@@ -71,7 +66,8 @@ public class MorphGenerator {
                 .serviceImpl("service.impl")
                 .mapper("mapper")
                 .controller("controller")
-                .pathInfo(Collections.singletonMap(OutputFile.xml, resourcesPath + File.separator + moduleAlias))
+                .pathInfo(Collections.singletonMap(OutputFile.xml,
+                        resourcesPath + File.separator + "mapper" + File.separator +  moduleAlias.replace(".",File.separator)))
                 .build();
     }
 
@@ -173,13 +169,13 @@ public class MorphGenerator {
     public static void main(String[] args) {
         MorphGenerator generator = MorphGenerator.builder().username("")
                 .password("")
-                .url("jdbc:mysql://localhost:3306/easy_escm?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&allowMultiQueries=true")
-                .author("yq")
+                .url("")
+                .author("")
                 .build();
         generator.execute("org.group1418.easy.escm",
-                "easy-escm-generate",
-                "generate",
-                config -> config.setFo(true).setVo(true).addLikeField("username","password"),
-                "system_test");
+                "easy-escm-core",
+                "core.system",
+                config -> config.setFo(true).setVo(true).addLikeField(),
+                "system_tenant");
     }
 }

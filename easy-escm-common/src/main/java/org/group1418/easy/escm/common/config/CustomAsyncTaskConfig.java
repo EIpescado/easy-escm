@@ -75,6 +75,7 @@ public class CustomAsyncTaskConfig implements AsyncConfigurer, InitializingBean 
      */
     private ThreadPoolTaskExecutor createExecutor(String prefix, CustomConfigProperties.AsyncConfig asyncExecutorConfigEntry) {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.initialize();
         taskExecutor.setCorePoolSize(asyncExecutorConfigEntry.getCoreSize());
         taskExecutor.setMaxPoolSize(asyncExecutorConfigEntry.getMaxSize());
         taskExecutor.setQueueCapacity(asyncExecutorConfigEntry.getQueueCapacity());
@@ -98,10 +99,11 @@ public class CustomAsyncTaskConfig implements AsyncConfigurer, InitializingBean 
     @Override
     public void afterPropertiesSet() throws Exception {
         if (configProperties != null && CollUtil.isNotEmpty(configProperties.getAsyncConfigs())) {
+            log.info("异步线程池配置共[{}]", CollUtil.size(configProperties.getAsyncConfigs()));
             configProperties.getAsyncConfigs().forEach(c -> {
                 String threadTaskExecutor = c.getThreadName() + TASK_EXECUTOR_SUFFIX;
                 if (StrUtil.isNotBlank(threadTaskExecutor)) {
-                    SpringContextHolder.putWaitImportBeans(threadTaskExecutor, this.createExecutor(threadTaskExecutor, c));
+                    SpringContextHolder.registerBeanDefinition(threadTaskExecutor, this.createExecutor(threadTaskExecutor, c));
                 }
             });
         }

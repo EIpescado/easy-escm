@@ -1,10 +1,12 @@
 package org.group1418.easy.escm.common.config;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.text.StrBuilder;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
+import org.group1418.easy.escm.common.cache.TenantRedisKeyPrefixNameMapper;
+import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
+import org.group1418.easy.escm.common.serializer.FastJson2JsonRedissonCodec;
 import org.group1418.easy.escm.common.service.CustomRedisCacheService;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
@@ -26,15 +28,20 @@ import java.util.List;
 
 /**
  * redis配置
- * @author yq
- * @date 2020/09/18 14:11
- * @since V1.0.0
+ *
+ * @author yq 2020/09/18 14:11
  */
 @Slf4j
 @Configuration
 @EnableCaching
-@EnableConfigurationProperties(RedisProperties.class)
+@EnableConfigurationProperties({RedisProperties.class})
 public class CustomRedisConfig extends CachingConfigurerSupport {
+
+    private final CustomConfigProperties configProperties;
+
+    public CustomRedisConfig(CustomConfigProperties configProperties) {
+        this.configProperties = configProperties;
+    }
 
     @Bean
     @ConditionalOnMissingBean(name = "redisTemplate")
@@ -85,26 +92,52 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
      * @param redisProperties redis配置
      */
     @Bean
-    List<RedissonAutoConfigurationCustomizer> redissonAutoConfigurationCustomizers(RedisProperties redisProperties) {
+    public RedissonAutoConfigurationCustomizer redissonAutoConfigurationCustomizers(RedisProperties redisProperties) {
         log.info("注入 redissonAutoConfigurationCustomizers [{}]", redisProperties.getHost());
-        return ListUtil.of(config -> {
-                    //redis cluster
-                    if (redisProperties.getCluster() != null) {
-                        List<String> nodes = redisProperties.getCluster().getNodes();
-                        ClusterServersConfig clusterServersConfig = config.useClusterServers();
-                        if (CollectionUtil.isNotEmpty(nodes)) {
-                            nodes.forEach(node -> clusterServersConfig.addNodeAddress(buildNodeAddress(node, redisProperties.isSsl())));
-                        }
-                        clusterServersConfig.setPassword(redisProperties.getPassword());
-                    } else {
-                        //单节点
-                        config.useSingleServer()
-                                .setAddress(buildNodeAddress(redisProperties.getHost(), redisProperties.getPort(), redisProperties.isSsl()))
-                                .setDatabase(redisProperties.getDatabase())
-                                .setPassword(redisProperties.getPassword());
-                    }
+        CustomConfigProperties.RedissonConfig redissonProperties = configProperties.getRedissonConfig();
+        return config -> {
+            //数据序列化和反序列化
+            config.setCodec(FastJson2JsonRedissonCodec.INSTANCE)
+                    .setThreads(redissonProperties.getThreads())
+                    .setNettyThreads(redissonProperties.getNettyThreads())
+                    //LUA脚本缓存
+                    .setUseScriptCache(true);
+            //redis cluster
+            if (redissonProperties.getClusterServersConfig() != null) {
+                List<String> nodes = redisProperties.getCluster().getNodes();
+                ClusterServersConfig clusterServersConfig = config.useClusterServers();
+                if (CollUtil.isNotEmpty(nodes)) {
+                    nodes.forEach(node -> clusterServersConfig.addNodeAddress(buildNodeAddress(node, redisProperties.isSsl())));
                 }
-        );
+                clusterServersConfig.setPassword(redisProperties.getPassword())
+                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(redissonProperties.getKeyPrefix()))
+                        .setTimeout(clusterServersConfig.getTimeout())
+                        .setClientName(clusterServersConfig.getClientName())
+                        .setIdleConnectionTimeout(clusterServersConfig.getIdleConnectionTimeout())
+                        .setSubscriptionConnectionPoolSize(clusterServersConfig.getSubscriptionConnectionPoolSize())
+                        .setMasterConnectionMinimumIdleSize(clusterServersConfig.getMasterConnectionMinimumIdleSize())
+                        .setMasterConnectionPoolSize(clusterServersConfig.getMasterConnectionPoolSize())
+                        .setSlaveConnectionMinimumIdleSize(clusterServersConfig.getSlaveConnectionMinimumIdleSize())
+                        .setSlaveConnectionPoolSize(clusterServersConfig.getSlaveConnectionPoolSize())
+                        .setReadMode(clusterServersConfig.getReadMode())
+                        .setSubscriptionMode(clusterServersConfig.getSubscriptionMode());
+
+            } else {
+                CustomConfigProperties.RedissonConfig.SingleServerConfig singleServerConfig = redissonProperties.getSingleServerConfig();
+                //单节点
+                config.useSingleServer()
+                        .setAddress(buildNodeAddress(redisProperties.getHost(), redisProperties.getPort(), redisProperties.isSsl()))
+                        .setDatabase(redisProperties.getDatabase())
+                        .setPassword(redisProperties.getPassword())
+                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(redissonProperties.getKeyPrefix()))
+                        .setTimeout(singleServerConfig.getTimeout())
+                        .setClientName(singleServerConfig.getClientName())
+                        .setIdleConnectionTimeout(singleServerConfig.getIdleConnectionTimeout())
+                        .setSubscriptionConnectionPoolSize(singleServerConfig.getSubscriptionConnectionPoolSize())
+                        .setConnectionMinimumIdleSize(singleServerConfig.getConnectionMinimumIdleSize())
+                        .setConnectionPoolSize(singleServerConfig.getConnectionPoolSize());
+            }
+        };
     }
 
     /**
@@ -113,11 +146,11 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
      * @param host host
      * @param port 端口
      * @param ssl  是否启用ssl
-     * @return
+     * @return node address
      */
-    private String buildNodeAddress(String host, int port, boolean ssl) {
-        String prefix = ssl ? "rediss://" : "redis://";
-        return StrBuilder.create(prefix, host, ":").append(port).toString();
+    private String buildNodeAddress(String host, Integer port, boolean ssl) {
+        String format = ssl ? "rediss://{}:{}" : "redis://{}:{}";
+        return StrUtil.format(format, host, port);
     }
 
     /**
@@ -125,12 +158,13 @@ public class CustomRedisConfig extends CachingConfigurerSupport {
      *
      * @param node 节点 127.0.0.1:6379
      * @param ssl  是否启用ssl
-     * @return
+     * @return node address
      */
     private String buildNodeAddress(String node, boolean ssl) {
-        String prefix = ssl ? "rediss://" : "redis://";
-        return prefix + node;
+        String format = ssl ? "rediss://{}" : "redis://{}";
+        return StrUtil.format(format, node);
     }
+
 
     public static RedisTemplate<String, Object> getDefaultRedisTemplate(RedisConnectionFactory connectionFactory,
                                                                         GenericFastJsonRedisSerializer fastJsonRedisSerializer) {

@@ -4,15 +4,15 @@ spring:
   web:
     resources:
       add-mappings: false
+  messages:
+    basename: i18n/messages
   #单redis配置
   redis:
-    host: 192.168.0.195
-    port: 6379
+    host:
+    port:
     password:
-    database: 6
+    database:
     timeout: 5s
-    redisson:
-      file: classpath:redisson-single.yml
   datasource:
     dynamic:
       primary: master
@@ -20,12 +20,17 @@ spring:
       datasource:
         master:
           type: com.zaxxer.hikari.HikariDataSource
-          url: jdbc:mysql://192.168.0.195:3306/easy_escm?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&allowMultiQueries=true
+          url:
           username:
           password:
           driver-class-name: com.mysql.cj.jdbc.Driver
   main:
     banner-mode: off
+  servlet:
+    multipart:
+      file-size-threshold: 10MB
+      max-file-size: 10MB
+      max-request-size: 10MB
 easy:
   escm:
     name: easy-escm
@@ -33,7 +38,7 @@ easy:
     log-path: ./logs
     token-config:
       is-log: true
-      not-check-login-paths: /isLogin,/testAsync
+      not-check-login-paths: /testAsync
       is-read-body: false
       is-read-cookie: false
       is-read-header: true
@@ -43,3 +48,15 @@ easy:
       request-private-key: MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAJbEFjISJeku3cTi+F3xn1qXR+15TZfZt614NkUbbDKDpSvm8IFr4QxEWlSsHh25X173tumYKBDWwuHIoYRzwdfiG+5HfsZAzhLm3vDcvzQrl7oxM1mLDBi5BQ2Be69o7mKu12rTFw1XGg628lEInMEyKMFp1AyFiA4nXxepN8XBAgMBAAECgYEAgu5p5DQUjmywFfOTBGr5HEBzK84Dz9M5C8JxRxToovnm8LiPt6XLfM7Dr/MF+IRrSdtRE46bhPwtpM2LT68D8LU5KGfhscSRuoArlCTN1nbO/Ds8CXYGU39umYOE9ZaLChm+eR/3o9yKiQCXDIjAyqBdeaGkLmM9HvzotIB4cr0CQQDRPRVTBkoSaeVO5stDAvSxVWP8vXjoSBc4FayYDRcxXmamSkCR7ZNx1MukvuUshvld7MD4of/1Bkv7blxEXTijAkEAuHWtrPdtac6Lgs+ImlVqOkBhRNPF9CpuNfn+cm64VaRNo/Kxa4ZOKU32iuu0p7pHAekT6u7XPnrwR6PY0ZP6SwJAGsiL4z3J24OMo8XtPN2y/sQkcWS7hlg8CKTVm/0I+/vOffjBPSzBE/AeRS9eXI3Ge9xjczAheHbe4QdmbiXUqwJAbLDi0q3FKfiL2luhmZdFDegLqLvExBgQcvvJA/Lb6ZL0MOv7wWkVO192K+uxureXybdmhiOQb3+PgBc61luEuwJBAI9OiK9iefB8MJ2u1bbomlwhkHKVwN0Jzu1HjbE+POcS6DPvbIzAU9WvnU3WOvi1M+CUU9rxYvAlnPfmoh4lR24=
       #响应加密公钥 对应加密私钥 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAK3+xRo+lOoqezAO8LXHCko7UBp51Cw6M6O1NjesfWRHq1ta8tpRkdi4IMGILvj3/69W9ei/gV2HHSKSJBR0lit2uknGb11KFpZWXc2ppDTzZGCzoL7KaGotp/2B/idT/S3pPIoZH4uYSTGXoIp2fK8PpiMdyuXnDKCYnnZGA99nAgMBAAECgYAnmci6hGvYL/sBoSTf+oE5C+7bV8cWmdiO9ft1CGkxna4+iKClV9NeA+pQofIu8CLdgWlOo+eJperXp3NWxII42gaTAIm9GFWQDQt/+wmLJfmi9LuWl/RVmE1hDlfOPILTshGhxxX19VjKxDQBTOa8h8Slh3B2wA5Xl7/6BnmgoQJBAN4iKbbSxI5lJSomg/yfLpvOUvuQ2Aq6UKNJ0LPlndW6R4AcKEUZF0cSVZ5dA9RPZCKULJR3lFJNPwBXsY2V1ZsCQQDIhccauHDhRLEt8KDRuMjWyH8FdPelD9UVnCTHFCIq+CKrw5GHRxsVKoAIY1quZWy6YqyqlkjaenYnfXPx1AAlAkB9N0bKby8rkaqMgx+dtOGiJIE0m+aczYANO9vwvLvnMdWCSt0MbmNnxdcLqSUydfpdX6dtnaa3aiHcgJJu3IqHAkBvviUDHe9BiY8W47YqyMea8WXfe5wZbqY3Aal5Cx4zRc3EXBp4AUb1V5a7lepNrxWVFDHWaiM1JPM89GstQw/FAkEAtpf4SA+vp/CwZM6845wkhU+rxADEq6DCHgBphN/d+dKibeCN2BDRInOrTiGxvFo9+XVVNoqR3//y+m0zfYgoww==
       response-public-key: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCt/sUaPpTqKnswDvC1xwpKO1AaedQsOjOjtTY3rH1kR6tbWvLaUZHYuCDBiC749/+vVvXov4Fdhx0ikiQUdJYrdrpJxm9dShaWVl3NqaQ082Rgs6C+ymhqLaf9gf4nU/0t6TyKGR+LmEkxl6CKdnyvD6YjHcrl5wygmJ52RgPfZwIDAQAB
+    redisson-config:
+      key-prefix: easy-escm
+      threads: 4
+      netty-threads: 8
+      lock-watchdog-timeout: 30000
+      single-server-config:
+        client-name: ${easy.escm.name}
+        connection-minimum-idle-size: 8
+        connection-pool-size: 32
+        idle-connection-timeout: 10000
+        timeout: 3000
+        subscription-connection-pool-size: 16

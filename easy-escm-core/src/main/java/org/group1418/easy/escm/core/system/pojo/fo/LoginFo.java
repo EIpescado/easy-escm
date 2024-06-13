@@ -1,13 +1,8 @@
 package org.group1418.easy.escm.core.system.pojo.fo;
 
 import lombok.Data;
-import org.group1418.easy.escm.common.validator.annotation.BigDecimalCheck;
+import lombok.EqualsAndHashCode;
 import org.group1418.easy.escm.common.validator.annotation.StrCheck;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * 登录表单
@@ -30,12 +25,11 @@ public class LoginFo {
     /**
      * 租户ID
      */
-    private String tenantId;
+    private Long tenantId;
 
     /**
      * 验证码
      */
-    @NotBlank()
     private String code;
 
     /**
@@ -43,15 +37,18 @@ public class LoginFo {
      */
     private String uuid;
 
-    @BigDecimalCheck(name = "测试",precision = 2,scale = 1)
-    private BigDecimal a;
-
-    @Valid
-    private List<Entry> list;
-
+    @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class Entry{
-        @StrCheck(name = "时间",type = StrCheck.StringType.DATE)
-        private String c;
+    public static class PasswordLoginFo extends LoginFo{
+
+        /**
+         * 用户名
+         */
+        private String username;
+        /**
+         * 密码
+         */
+        private String password;
     }
+
 }

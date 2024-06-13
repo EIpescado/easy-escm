@@ -26,4 +26,9 @@ public enum AbleStateEnum implements IBaseEnum {
         return state;
     }
 
+
+    @Override
+    public IBaseEnum getMatch(String key) {
+        return IBaseEnum.super.getMatch(key);
+    }
 }

@@ -12,11 +12,14 @@ import org.group1418.easy.escm.core.system.pojo.vo.LoginVo;
 import org.group1418.easy.escm.core.system.pojo.vo.SystemClientVo;
 import org.group1418.easy.escm.core.system.service.IAuthService;
 import org.group1418.easy.escm.core.system.service.ISystemClientService;
+import org.group1418.easy.escm.core.system.service.ISystemTenantService;
+import org.group1418.easy.escm.core.system.strategy.IAuthStrategy;
 import org.springframework.stereotype.Service;
 
 /**
+ * AuthServiceImpl
+ *
  * @author yq 2024/4/10 16:45
- * @description AuthServiceImpl
  */
 @Slf4j
 @Service
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 public class AuthServiceImpl implements IAuthService {
 
     private final ISystemClientService systemClientService;
+    private final ISystemTenantService systemTenantService;
 
     @Override
     public LoginVo login(String body) {
@@ -33,18 +37,21 @@ public class AuthServiceImpl implements IAuthService {
         String clientId = loginFo.getClientId();
         //授权类型
         String grantType = loginFo.getGrantType();
+        //租户
+        Long tenantId = loginFo.getTenantId();
         SystemClientVo client = systemClientService.getByClientId(clientId);
         //客户端存在 且 授权类型包含
-        if(client == null || !StrUtil.contains(client.getGrantType(),grantType)){
+        if (client == null || !StrUtil.contains(client.getGrantType(), grantType)) {
             log.info("客户端[{}]授权类型[{}]不匹配", clientId, grantType);
             throw SystemCustomException.i18n("auth.client.not.exist.or.grant.type.not.match");
         }
         //客户端禁用
-        if(AbleStateEnum.OFF == client.getState()){
+        if (AbleStateEnum.OFF == client.getState()) {
             log.info("客户端[{}]已被禁用", clientId);
             throw SystemCustomException.i18n("auth.client.disabled");
         }
         //校验租户
-        return null;
+        systemTenantService.check(tenantId);
+        return IAuthStrategy.login(body, client, grantType);
     }
 }

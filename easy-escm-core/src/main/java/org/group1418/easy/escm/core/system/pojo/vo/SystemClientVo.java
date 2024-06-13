@@ -8,9 +8,9 @@ import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import java.io.Serializable;
 
 /**
+ * system client Vo
  * @author yq
  * @date 2021-04-22 15:09:29
- * @description system client Vo
  * @since V1.0.0
  */
 @Data

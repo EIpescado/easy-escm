@@ -1,30 +1,37 @@
 package org.group1418.easy.escm.common.config;
 
+import cn.hutool.core.net.NetUtil;
 import com.baomidou.mybatisplus.annotation.DbType;
-import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
+import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 import org.group1418.easy.escm.common.config.properties.CustomConfigProperties;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.group1418.easy.escm.common.spring.SpringContextHolder;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.time.LocalDateTime;
 
 
 /**
  * mybatis-plus config
- * @author yq
- * @date 2021年4月14日 11:25:49
- * @since V1.0.0
+ *
+ * @author yq 2021年4月14日 11:25:49
  */
-@Configuration
 @Slf4j
-@AutoConfigureAfter({MybatisPlusAutoConfiguration.class})
+@EnableTransactionManagement(proxyTargetClass = true)
+@MapperScan("${mybatis-plus.mapper-package}")
+@Configuration
 public class CustomMybatisPlusConfig {
 
 
@@ -33,15 +40,38 @@ public class CustomMybatisPlusConfig {
     }
 
     /**
-     * mybatis-plus分页插件
+     * mybatis-plus插件
      */
     @Bean
     @ConditionalOnClass(MybatisPlusInterceptor.class)
     public MybatisPlusInterceptor mybatisPlusInterceptor(CustomConfigProperties plusConfigProperties) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        // 多租户插件 必须放到第一位
+        try {
+            TenantLineInnerInterceptor tenant = SpringContextHolder.getBean(TenantLineInnerInterceptor.class);
+            interceptor.addInnerInterceptor(tenant);
+        } catch (BeansException e){
+            log.warn("add TenantLineInnerInterceptor [{}]",e.getLocalizedMessage());
+        }
         String dbType = plusConfigProperties.getDbType();
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.getDbType(dbType)));
+        //todo 数据权限处理
+        //分页插件
+        PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor(DbType.getDbType(dbType));
+        //分页合理化
+        paginationInnerInterceptor.setOverflow(true);
+        interceptor.addInnerInterceptor(paginationInnerInterceptor);
+        //乐观锁
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         return interceptor;
+    }
+
+    /**
+     * 使用网卡信息绑定雪花生成器
+     * 防止集群雪花ID重复
+     */
+    @Bean
+    public IdentifierGenerator idGenerator() {
+        return new DefaultIdentifierGenerator(NetUtil.getLocalhost());
     }
 
     /**

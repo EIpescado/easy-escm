@@ -2,6 +2,7 @@ package org.group1418.easy.escm.core.system.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
 import lombok.RequiredArgsConstructor;
+import org.group1418.easy.escm.common.annotation.OpLog;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.group1418.easy.escm.core.system.pojo.vo.LoginVo;
 import org.group1418.easy.escm.core.system.service.IAuthService;
@@ -24,6 +25,7 @@ public class AuthController {
     @PostMapping("login")
     @SaIgnore
 //    @ApiEncrypt
+    @OpLog(value = "登录",hadLogin = false)
     public R<LoginVo> login(@RequestBody String body) {
         return R.ok(authService.login(body));
     }

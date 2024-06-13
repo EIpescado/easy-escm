@@ -3,8 +3,8 @@ package org.group1418.easy.escm.core.system.service;
 import org.group1418.easy.escm.core.system.pojo.vo.LoginVo;
 
 /**
+ *  IAuthService auth相关
  * @author yq 2024/4/10 16:44
- * @description IAuthService auth相关
  */
 public interface IAuthService {
 

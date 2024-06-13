@@ -47,7 +47,7 @@ public class DateTimeUtil {
     /**
      * 转化日期,无值则默认
      *
-     * @param date yyyy-MM-dd 日期字符串
+     * @param date        yyyy-MM-dd 日期字符串
      * @param defaultDate 无值则使用默认值
      * @return 日期
      */
@@ -85,6 +85,9 @@ public class DateTimeUtil {
      * @return 一天的开始, 即yyyy-MM-dd 23:59:59
      */
     public static LocalDateTime getEndOfDay(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
         return date.atTime(END_OF_DAY);
     }
 
@@ -97,19 +100,31 @@ public class DateTimeUtil {
      * @return 是否有效
      */
     public static boolean timeValid(LocalDateTime judgeTime, LocalDate startDate, LocalDate endDate) {
+        return timeValid(judgeTime, startDate != null ? startDate.atStartOfDay() : null, getEndOfDay(endDate));
+    }
+
+    /**
+     * 判定指定时间是否在有效期内
+     *
+     * @param judgeTime 判定的时间
+     * @param startTime 有效期
+     * @param endTime   失效期
+     * @return 是否有效
+     */
+    public static boolean timeValid(LocalDateTime judgeTime, LocalDateTime startTime, LocalDateTime endTime) {
         if (judgeTime == null) {
             return false;
         }
-        if (startDate == null) {
-            if (endDate != null) {
-                return judgeTime.isBefore(getEndOfDay(endDate));
+        if (startTime == null) {
+            if (endTime != null) {
+                return judgeTime.isBefore(endTime);
             }
             return false;
         } else {
-            if (endDate == null) {
-                return judgeTime.isAfter(startDate.atStartOfDay());
+            if (endTime == null) {
+                return judgeTime.isAfter(startTime);
             }
-            return judgeTime.isAfter(startDate.atStartOfDay()) && judgeTime.isBefore(getEndOfDay(endDate));
+            return judgeTime.isAfter(startTime) && judgeTime.isBefore(endTime);
         }
     }
 

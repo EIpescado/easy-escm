@@ -19,10 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author yq
- * @date 2021-04-22 15:09:29
- * @description system client
- * @since V1.0.0
+ * system client
+ * @author yq 2021-04-22 15:09:29
  */
 @Service
 @RequiredArgsConstructor

@@ -1,20 +1,23 @@
 package org.group1418.easy.escm.common.spring;
 
-import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.exceptions.UtilException;
 import cn.hutool.core.util.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.group1418.easy.escm.common.exception.SystemCustomException;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.env.Environment;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -24,12 +27,39 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Slf4j
 @Component
-public class SpringContextHolder implements ApplicationContextAware, DisposableBean {
+public class SpringContextHolder implements BeanFactoryPostProcessor, ApplicationContextAware {
 
-    private static ApplicationContext applicationContext = null;
+    /**
+     * "@PostConstruct"注解标记的类中，由于ApplicationContext还未加载，导致空指针<br>
+     * 因此实现BeanFactoryPostProcessor注入ConfigurableListableBeanFactory实现bean的操作
+     */
+    private static ConfigurableListableBeanFactory beanFactory;
+    /**
+     * Spring应用上下文环境
+     */
+    private static ApplicationContext applicationContext;
     private static final List<SpringApplicationCallBack> CALL_BACKS = new CopyOnWriteArrayList<>();
-    private static final Map<String, Object> WAIT_IMPORT_BEANS = new ConcurrentHashMap<>();
     private static boolean addCallback = true;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        log.info("注入[applicationContext]");
+        SpringContextHolder.applicationContext = applicationContext;
+        if (addCallback) {
+            for (SpringApplicationCallBack callBack : SpringContextHolder.CALL_BACKS) {
+                callBack.execute();
+            }
+            CALL_BACKS.clear();
+        }
+        SpringContextHolder.addCallback = false;
+    }
+
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        log.info("注入[beanFactory]");
+        SpringContextHolder.beanFactory = beanFactory;
+    }
 
     /**
      * 针对 某些初始化方法，在SpringContextHolder 未初始化时 提交回调方法。
@@ -43,10 +73,6 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         } else {
             callBack.execute();
         }
-    }
-
-    public synchronized static void putWaitImportBeans(String beanName, Object bean) {
-        SpringContextHolder.WAIT_IMPORT_BEANS.put(beanName, bean);
     }
 
     /**
@@ -77,20 +103,13 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     }
 
     /**
-     * 获取SpringBoot 配置信息
+     * spring上下文是否包含指定名称的bean
      *
-     * @param property     属性key
-     * @param defaultValue 默认值
-     * @param requiredType 返回类型
-     * @return /
+     * @param name 名称
+     * @return 是否包含
      */
-    public static <T> T getProperties(String property, T defaultValue, Class<T> requiredType) {
-        T result = defaultValue;
-        try {
-            result = getBean(Environment.class).getProperty(property, requiredType);
-        } catch (Exception ignored) {
-        }
-        return result;
+    public static boolean containsBean(String name) {
+        return applicationContext.containsBean(name);
     }
 
     /**
@@ -98,7 +117,6 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
      *
      * @param key 配置项key
      * @return 属性值
-     * @since 5.3.3
      */
     public static String getProperty(String key) {
         if (null == applicationContext) {
@@ -107,6 +125,28 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         return applicationContext.getEnvironment().getProperty(key);
     }
 
+    /**
+     * 获取SpringBoot 配置信息
+     *
+     * @param property   属性key
+     * @param targetType 返回类型
+     * @return /
+     */
+    public static <T> T getProperty(String property, Class<T> targetType) {
+        return getProperty(property, null, targetType);
+    }
+
+    /**
+     * 获取SpringBoot 配置信息
+     *
+     * @param property     属性key
+     * @param defaultValue 默认值
+     * @param targetType   返回类型
+     * @return /
+     */
+    public static <T> T getProperty(String property, T defaultValue, Class<T> targetType) {
+        return null == applicationContext ? null : applicationContext.getEnvironment().getProperty(property, targetType, defaultValue);
+    }
 
     /**
      * 获取应用程序名称
@@ -142,63 +182,90 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
         return ArrayUtil.isNotEmpty(activeProfiles) ? activeProfiles[0] : null;
     }
 
-    /**
-     * 获取SpringBoot 配置信息
-     *
-     * @param property 属性key
-     * @return /
-     */
-    public static String getProperties(String property) {
-        return getProperties(property, null, String.class);
-    }
-
-    /**
-     * 获取SpringBoot 配置信息
-     *
-     * @param property     属性key
-     * @param requiredType 返回类型
-     * @return /
-     */
-    public static <T> T getProperties(String property, Class<T> requiredType) {
-        return getProperties(property, null, requiredType);
-    }
-
-    @Override
-    public void destroy() {
-        applicationContext = null;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        if (SpringContextHolder.applicationContext != null) {
-            log.warn("SpringContextHolder中的ApplicationContext被覆盖, 原有ApplicationContext为:" + SpringContextHolder.applicationContext);
-        }
-        log.info("注入[applicationContext]");
-        SpringContextHolder.applicationContext = applicationContext;
-        if (addCallback) {
-            for (SpringApplicationCallBack callBack : SpringContextHolder.CALL_BACKS) {
-                callBack.execute();
+    public static ConfigurableListableBeanFactory getConfigurableBeanFactory() throws UtilException {
+        ConfigurableListableBeanFactory factory;
+        if (null != beanFactory) {
+            factory = beanFactory;
+        } else {
+            if (!(applicationContext instanceof ConfigurableApplicationContext)) {
+                throw SystemCustomException.simple("No ConfigurableListableBeanFactory from context!");
             }
-            CALL_BACKS.clear();
+            factory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
         }
-        if (MapUtil.isNotEmpty(WAIT_IMPORT_BEANS)) {
-            WAIT_IMPORT_BEANS.forEach(this::registerBean);
-        }
-        SpringContextHolder.addCallback = false;
+
+        return factory;
     }
 
     /**
-     * 注册Bean
+     * 注册Bean, 此注册不会 动触发初始化方法（如 @PostConstruct 注解的方法或通过 init-method 指定的方法 或实现 InitializingBean）。
+     * 只是将一个已经创建的对象注册为bean，而不会触发Spring的完整生命周期管理
+     *
+     * @param beanName bean名称
+     * @param bean     bean对象
+     * @param <T>      bean类型
      */
-    private Object registerBean(String beanName, Object object) {
+    public static <T> void registerBean(String beanName, T bean) {
+        ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
+        factory.autowireBean(bean);
+        factory.registerSingleton(beanName, bean);
+        log.info("注入bean [{}]",beanName);
+        log.info("自动注入[{}]", beanName);
+    }
+
+    /**
+     * 注册bean 并触发Spring的完整生命周期管理
+     * @param beanName  bean名称
+     * @param object  bean对象
+     */
+    public static void registerBeanDefinition(String beanName, Object object) {
         log.info("自动注入[{}]", beanName);
         // 获取BeanFactory
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
         // 创建bean信息
         BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(object.getClass());
+        //延迟加载
+        beanDefinitionBuilder.setLazyInit(true);
         // 动态注册bean
         defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinitionBuilder.getBeanDefinition());
-        return applicationContext.getBean(beanName, object.getClass());
+    }
+
+    /**
+     * 移除bean
+     *
+     * @param beanName bean名称
+     */
+    public static void unregisterBean(String beanName) {
+        ConfigurableListableBeanFactory factory = getConfigurableBeanFactory();
+        if (factory instanceof DefaultSingletonBeanRegistry) {
+            DefaultSingletonBeanRegistry registry = (DefaultSingletonBeanRegistry) factory;
+            registry.destroySingleton(beanName);
+            log.info("移除注入bean [{}]",beanName);
+        } else {
+            log.info("移除bean [{}] 失败",beanName);
+            throw SystemCustomException.simple("Can not unregister bean, the factory is not a DefaultSingletonBeanRegistry!");
+        }
+    }
+
+    public static void publishEvent(ApplicationEvent event) {
+        if (null != applicationContext) {
+            applicationContext.publishEvent(event);
+        }
+
+    }
+
+    public static void publishEvent(Object event) {
+        if (null != applicationContext) {
+            applicationContext.publishEvent(event);
+        }
+
+    }
+
+    /**
+     * 获取aop代理对象
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getAopProxy(T invoker) {
+        return (T) AopContext.currentProxy();
     }
 
     /**

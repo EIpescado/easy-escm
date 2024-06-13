@@ -2,7 +2,6 @@ package org.group1418.easy.escm;
 
 import org.group1418.easy.escm.common.base.IMQService;
 import org.group1418.easy.escm.common.wrapper.OpLogData;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -17,7 +16,6 @@ import java.util.concurrent.TimeUnit;
  * @author yq 2023/12/27 16:08
  */
 @SpringBootApplication
-@MapperScan(basePackages = "org.group1418.easy.escm.*.*.mapper")
 public class EasyEscmApp {
 
     @Bean
