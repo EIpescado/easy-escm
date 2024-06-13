@@ -1,10 +1,8 @@
 package org.group1418.easy.escm.core.constant;
 
 /**
- * @author yq
- * @date 2024年3月8日 14:09:02
- * @description redis缓存名称常量
- * @since V1.0.0
+ * redis缓存名称常量
+ * @author yq 2024年3月8日 14:09:02
  */
 public interface CacheConstant {
 
@@ -26,6 +24,11 @@ public interface CacheConstant {
          * 系统按钮
          */
         String SYSTEM_BUTTON = "system_button";
+
+        /**
+         * 租户
+         */
+        String SYSTEM_TENANT = "system_tenant";
     }
 
     interface Lists {

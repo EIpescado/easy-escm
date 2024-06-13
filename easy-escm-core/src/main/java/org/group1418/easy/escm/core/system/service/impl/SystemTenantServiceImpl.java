@@ -4,11 +4,13 @@ import cn.hutool.core.lang.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
+import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.utils.DateTimeUtil;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
+import org.group1418.easy.escm.core.constant.CacheConstant;
 import org.group1418.easy.escm.core.system.entity.SystemTenant;
 import org.group1418.easy.escm.core.system.mapper.SystemTenantMapper;
 import org.group1418.easy.escm.core.system.pojo.fo.SystemTenantFo;
@@ -31,6 +33,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper, SystemTenant> implements ISystemTenantService {
+
+    private final RedisCacheService redisCacheService;
 
     @Override
     public void check(Long tenantId) {
@@ -71,7 +75,7 @@ public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper,
 
     @Override
     public SystemTenantVo get(Long id) {
-        return baseMapper.get(id);
+        return redisCacheService.hashRound(CacheConstant.Hashs.SYSTEM_TENANT, Long.toString(id), () -> baseMapper.get(id), null);
     }
 
     @Override
