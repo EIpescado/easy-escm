@@ -9,13 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
+ * SaTokenDaoRedis sa-token redis实现
+ *
  * @author yq 2024/2/20 10:49
- * @description SaTokenDaoRedis sa-token redis实现
  */
 @Component
 @Slf4j
@@ -32,11 +33,7 @@ public class SaTokenRedisDao implements SaTokenDao {
     @Override
     public void set(String key, String value, long timeout) {
         if (timeout != 0L && timeout > -2L) {
-            if (timeout == -1L) {
-                this.redisCacheService.template().opsForValue().set(key, value);
-            } else {
-                this.redisCacheService.template().opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
-            }
+            this.redisCacheService.set(key, timeout, () -> value, null);
         }
     }
 
@@ -55,7 +52,7 @@ public class SaTokenRedisDao implements SaTokenDao {
 
     @Override
     public long getTimeout(String key) {
-        return redisCacheService.ttl(key);
+        return redisCacheService.ttl(key) / 1000;
     }
 
     @Override
@@ -66,24 +63,19 @@ public class SaTokenRedisDao implements SaTokenDao {
                 this.set(key, this.get(key), timeout);
             }
         } else {
-            redisCacheService.expire(key, timeout, TimeUnit.SECONDS);
+            redisCacheService.expire(key, Duration.ofSeconds(timeout));
         }
     }
 
     @Override
     public Object getObject(String key) {
-        return redisCacheService.template().opsForValue().get(key);
+        return redisCacheService.get(key);
     }
 
     @Override
     public void setObject(String key, Object object, long timeout) {
         if (timeout != 0L && timeout > -2L) {
-            if (timeout == -1L) {
-                this.redisCacheService.template().opsForValue().set(key, object);
-            } else {
-                this.redisCacheService.template().opsForValue().set(key, object, timeout, TimeUnit.SECONDS);
-            }
-
+            this.redisCacheService.set(key, timeout, () -> object, null);
         }
     }
 
@@ -113,13 +105,13 @@ public class SaTokenRedisDao implements SaTokenDao {
                 this.setObject(key, this.getObject(key), timeout);
             }
         } else {
-            redisCacheService.expire(key, timeout, TimeUnit.SECONDS);
+            redisCacheService.expire(key, Duration.ofSeconds(timeout));
         }
     }
 
     @Override
     public List<String> searchData(String prefix, String keyword, int start, int size, boolean sortType) {
-        Set<String> keys = redisCacheService.template().keys(prefix + "*" + keyword + "*");
+        Iterable<String> keys = redisCacheService.keys(prefix + "*" + keyword + "*");
         if (CollUtil.isEmpty(keys)) {
             return ListUtil.empty();
         }

@@ -1,40 +1,33 @@
 package org.group1418.easy.escm.common.cache;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.func.Func0;
 import cn.hutool.core.lang.func.VoidFunc0;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.StrBuilder;
-import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.redisson.RedissonMultiLock;
+import org.redisson.api.RBatch;
 import org.redisson.api.RLock;
+import org.redisson.api.RMapAsync;
+import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -55,11 +48,8 @@ public class RedisCacheService {
      */
     private final static Map<String, CustomCacheConfig> CONFIG_MAP = new ConcurrentHashMap<>();
     private static final long DEFAULT_EXPIRE_SECONDS = -1L;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final RedissonClient redissonClient;
-    private final RedisSerializer<String> keySerializer;
-    private final GenericFastJsonRedisSerializer valueSerializer;
-    private static final String REDIS_LOCK_SUFFIX = "_LOCK_HASH";
+    private static final String REDIS_LOCK_SUFFIX = "_LOCK";
     private static final String INCREMENT_AND_TTL_LUA = "local errorCount = redis.call('GET',KEYS[1])" +
             "\nif (errorCount == false) then errorCount = 0" +
             "\nelse errorCount = tonumber(errorCount) end" +
@@ -68,12 +58,8 @@ public class RedisCacheService {
             "\nreturn errorCount";
     private static final String AUTO_INC_SN = "auto_inc_sn";
 
-    public RedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
-        this.redisTemplate = redisTemplate;
+    public RedisCacheService(RedissonClient redissonClient) {
         this.redissonClient = redissonClient;
-        //缓存redis的Serializer 参照RedisConfig中配置
-        this.valueSerializer = (GenericFastJsonRedisSerializer) redisTemplate.getDefaultSerializer();
-        this.keySerializer = (StringRedisSerializer) redisTemplate.getKeySerializer();
     }
 
     /**
@@ -112,9 +98,9 @@ public class RedisCacheService {
                 result = getter.get();
                 //将数据存入redis
                 if (forever) {
-                    redisTemplate.opsForValue().set(redisKey, result);
+                    redissonClient.getBucket(redisKey).set(result);
                 } else {
-                    redisTemplate.opsForValue().set(redisKey, result, ttlSeconds, TimeUnit.SECONDS);
+                    redissonClient.getBucket(redisKey).set(result, Duration.ofSeconds(ttlSeconds));
                 }
             } finally {
                 //释放锁
@@ -123,9 +109,9 @@ public class RedisCacheService {
         } else {
             result = getter.get();
             if (forever) {
-                redisTemplate.opsForValue().set(redisKey, result);
+                redissonClient.getBucket(redisKey).set(result);
             } else {
-                redisTemplate.opsForValue().set(redisKey, result, ttlSeconds, TimeUnit.SECONDS);
+                redissonClient.getBucket(redisKey).set(result, Duration.ofSeconds(ttlSeconds));
             }
         }
         return result;
@@ -136,19 +122,17 @@ public class RedisCacheService {
      *
      * @param name     缓存名称
      * @param key      缓存二级key
-     * @param ttl      过期时间
-     * @param timeUnit 时间单位
+     * @param duration 过期时间
      * @param getter   获取数据函数
      * @param <T>      数据类型
      * @return 是否设置成功
      */
-    public <T> boolean setNx(String name, String key, long ttl, TimeUnit timeUnit, Supplier<T> getter) {
+    public <T> boolean setNx(String name, String key, Duration duration, Supplier<T> getter) {
         String redisKey = buildKey(name, key);
         if (StrUtil.isEmpty(redisKey)) {
             return false;
         }
-        Boolean result = redisTemplate.opsForValue().setIfAbsent(redisKey, getter.get(), ttl, timeUnit);
-        return BooleanUtil.isTrue(result);
+        return redissonClient.getBucket(redisKey).setIfAbsent(getter.get(), duration);
     }
 
     /**
@@ -201,7 +185,7 @@ public class RedisCacheService {
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String redisKey) {
-        return (T) redisTemplate.opsForValue().get(redisKey);
+        return (T) redissonClient.getBucket(redisKey).get();
     }
 
 
@@ -209,10 +193,11 @@ public class RedisCacheService {
      * 删除缓存
      *
      * @param redisKeys 缓存key
-     * @return 成功失败
      */
-    public Long del(String... redisKeys) {
-        return redisTemplate.delete(Arrays.asList(redisKeys));
+    public void del(String... redisKeys) {
+        RBatch batch = redissonClient.createBatch();
+        Arrays.asList(redisKeys).forEach(t -> batch.getBucket(t).deleteAsync());
+        batch.execute();
     }
 
     /**
@@ -220,11 +205,10 @@ public class RedisCacheService {
      *
      * @param name 缓存名称
      * @param key  缓存名称后跟随的唯一表示 ,如 SYSTEM_USER_TREE:test 的test即为key
-     * @return 成功失败
      */
-    public Long del(String name, String key) {
+    public void del(String name, String key) {
         String redisKey = buildKey(name, key);
-        return del(redisKey);
+        redissonClient.getBucket(redisKey).delete();
     }
 
     /**
@@ -232,21 +216,18 @@ public class RedisCacheService {
      *
      * @param name 缓存名称
      */
-    @SuppressWarnings("unchecked")
     public void batchDel(String name) {
-        redisTemplate.execute(new SessionCallback<List<Object>>() {
-            @Override
-            public List<Object> execute(RedisOperations redisOperations) throws DataAccessException {
-                String keyPattern = buildKey(name, "*");
-                // 开启事务使得后续操作 原子性
-                redisOperations.multi();
-                Set<String> keys = redisTemplate.keys(keyPattern);
-                if (CollectionUtil.isNotEmpty(keys)) {
-                    redisTemplate.delete(keys);
-                }
-                return redisOperations.exec();
-            }
-        });
+        redissonClient.getKeys().deleteByPattern(buildKey(name, "*"));
+    }
+
+    /**
+     * 批量获取key,按匹配
+     *
+     * @param pattern 正则
+     * @return 返回
+     */
+    public Iterable<String> keys(String pattern) {
+        return redissonClient.getKeys().getKeysByPattern(pattern);
     }
 
     /**
@@ -323,7 +304,7 @@ public class RedisCacheService {
             handler.accept(result);
         }
         if (result != null) {
-            redisTemplate.delete(redisKey);
+            redissonClient.getBucket(redisKey).delete();
         }
         return result;
     }
@@ -342,7 +323,7 @@ public class RedisCacheService {
             r = function.apply(result);
         }
         if (result != null) {
-            redisTemplate.delete(redisKey);
+            redissonClient.getBucket(redisKey).delete();
         }
         return r;
     }
@@ -382,7 +363,7 @@ public class RedisCacheService {
                     result = getter.get();
                     if (result != null) {
                         //将数据存入redis
-                        redisTemplate.opsForHash().put(hash, hk, result);
+                        redissonClient.getMap(hash).put(hk, result);
                     }
                     return result;
                 } finally {
@@ -393,7 +374,7 @@ public class RedisCacheService {
                 result = getter.get();
                 if (result != null) {
                     //将数据存入redis
-                    redisTemplate.opsForHash().put(hash, hk, result);
+                    redissonClient.getMap(hash).put(hk, result);
                 }
             }
         }
@@ -412,7 +393,7 @@ public class RedisCacheService {
     @SuppressWarnings("unchecked")
     public <T> T hashRound(String hashKey, String redisKey, Supplier<T> getter, String lockKey) {
         //从缓存中提取数据
-        T result = (T) redisTemplate.opsForHash().get(hashKey, redisKey);
+        T result = (T) redissonClient.getMap(hashKey).get(redisKey);
         if (result != null) {
             return result;
         } else {
@@ -439,41 +420,30 @@ public class RedisCacheService {
      * @return boolean 是否存在
      */
     public boolean exists(String redisKey) {
-        Boolean has = redisTemplate.hasKey(redisKey);
-        return has != null && has;
-    }
-
-    /**
-     * 获取指定key的过期时间(秒)
-     *
-     * @param name 缓存名称 用于取缓存过期时间
-     * @param key  缓存名称后跟随的唯一表示 ,如 SYSTEM_USER_TREEtest 的test即为key
-     * @return 过期时间 单位s redis 2.8之后 若key不存在则返回 -2
-     */
-    public Long ttl(String name, String key) {
-        String redisKey = buildKey(name, key);
-        return redisTemplate.getExpire(redisKey);
-    }
-
-    /**
-     * 获取指定key的过期时间(秒)
-     *
-     * @param redisKey 缓存key
-     * @return 过期时间 单位s redis 2.8之后 若key不存在则返回 -2
-     */
-    public Long ttl(String redisKey) {
-        return redisTemplate.getExpire(redisKey);
+        long l = redissonClient.getKeys().countExists(redisKey);
+        return l > 0;
     }
 
     /**
      * 获取指定key的过期时间(毫秒)
      *
-     * @param redisKey key
-     * @param timeUnit 时间单位
-     * @return 过期时间  redis 2.8之后 若key不存在则返回 -2
+     * @param name 缓存名称 用于取缓存过期时间
+     * @param key  缓存名称后跟随的唯一表示 ,如 SYSTEM_USER_TREEtest 的test即为key
+     * @return 过期时间 单位s redis 2.8之后 若key不存在则返回 -2
      */
-    public Long pttl(String redisKey, TimeUnit timeUnit) {
-        return redisTemplate.getExpire(redisKey, timeUnit);
+    public long ttl(String name, String key) {
+        String redisKey = buildKey(name, key);
+        return redissonClient.getBucket(redisKey).remainTimeToLive();
+    }
+
+    /**
+     * 获取指定key的过期时间(毫秒)
+     *
+     * @param redisKey 缓存key
+     * @return 过期时间 单位s redis 2.8之后 若key不存在则返回 -2
+     */
+    public long ttl(String redisKey) {
+        return redissonClient.getBucket(redisKey).remainTimeToLive();
     }
 
     /**
@@ -485,25 +455,24 @@ public class RedisCacheService {
      */
     @SuppressWarnings("unchecked")
     public <T> T hGet(String hash, String hk) {
-        return (T) redisTemplate.opsForHash().get(hash, hk);
+        return (T) redissonClient.getMap(hash).get(hk);
     }
 
     /**
      * 删除缓存
      *
      * @param hashKey   h
-     * @param redisKeys 域
-     * @return 成功失败
+     * @param redisKeys key
      */
-    public Long hDel(String hashKey, Object... redisKeys) {
-        if (redisKeys != null && redisKeys.length > 0) {
-            return redisTemplate.opsForHash().delete(hashKey,
-                    Arrays.stream(redisKeys)
-                            .filter(o -> ObjectUtil.isNotNull(o) && StrUtil.isNotEmpty(o.toString()))
-                            .map(Object::toString).toArray()
-            );
+    public void hDel(String hashKey, Object... redisKeys) {
+        if (ArrayUtil.isNotEmpty(redisKeys)) {
+            RBatch batch = redissonClient.createBatch();
+            RMapAsync<String, Object> rMap = batch.getMap(hashKey);
+            Arrays.stream(redisKeys)
+                    .filter(o -> ObjectUtil.isNotNull(o) && StrUtil.isNotEmpty(o.toString()))
+                    .map(Object::toString).forEach(rMap::removeAsync);
+            batch.execute();
         }
-        return 0L;
     }
 
     /**
@@ -514,7 +483,7 @@ public class RedisCacheService {
      * @return 是否存在
      */
     public boolean hExists(String hashKey, Object key) {
-        return redisTemplate.opsForHash().hasKey(hashKey, key);
+        return redissonClient.getMap(hashKey).containsKey(key);
     }
 
     /**
@@ -525,9 +494,9 @@ public class RedisCacheService {
      * @param getter  获取数据函数
      * @param <T>     类型
      */
-    public <T> void hashNxThenPut(String hashKey, Object key, Supplier<T> getter) {
+    public <T> void hashSetNx(String hashKey, Object key, Supplier<T> getter) {
         if (!hExists(hashKey, key) && getter != null) {
-            redisTemplate.opsForHash().put(hashKey, key, getter.get());
+            redissonClient.getMap(hashKey).putIfAbsent(key, getter.get());
         }
     }
 
@@ -552,25 +521,23 @@ public class RedisCacheService {
     /**
      * 设置key过期时间
      *
-     * @param name 缓存名称
-     * @param key  缓存名称后跟随的唯一表示 ,如 SYSTEM_USER_TREE:test 的test即为key
-     * @param ttl  过期时间
-     * @param unit 时间单位
+     * @param name     缓存名称
+     * @param key      缓存名称后跟随的唯一表示 ,如 SYSTEM_USER_TREE:test 的test即为key
+     * @param duration 过期时间
      */
-    public void expire(String name, String key, long ttl, TimeUnit unit) {
+    public void expire(String name, String key, Duration duration) {
         String redisKey = buildKey(name, key);
-        redisTemplate.expire(redisKey, ttl, unit);
+        expire(redisKey, duration);
     }
 
     /**
      * 设置key过期时间
      *
      * @param redisKey 缓存key
-     * @param ttl      过期时间
-     * @param unit     时间单位
+     * @param duration 过期时间
      */
-    public void expire(String redisKey, long ttl, TimeUnit unit) {
-        redisTemplate.expire(redisKey, ttl, unit);
+    public void expire(String redisKey, Duration duration) {
+        redissonClient.getBucket(redisKey).expire(duration);
     }
 
     /**
@@ -581,7 +548,7 @@ public class RedisCacheService {
      */
     @SuppressWarnings("unchecked")
     public <T> T rightPop(String redisKey) {
-        return (T) redisTemplate.opsForList().rightPop(redisKey);
+        return (T) redissonClient.getDeque(redisKey).pollLast();
     }
 
     /**
@@ -589,10 +556,9 @@ public class RedisCacheService {
      *
      * @param redisKey list key
      * @param value    push的数据
-     * @return push数据行
      */
-    public <T> Long leftPush(String redisKey, T value) {
-        return redisTemplate.opsForList().leftPush(redisKey, value);
+    public void leftPush(String redisKey, Object value) {
+        redissonClient.getDeque(redisKey).addFirst(value);
     }
 
     /**
@@ -600,10 +566,9 @@ public class RedisCacheService {
      *
      * @param redisKey list key
      * @param value    push的数据
-     * @return push数据行
      */
-    public <T> Long leftPushAll(String redisKey, T... value) {
-        return redisTemplate.opsForList().leftPushAll(redisKey, value);
+    public void leftPushAll(String redisKey, Object... value) {
+        redissonClient.getDeque(redisKey).addFirst(value);
     }
 
     /**
@@ -612,8 +577,8 @@ public class RedisCacheService {
      * @param redisKey list key
      * @return List里元素个数
      */
-    public Long lLen(String redisKey) {
-        return redisTemplate.opsForList().size(redisKey);
+    public int lLen(String redisKey) {
+        return redissonClient.getDeque(redisKey).size();
     }
 
     /**
@@ -766,87 +731,18 @@ public class RedisCacheService {
     }
 
     /**
-     * 使用redis底层命令,单个连接执行多个redis命令
-     *
-     * @param callback 执行
-     * @param pipeline 管道执行,将多个命令的结果返回
-     * @param <T>      返回类型
-     * @return 返回
-     */
-    public <T> T execute(RedisCallback<T> callback, boolean pipeline) {
-        return redisTemplate.execute(callback, true, pipeline);
-    }
-
-    /**
-     * 使用spring封装的redis命令,更友好
-     *
-     * @param callback 执行
-     * @param <T>      返回类型
-     * @return 返回
-     */
-    public <T> T execute(SessionCallback<T> callback) {
-        return redisTemplate.execute(callback);
-    }
-
-    /**
-     * 序列化key
-     *
-     * @param redisKey key值
-     * @return 结果
-     */
-    public byte[] serializeKey(String redisKey) {
-        return keySerializer.serialize(redisKey);
-    }
-
-    /**
-     * 序列化key
-     *
-     * @param name 缓存名称
-     * @param key  缓存key值
-     * @return 结果
-     */
-    public byte[] serializeKey(String name, String key) {
-        return keySerializer.serialize(buildKey(name, key));
-    }
-
-    /**
-     * 序列化数据
-     *
-     * @param value 数据
-     * @return 结果
-     */
-    public <T> byte[] serializeValue(T value) {
-        return valueSerializer.serialize(value);
-    }
-
-    /**
-     * 序列化数据
-     *
-     * @param getter 获取数据的函数
-     * @return 结果
-     */
-    public <T> byte[] serializeValue(Supplier<T> getter) {
-        return valueSerializer.serialize(getter.get());
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T deserializeValue(byte[] bytes) {
-        return (T) valueSerializer.deserialize(bytes);
-    }
-
-    /**
      * 执行Lua脚本
      *
      * @param lua        脚本
-     * @param resultType lua脚本返回数据类型
+     * @param returnType 返回值类型
      * @param keys       keys
      * @param args       参数
      * @param <T>        返回类型
      * @return 返回
      */
-    public <T> T executeLua(String lua, Class<T> resultType, List<String> keys, Object... args) {
-        RedisScript<T> redisScript = new DefaultRedisScript<>(lua, resultType);
-        return redisTemplate.execute(redisScript, keys, args);
+    public <T> T executeLua(String lua, RScript.ReturnType returnType, List<Object> keys, Object... args) {
+        RScript script = redissonClient.getScript();
+        return script.eval(RScript.Mode.READ_WRITE, lua, returnType, keys, args);
     }
 
     /**
@@ -858,8 +754,12 @@ public class RedisCacheService {
      * @return 结果集
      */
     @SuppressWarnings("unchecked")
-    public <T> List<T> hMGet(String hashKey, List keys) {
-        return (List<T>) redisTemplate.opsForHash().multiGet(hashKey, keys);
+    public <T> List<T> hmGet(String hashKey, List<?> keys) {
+        Map<Object, Object> all = redissonClient.getMap(hashKey).getAll(new HashSet<>(keys));
+        if (MapUtil.isNotEmpty(all)) {
+            return (List<T>) ListUtil.toList(all.values());
+        }
+        return ListUtil.empty();
     }
 
     /**
@@ -868,8 +768,8 @@ public class RedisCacheService {
      * @param hashKey   hash key
      * @param keyValues 只
      */
-    public void hMSet(String hashKey, Map<String, Object> keyValues) {
-        redisTemplate.opsForHash().putAll(hashKey, keyValues);
+    public void hmSet(String hashKey, Map<String, Object> keyValues) {
+        redissonClient.getMap(hashKey).putAll(keyValues);
     }
 
     /**
@@ -881,8 +781,7 @@ public class RedisCacheService {
      * @return 号码
      */
     public String incSn(String prefix, int len, Duration duration) {
-        String redisKey = buildKey(AUTO_INC_SN, prefix);
-        Long increment = executeLua(INCREMENT_AND_TTL_LUA, Long.class, CollUtil.newArrayList(redisKey), duration.toMillis() / 1000, 1);
+        Long increment = incrementAndTtl(AUTO_INC_SN, prefix, Long.valueOf(duration.getSeconds()).intValue(), 1);
         return StrBuilder.create(prefix, StrUtil.fillBefore(String.valueOf(increment), '0', len)).toString();
     }
 
@@ -895,7 +794,7 @@ public class RedisCacheService {
      * @return 前值
      */
     public Long increment(String name, String key, long step) {
-        return redisTemplate.opsForValue().increment(buildKey(name, key), step);
+        return redissonClient.getAtomicLong(buildKey(name, key)).addAndGet(step);
     }
 
     /**
@@ -909,12 +808,8 @@ public class RedisCacheService {
      */
     public Long incrementAndTtl(String name, String key, Integer ttlSeconds, Integer step) {
         String redisKey = buildKey(name, key);
-        List<String> keys = CollUtil.newArrayList(redisKey);
-        return executeLua(INCREMENT_AND_TTL_LUA, Long.class, keys, ttlSeconds, step);
-    }
-
-    public RedisTemplate<String, Object> template() {
-        return redisTemplate;
+        List<Object> keys = CollUtil.newArrayList(redisKey);
+        return executeLua(INCREMENT_AND_TTL_LUA, RScript.ReturnType.INTEGER, keys, ttlSeconds, step);
     }
 
     /**

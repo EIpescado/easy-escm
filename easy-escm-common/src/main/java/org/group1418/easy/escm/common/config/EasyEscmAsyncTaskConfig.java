@@ -4,7 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import lombok.var;
+import org.group1418.easy.escm.common.config.properties.EasyEscmAsyncConfig;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfig;
 import org.group1418.easy.escm.common.exception.BaseEasyEscmException;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -35,7 +37,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequiredArgsConstructor
 public class EasyEscmAsyncTaskConfig implements AsyncConfigurer, InitializingBean {
 
-    private final EasyEscmConfigProperties configProperties;
+    private final EasyEscmConfig configProperties;
     public static final String TASK_EXECUTOR_SUFFIX = "-TaskExecutor";
 
 
@@ -60,7 +62,7 @@ public class EasyEscmAsyncTaskConfig implements AsyncConfigurer, InitializingBea
     @Bean(name = {TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME, AsyncAnnotationBeanPostProcessor.DEFAULT_TASK_EXECUTOR_BEAN_NAME})
     @Primary
     public ThreadPoolTaskExecutor applicationTaskExecutor() {
-        EasyEscmConfigProperties.AsyncConfig asyncExecutorConfigEntry = new EasyEscmConfigProperties.AsyncConfig();
+        var asyncExecutorConfigEntry = new EasyEscmAsyncConfig();
         String taskExecutor = configProperties.getName() + TASK_EXECUTOR_SUFFIX;
         log.info("注入[{}]", taskExecutor);
         return this.createExecutor(taskExecutor, asyncExecutorConfigEntry);
@@ -73,7 +75,7 @@ public class EasyEscmAsyncTaskConfig implements AsyncConfigurer, InitializingBea
      * @param asyncExecutorConfigEntry 线程池配置
      * @return Executor
      */
-    private ThreadPoolTaskExecutor createExecutor(String prefix, EasyEscmConfigProperties.AsyncConfig asyncExecutorConfigEntry) {
+    private ThreadPoolTaskExecutor createExecutor(String prefix, EasyEscmAsyncConfig asyncExecutorConfigEntry) {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.initialize();
         taskExecutor.setCorePoolSize(asyncExecutorConfigEntry.getCoreSize());

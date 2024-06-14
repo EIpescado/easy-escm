@@ -7,7 +7,7 @@ import org.group1418.easy.escm.common.constant.GlobalConstants;
 import org.redisson.api.NameMapper;
 
 /**
- * RedisKeyPrefixNameMapper
+ * TenantRedisKeyPrefixNameMapper
  * redis 缓存key前缀处理
  *
  * @author yq 2024/6/11 13:48
@@ -41,11 +41,11 @@ public class TenantRedisKeyPrefixNameMapper extends RedisKeyPrefixNameMapper {
         if (StrUtil.isBlank(tenantId)) {
             log.error("无法获取有效的租户id -> Null");
         }
-        if (StrUtil.startWith(name, tenantId + "")) {
+        if (StrUtil.isNotBlank(tenantId) && StrUtil.startWith(name, tenantId)) {
             // 如果存在则直接返回
             return super.map(name);
         }
-        return super.map(tenantId + ":" + name);
+        return super.map(StrUtil.isNotBlank(tenantId) ? tenantId + ":" + name : name);
     }
 
     /**
@@ -70,7 +70,7 @@ public class TenantRedisKeyPrefixNameMapper extends RedisKeyPrefixNameMapper {
         if (StrUtil.isBlank(tenantId)) {
             log.error("无法获取有效的租户id -> Null");
         }
-        if (StrUtil.startWith(unmap, tenantId + "")) {
+        if (StrUtil.isNotBlank(tenantId) && StrUtil.startWith(unmap, tenantId)) {
             // 如果存在则删除
             return unmap.substring((tenantId + ":").length());
         }

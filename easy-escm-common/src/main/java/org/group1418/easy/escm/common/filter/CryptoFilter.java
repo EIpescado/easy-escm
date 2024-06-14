@@ -6,7 +6,7 @@ import cn.hutool.crypto.CryptoException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmApiDecryptConfig;
 import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
 import org.group1418.easy.escm.common.filter.wrapper.DecryptRequestBodyWrapper;
 import org.group1418.easy.escm.common.filter.wrapper.EncryptResponseBodyWrapper;
@@ -38,7 +38,7 @@ import java.io.IOException;
 @Slf4j
 public class CryptoFilter implements Filter {
 
-    private final EasyEscmConfigProperties properties;
+    private final EasyEscmApiDecryptConfig apiDecryptConfig;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -48,7 +48,6 @@ public class CryptoFilter implements Filter {
         boolean responseFlag = false;
         ServletRequest requestWrapper = null;
         EncryptResponseBodyWrapper responseBodyWrapper = null;
-        EasyEscmConfigProperties.ApiDecryptConfig apiDecryptConfig = properties.getApiDecryptConfig();
 
         // 是否为 json 请求
         if (StrUtil.startWithIgnoreCase(request.getContentType(), MediaType.APPLICATION_JSON_VALUE)) {

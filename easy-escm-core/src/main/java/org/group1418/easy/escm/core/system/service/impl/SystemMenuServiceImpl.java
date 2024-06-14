@@ -107,7 +107,7 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
         if (CollectionUtil.isEmpty(menuIds)) {
             return null;
         }
-        menuTreeNodeList = CollUtil.defaultIfEmpty(redisCacheService.hMGet(CacheConstant.Hashs.SYSTEM_MENU, menuIds), new ArrayList<>(menuIds.size()));
+        menuTreeNodeList = CollUtil.defaultIfEmpty(redisCacheService.hmGet(CacheConstant.Hashs.SYSTEM_MENU, menuIds), new ArrayList<>(menuIds.size()));
         //缓存中未包含全部,则查数据库并存入缓存
         if (CollUtil.size(menuIds) > CollUtil.size(menuTreeNodeList)) {
             List<String> noCacheMenuIds = CollUtil.subtractToList(menuIds, menuTreeNodeList.stream().map(n -> n.getId().toString()).collect(Collectors.toList()));
@@ -118,10 +118,10 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
                     menuTreeNodeList.add(menuTreeNode);
                     return menuTreeNode;
                 });
-                redisCacheService.hMSet(CacheConstant.Hashs.SYSTEM_MENU, noCacheMenuMap);
+                redisCacheService.hmSet(CacheConstant.Hashs.SYSTEM_MENU, noCacheMenuMap);
             }
         }
-        buttonNodeList = CollUtil.defaultIfEmpty(redisCacheService.hMGet(CacheConstant.Hashs.SYSTEM_BUTTON, buttonIds), new ArrayList<>(buttonIds.size()));
+        buttonNodeList = CollUtil.defaultIfEmpty(redisCacheService.hmGet(CacheConstant.Hashs.SYSTEM_BUTTON, buttonIds), new ArrayList<>(buttonIds.size()));
         //缓存中未包含全部,则查数据库并存入缓存
         if (CollUtil.size(buttonIds) > CollUtil.size(buttonNodeList)) {
             List<String> noCacheButtonIds = CollUtil.subtractToList(buttonIds, buttonNodeList.stream().map(n -> n.getId().toString()).collect(Collectors.toList()));
@@ -131,7 +131,7 @@ public class SystemMenuServiceImpl extends BaseServiceImpl<SystemMenuMapper, Sys
                     buttonNodeList.add(sb);
                     return sb;
                 });
-                redisCacheService.hMSet(CacheConstant.Hashs.SYSTEM_BUTTON, noCacheButtonMap);
+                redisCacheService.hmSet(CacheConstant.Hashs.SYSTEM_BUTTON, noCacheButtonMap);
             }
         }
         //构建树

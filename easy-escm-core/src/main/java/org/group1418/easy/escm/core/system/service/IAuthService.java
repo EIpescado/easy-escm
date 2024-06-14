@@ -20,6 +20,10 @@ public interface IAuthService {
      */
     LoginVo login(String body);
 
+    /**
+     * 登出
+     */
+    void logout();
 
     /**
      * 登录校验
@@ -29,5 +33,7 @@ public interface IAuthService {
      * @param supplier  登录是否失败的额外判断
      */
     void checkLogin(LoginType loginType, String username, Supplier<Boolean> supplier);
+
+
 
 }

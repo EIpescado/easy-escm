@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 认证
+ *
  * @author yq 2024/3/29 15:29
  */
 @RestController
@@ -25,8 +26,14 @@ public class AuthController {
     @PostMapping("login")
     @SaIgnore
 //    @ApiEncrypt
-    @OpLog(value = "登录",hadLogin = false)
+    @OpLog(value = "登录", hadLogin = false)
     public R<LoginVo> login(@RequestBody String body) {
         return R.ok(authService.login(body));
+    }
+
+    @PostMapping("logout")
+    public R<String> logout() {
+        authService.logout();
+        return R.ok();
     }
 }

@@ -10,7 +10,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmTokenConfig;
 import org.group1418.easy.escm.common.enums.IBaseEnum;
 import org.group1418.easy.escm.common.serializer.BaseEnum2KeyWriter;
 import org.group1418.easy.escm.common.serializer.LocalDateWriter;
@@ -49,11 +49,11 @@ import java.util.Set;
 public class EasyEscmWebMvcConfig extends WebMvcConfigurationSupport {
 
     private final FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
-    private final EasyEscmConfigProperties configProperties;
+    private final EasyEscmTokenConfig easyEscmTokenConfig;
 
-    public EasyEscmWebMvcConfig(EasyEscmConfigProperties configProperties) {
+    public EasyEscmWebMvcConfig(EasyEscmTokenConfig configProperties) {
         this.fastJsonHttpMessageConverter = createDefaultFastJsonHttpMessageConverter();
-        this.configProperties = configProperties;
+        this.easyEscmTokenConfig = configProperties;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class EasyEscmWebMvcConfig extends WebMvcConfigurationSupport {
         // 注册 Sa-Token 拦截器，打开注解式鉴权功能,除开 @SaIgnore 标识和 配置所有接口需登录,
         registry.addInterceptor(new SaInterceptor(handle ->
                 SaRouter.match("/**")
-                        .notMatch(configProperties.getTokenConfig().getNotCheckLoginPaths())
+                        .notMatch(easyEscmTokenConfig.getNotCheckLoginPaths())
                         .check(r -> {
                             StpUtil.checkLogin();
                             //todo 检查header或参数中的clientId与token一致

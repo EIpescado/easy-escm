@@ -1,11 +1,13 @@
 package org.group1418.easy.escm.core.system.service.impl;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfig;
 import org.group1418.easy.escm.common.constant.GlobalConstants;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
@@ -36,7 +38,7 @@ public class AuthServiceImpl implements IAuthService {
     private final ISystemClientService systemClientService;
     private final ISystemTenantService systemTenantService;
     private final RedisCacheService redisCacheService;
-    private final EasyEscmConfigProperties easyEscmConfigProperties;
+    private final EasyEscmConfig easyEscmConfig;
 
     @Override
     public LoginVo login(String body) {
@@ -65,14 +67,22 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
+    public void logout() {
+        try {
+            StpUtil.logout();
+        } catch (NotLoginException | EasyEscmException ignored) {
+        }
+    }
+
+    @Override
     public void checkLogin(LoginType loginType, String username, Supplier<Boolean> supplier) {
         // 获取用户登录错误次数，默认为0 (可自定义限制策略 例如: key + username + ip)
         redisCacheService.getAndDel(GlobalConstants.PWD_ERR_CNT_KEY, username, (Integer en) -> {
             int errorNumber = PudgeUtil.null2Zero(en);
             //最大错误次数
-            Integer maxRetryCount = easyEscmConfigProperties.getLoginMaxRetryCount();
+            Integer maxRetryCount = easyEscmConfig.getLoginMaxRetryCount();
             //锁定时间
-            Integer lockTime = easyEscmConfigProperties.getLoginLockTime();
+            Integer lockTime = easyEscmConfig.getLoginLockTime();
             // 锁定时间内登录 则踢出
             if (errorNumber >= maxRetryCount) {
                 log.info("用户[{}]登录密码错误超出最大次数,当前[{}]", username, errorNumber);

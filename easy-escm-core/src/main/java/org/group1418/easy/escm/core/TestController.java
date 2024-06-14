@@ -6,7 +6,8 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaResult;
 import com.alibaba.fastjson2.JSONObject;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.cache.RedisCacheService;
+import org.group1418.easy.escm.common.config.properties.EasyEscmConfig;
 import org.group1418.easy.escm.common.saToken.CurrentUserHelper;
 import org.group1418.easy.escm.common.utils.ExcelUtil;
 import org.group1418.easy.escm.common.wrapper.R;
@@ -34,11 +35,13 @@ import java.util.List;
 public class TestController {
 
     @Autowired
-    private EasyEscmConfigProperties easyEscmConfigProperties;
+    private EasyEscmConfig easyEscmConfig;
     @Autowired
     private TestService testService;
     @Autowired
     private ISystemClientService systemClientService;
+    @Autowired
+    private RedisCacheService redisCacheService;
 
     @GetMapping("test")
     @SaIgnore
@@ -74,10 +77,8 @@ public class TestController {
     }
 
     @GetMapping("testAsync")
-//    @SaCheckRole("super-admin")
-//    @SaCheckPermission(value = "super-admin")
     public R<String> testAsync() {
-        testService.testAsync();
+        redisCacheService.batchDel("a");
         return R.ok();
     }
 

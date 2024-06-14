@@ -4,14 +4,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.cache.TenantRedisKeyPrefixNameMapper;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
-import org.group1418.easy.escm.common.serializer.FastJson2JsonRedissonCodec;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
+import org.group1418.easy.escm.common.cache.TenantRedisKeyPrefixNameMapper;
+import org.group1418.easy.escm.common.config.properties.EasyEscmRedissonConfig;
+import org.group1418.easy.escm.common.serializer.FastJson2JsonRedissonCodec;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
+import org.redisson.codec.CompositeCodec;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.spring.starter.RedissonAutoConfigurationCustomizer;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
@@ -37,23 +38,16 @@ import java.util.List;
 @EnableConfigurationProperties({RedisProperties.class})
 public class EasyEscmRedisConfig extends CachingConfigurerSupport {
 
-    private final EasyEscmConfigProperties configProperties;
+    private final EasyEscmRedissonConfig easyEscmRedissonConfig;
 
-    public EasyEscmRedisConfig(EasyEscmConfigProperties configProperties) {
-        this.configProperties = configProperties;
+    public EasyEscmRedisConfig(EasyEscmRedissonConfig easyEscmRedissonConfig) {
+        this.easyEscmRedissonConfig = easyEscmRedissonConfig;
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "redisTemplate")
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        log.info("注入自定义 redisTemplate<String,Object>");
-        return getDefaultRedisTemplate(redisConnectionFactory, new GenericFastJsonRedisSerializer());
-    }
-
-    @Bean
-    public RedisCacheService customRedisCacheService(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
+    public RedisCacheService customRedisCacheService(RedissonClient redissonClient) {
         log.info("注入 customRedisCacheService");
-        return new RedisCacheService(redisTemplate, redissonClient);
+        return new RedisCacheService(redissonClient);
     }
 
     @Bean
@@ -94,23 +88,24 @@ public class EasyEscmRedisConfig extends CachingConfigurerSupport {
     @Bean
     public RedissonAutoConfigurationCustomizer redissonAutoConfigurationCustomizers(RedisProperties redisProperties) {
         log.info("注入 redissonAutoConfigurationCustomizers [{}]", redisProperties.getHost());
-        EasyEscmConfigProperties.RedissonConfig redissonProperties = configProperties.getRedissonConfig();
         return config -> {
+            FastJson2JsonRedissonCodec fastJson2Codec = new FastJson2JsonRedissonCodec(null, null);
+            CompositeCodec codec = new CompositeCodec(StringCodec.INSTANCE, fastJson2Codec, fastJson2Codec);
             //数据序列化和反序列化
-            config.setCodec(FastJson2JsonRedissonCodec.INSTANCE)
-                    .setThreads(redissonProperties.getThreads())
-                    .setNettyThreads(redissonProperties.getNettyThreads())
+            config.setCodec(codec)
+                    .setThreads(easyEscmRedissonConfig.getThreads())
+                    .setNettyThreads(easyEscmRedissonConfig.getNettyThreads())
                     //LUA脚本缓存
                     .setUseScriptCache(true);
             //redis cluster
-            if (redissonProperties.getClusterServersConfig() != null) {
+            if (easyEscmRedissonConfig.getClusterServersConfig() != null) {
                 List<String> nodes = redisProperties.getCluster().getNodes();
                 ClusterServersConfig clusterServersConfig = config.useClusterServers();
                 if (CollUtil.isNotEmpty(nodes)) {
                     nodes.forEach(node -> clusterServersConfig.addNodeAddress(buildNodeAddress(node, redisProperties.isSsl())));
                 }
                 clusterServersConfig.setPassword(redisProperties.getPassword())
-                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(redissonProperties.getKeyPrefix()))
+                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(easyEscmRedissonConfig.getKeyPrefix()))
                         .setTimeout(clusterServersConfig.getTimeout())
                         .setClientName(clusterServersConfig.getClientName())
                         .setIdleConnectionTimeout(clusterServersConfig.getIdleConnectionTimeout())
@@ -123,13 +118,13 @@ public class EasyEscmRedisConfig extends CachingConfigurerSupport {
                         .setSubscriptionMode(clusterServersConfig.getSubscriptionMode());
 
             } else {
-                EasyEscmConfigProperties.RedissonConfig.SingleServerConfig singleServerConfig = redissonProperties.getSingleServerConfig();
+                EasyEscmRedissonConfig.SingleServerConfig singleServerConfig = easyEscmRedissonConfig.getSingleServerConfig();
                 //单节点
                 config.useSingleServer()
                         .setAddress(buildNodeAddress(redisProperties.getHost(), redisProperties.getPort(), redisProperties.isSsl()))
                         .setDatabase(redisProperties.getDatabase())
                         .setPassword(redisProperties.getPassword())
-                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(redissonProperties.getKeyPrefix()))
+                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(easyEscmRedissonConfig.getKeyPrefix()))
                         .setTimeout(singleServerConfig.getTimeout())
                         .setClientName(singleServerConfig.getClientName())
                         .setIdleConnectionTimeout(singleServerConfig.getIdleConnectionTimeout())

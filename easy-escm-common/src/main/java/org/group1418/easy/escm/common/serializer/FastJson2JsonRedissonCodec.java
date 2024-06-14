@@ -1,38 +1,40 @@
 package org.group1418.easy.escm.common.serializer;
 
-import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
-import org.redisson.client.codec.StringCodec;
+import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.support.redission.JSONCodec;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.client.protocol.Decoder;
 import org.redisson.client.protocol.Encoder;
-
-import java.io.IOException;
 
 /**
  * FastJson2JsonRedissonCodec redisson使用fastjson2 codec
  *
  * @author yq 2024/6/7 18:33
  */
-public class FastJson2JsonRedissonCodec extends StringCodec {
+@Slf4j
+public class FastJson2JsonRedissonCodec extends JSONCodec {
 
-    private final Encoder encoder = in -> {
-        ByteBuf out = ByteBufAllocator.DEFAULT.buffer();
-        try {
-            ByteBufOutputStream os = new ByteBufOutputStream(out);
-            JSON.writeTo(os, in, JSONWriter.Feature.WriteClassName);
-            return os.buffer();
-        } catch (Exception e) {
-            out.release();
-            throw new IOException(e);
-        }
-    };
+    static final Filter AUTO_TYPE_FILTER = JSONReader.autoTypeFilter(
+            // 按需加上需要支持自动类型的类名前缀，范围越小越安全
+            "org.group1418"
+    );
 
+    private final Encoder encoder;
+    private final Decoder<Object> decoder;
 
-    private final Decoder<Object> decoder = (buf, state) -> JSON.parseObject(new ByteBufInputStream(buf), Object.class);
+    public FastJson2JsonRedissonCodec(ClassLoader classLoader, FastJson2JsonRedissonCodec codec) {
+        super(Object.class);
+        JSONCodec fastIns = new JSONCodec(
+                JSONFactory.createWriteContext(JSONWriter.Feature.WriteClassName),
+                JSONFactory.createReadContext(AUTO_TYPE_FILTER)
+        );
+        log.info("new FastJson2JsonRedissonCodec");
+        encoder = fastIns.getValueEncoder();
+        decoder = fastIns.getValueDecoder();
+    }
 
     @Override
     public Decoder<Object> getValueDecoder() {

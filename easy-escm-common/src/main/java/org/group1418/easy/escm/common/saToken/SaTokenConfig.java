@@ -4,7 +4,7 @@ import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.SaTokenException;
 import cn.hutool.core.map.MapBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfigProperties;
+import org.group1418.easy.escm.common.config.properties.EasyEscmTokenConfig;
 import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.context.annotation.Bean;
@@ -37,8 +37,8 @@ public class SaTokenConfig {
 
     @Bean
     @Primary
-    public cn.dev33.satoken.config.SaTokenConfig getSaTokenConfigPrimary(EasyEscmConfigProperties easyEscmConfigProperties) {
-        return easyEscmConfigProperties.getTokenConfig();
+    public cn.dev33.satoken.config.SaTokenConfig getSaTokenConfigPrimary(EasyEscmTokenConfig tokenConfig) {
+        return tokenConfig;
     }
 
     public static R<String> saTokenExceptionHandler(SaTokenException e) {
@@ -51,7 +51,7 @@ public class SaTokenConfig {
             customTipEnum = SA_LOGIN_CODE_MAP.get(type);
             customTipEnum = customTipEnum != null ? customTipEnum : EasyEscmTipEnum.FAIL;
         }
-        log.error("sa-token异常码[{}]",code);
+        log.error("sa-token异常码[{}]", code);
         return R.fail(customTipEnum);
     }
 
