@@ -11,8 +11,10 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfig;
+import org.group1418.easy.escm.common.config.properties.EasyEscmProp;
+import org.group1418.easy.escm.common.config.properties.EasyEscmTenantProp;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
+import org.group1418.easy.escm.common.tenant.EasyEscmTenantLineHandler;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -44,20 +46,15 @@ public class EasyEscmMybatisPlusConfig {
      */
     @Bean
     @ConditionalOnClass(MybatisPlusInterceptor.class)
-    public MybatisPlusInterceptor mybatisPlusInterceptor(EasyEscmConfig plusConfigProperties) {
+    public MybatisPlusInterceptor mybatisPlusInterceptor(EasyEscmProp easyEscmProp, EasyEscmTenantProp easyEscmTenantProp) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        // 多租户插件 必须放到第一位
-        try {
-            TenantLineInnerInterceptor tenant = SpringContextHolder.getBean(TenantLineInnerInterceptor.class);
-            interceptor.addInnerInterceptor(tenant);
-        } catch (BeansException e){
-            log.warn("add TenantLineInnerInterceptor [{}]",e.getLocalizedMessage());
-        }
-        String dbType = plusConfigProperties.getDbType();
+        // 多租户插件 必须放第一位
+        TenantLineInnerInterceptor tenantLineInnerInterceptor = new TenantLineInnerInterceptor(new EasyEscmTenantLineHandler(easyEscmTenantProp));
+        interceptor.addInnerInterceptor(tenantLineInnerInterceptor);
+        String dbType = easyEscmProp.getDbType();
         //todo 数据权限处理
-        //分页插件
+        //分页插件 及 合理化
         PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor(DbType.getDbType(dbType));
-        //分页合理化
         paginationInnerInterceptor.setOverflow(true);
         interceptor.addInnerInterceptor(paginationInnerInterceptor);
         //乐观锁

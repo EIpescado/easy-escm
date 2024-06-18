@@ -25,7 +25,7 @@ public class LoginFo {
     /**
      * 租户ID
      */
-    private Long tenantId;
+    private String tenantId;
 
     /**
      * 验证码

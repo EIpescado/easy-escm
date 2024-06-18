@@ -29,4 +29,11 @@ public interface SystemTenantMapper extends CommonMapper<SystemTenant> {
     * @return SystemTenantVo
     */
     SystemTenantVo get(@Param("id")Long id);
+
+    /**
+     * 详情
+     * @param tenantId 租户编码
+     * @return SystemTenantVo
+     */
+    SystemTenantVo getByTenantId(@Param("tenantId")String tenantId);
 }

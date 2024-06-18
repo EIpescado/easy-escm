@@ -94,7 +94,7 @@ public class SaTokenRedisDao implements SaTokenDao {
 
     @Override
     public long getObjectTimeout(String key) {
-        return redisCacheService.ttl(key);
+        return redisCacheService.ttl(key) / 1000;
     }
 
     @Override

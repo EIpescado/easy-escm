@@ -8,7 +8,7 @@ import lombok.Data;
  * @author yq 2024/6/14 10:03
  */
 @Data
-public class EasyEscmAsyncConfig {
+public class EasyEscmAsyncProp {
     /**
      * 线程池名称, 线程名称为 threadName_数字
      */

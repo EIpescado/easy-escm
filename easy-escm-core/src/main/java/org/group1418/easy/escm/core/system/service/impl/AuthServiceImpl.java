@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.JSON;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfig;
+import org.group1418.easy.escm.common.config.properties.EasyEscmProp;
 import org.group1418.easy.escm.common.constant.GlobalConstants;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
@@ -38,7 +38,7 @@ public class AuthServiceImpl implements IAuthService {
     private final ISystemClientService systemClientService;
     private final ISystemTenantService systemTenantService;
     private final RedisCacheService redisCacheService;
-    private final EasyEscmConfig easyEscmConfig;
+    private final EasyEscmProp easyEscmProp;
 
     @Override
     public LoginVo login(String body) {
@@ -49,7 +49,7 @@ public class AuthServiceImpl implements IAuthService {
         //授权类型
         String grantType = loginFo.getGrantType();
         //租户
-        Long tenantId = loginFo.getTenantId();
+        String tenantId = loginFo.getTenantId();
         SystemClientVo client = systemClientService.getByClientId(clientId);
         //客户端存在 且 授权类型包含
         if (client == null || !StrUtil.contains(client.getGrantType(), grantType)) {
@@ -63,7 +63,7 @@ public class AuthServiceImpl implements IAuthService {
         }
         //校验租户
         systemTenantService.check(tenantId);
-        return IAuthStrategy.login(body, client, grantType);
+        return IAuthStrategy.login(body, tenantId, client, grantType);
     }
 
     @Override
@@ -80,9 +80,9 @@ public class AuthServiceImpl implements IAuthService {
         redisCacheService.getAndDel(GlobalConstants.PWD_ERR_CNT_KEY, username, (Integer en) -> {
             int errorNumber = PudgeUtil.null2Zero(en);
             //最大错误次数
-            Integer maxRetryCount = easyEscmConfig.getLoginMaxRetryCount();
+            Integer maxRetryCount = easyEscmProp.getLoginMaxRetryCount();
             //锁定时间
-            Integer lockTime = easyEscmConfig.getLoginLockTime();
+            Integer lockTime = easyEscmProp.getLoginLockTime();
             // 锁定时间内登录 则踢出
             if (errorNumber >= maxRetryCount) {
                 log.info("用户[{}]登录密码错误超出最大次数,当前[{}]", username, errorNumber);

@@ -9,4 +9,7 @@
     <select id="get" resultType="org.group1418.easy.escm.core.system.pojo.vo.SystemTenantVo">
         select * from system_tenant where id = #{id}
     </select>
+    <select id="getByTenantId" resultType="org.group1418.easy.escm.core.system.pojo.vo.SystemTenantVo">
+        select * from system_tenant where tenant_id = #{tenantId} AND enabled = 1
+    </select>
 </mapper>

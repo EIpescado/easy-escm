@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  *
  * @author yq 2024年3月7日 17:38:34
  */
-public class CurrentUserHelper {
+public class UserHelper {
 
     public static final String USER_INFO_KEY = "userInfo";
     public static final String TENANT_ID_KEY = "tenantId";
@@ -34,7 +34,7 @@ public class CurrentUserHelper {
      * @param model       配置参数
      */
     public static void login(CurrentUser currentUser, SaLoginModel model) {
-        model = ObjectUtil.defaultIfNull(model, new SaLoginModel());
+        model = model != null ? model : new SaLoginModel();
         StpUtil.login(currentUser.getId(), model);
         //用户信息
         StpUtil.getTokenSession().set(USER_INFO_KEY, currentUser);
@@ -71,14 +71,62 @@ public class CurrentUserHelper {
      * 获取当前登录用户id
      */
     public static Long id() {
-        return StpUtil.getLoginIdAsLong();
+        return id(true);
     }
 
     /**
-     * 获取当前登录用户租户id
+     * 获取当前登录用户ID
+     *
+     * @param required 必填
+     * @return 登录用户ID
      */
-    public static Long getTenantId() {
-        return currentUser().getTenantId();
+    public static Long id(boolean required) {
+        try {
+            return StpUtil.getLoginIdAsLong();
+        } catch (Exception e) {
+            if (required) {
+                throw e;
+            }
+            //未登录时
+            return null;
+        }
+    }
+
+    /**
+     * 获取当前登录用户租户编码
+     */
+    public static String tenantId() {
+        return tenantId(true);
+    }
+
+    /**
+     * 获取当前登录用户租户编码
+     *
+     * @param required 要求
+     * @return 租户ID
+     */
+    public static String tenantId(boolean required) {
+        try {
+            return currentUser().getTenantId();
+        } catch (Exception e) {
+            if (required) {
+                throw e;
+            }
+            //未登录时
+            return null;
+        }
+    }
+
+    /**
+     * 是否已登录
+     * @return 响应
+     */
+    public static boolean isLogin() {
+        try {
+            return StpUtil.isLogin();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @SuppressWarnings("unchecked")

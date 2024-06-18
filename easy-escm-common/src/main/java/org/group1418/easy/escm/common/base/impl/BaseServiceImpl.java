@@ -1,13 +1,12 @@
 package org.group1418.easy.escm.common.base.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.base.BaseService;
 import org.group1418.easy.escm.common.base.CommonMapper;
-import org.group1418.easy.escm.common.base.LambdaQueryWrapperX;
 import org.group1418.easy.escm.common.base.obj.BaseEntity;
 
 import java.util.List;
@@ -15,10 +14,9 @@ import java.util.function.Consumer;
 
 
 /**
- * @author yq
- * @date 2018/11/15 11:39
- * @description 基础实现
- * @since V1.0.0
+ * service 基础实现
+ *
+ * @author yq  2018/11/15 11:39
  */
 @Slf4j
 public class BaseServiceImpl<M extends CommonMapper<T>, T extends BaseEntity> extends ServiceImpl<M, T> implements BaseService<T> {
@@ -30,65 +28,56 @@ public class BaseServiceImpl<M extends CommonMapper<T>, T extends BaseEntity> ex
 
     @Override
     public boolean haveFieldValueEq(SFunction<T, ?> function, Object value) {
-        Long count = baseMapper.selectCount(Wrappers.<T>lambdaQuery().eq(function, value));
-        return count != null && count > 0;
+        return baseMapper.haveFieldValueEq(function, value);
     }
 
     @Override
-    public boolean haveMatchData(Consumer<LambdaQueryWrapperX<T>> consumer) {
-        LambdaQueryWrapperX<T> lambdaQueryWrapper = new LambdaQueryWrapperX<>();
-        consumer.accept(lambdaQueryWrapper);
-        Long count = baseMapper.selectCount(lambdaQueryWrapper);
-        return count != null && count > 0;
+    public boolean haveMatchData(Consumer<LambdaQueryWrapper<T>> consumer) {
+        return baseMapper.haveMatchData(consumer);
     }
 
     @Override
     public T getOneByFieldValueEq(SFunction<T, ?> function, Object value) {
-        return baseMapper.selectOne(Wrappers.<T>lambdaQuery().eq(function, value));
+        return baseMapper.getOneByFieldValueEq(function, value);
     }
 
     @Override
-    public T getOneByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer) {
-        LambdaQueryWrapperX<T> wrapper = new LambdaQueryWrapperX<>();
-        consumer.accept(wrapper);
-        return baseMapper.selectOne(wrapper);
+    public T getOneByWrapper(Consumer<LambdaQueryWrapper<T>> consumer) {
+        return baseMapper.getOneByWrapper(consumer);
     }
 
     @Override
     public List<T> getByFieldValueEq(SFunction<T, ?> function, Object value) {
-        return baseMapper.selectList(Wrappers.<T>lambdaQuery().eq(function, value));
+        return baseMapper.getByFieldValueEq(function, value);
     }
 
     @Override
-    public List<T> getByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer) {
-        LambdaQueryWrapperX<T> wrapper = new LambdaQueryWrapperX<>();
-        consumer.accept(wrapper);
-        return baseMapper.selectList(wrapper);
+    public List<T> getByWrapper(Consumer<LambdaQueryWrapper<T>> consumer) {
+        return baseMapper.getByWrapper(consumer);
     }
 
     @Override
     public Integer deleteByFieldEq(SFunction<T, ?> function, Object value) {
-        return baseMapper.delete(Wrappers.<T>lambdaQuery().eq(function, value));
+        return baseMapper.deleteByFieldEq(function, value);
     }
 
     @Override
-    public Integer deleteByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer) {
-        LambdaQueryWrapperX<T> wrapper = new LambdaQueryWrapperX<>();
-        consumer.accept(wrapper);
-        return baseMapper.delete(wrapper);
+    public Integer deleteByWrapper(Consumer<LambdaQueryWrapper<T>> consumer) {
+        return baseMapper.deleteByWrapper(consumer);
     }
 
     @Override
     public void updateByWrapper(Consumer<LambdaUpdateWrapper<T>> consumer) {
-        LambdaUpdateWrapper<T> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        consumer.accept(lambdaUpdateWrapper);
-        this.update(lambdaUpdateWrapper);
+        baseMapper.updateByWrapper(consumer);
     }
 
     @Override
-    public Long countByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer) {
-        LambdaQueryWrapperX<T> wrapper = new LambdaQueryWrapperX<>();
-        consumer.accept(wrapper);
-        return baseMapper.selectCount(wrapper);
+    public Long countByWrapper(Consumer<LambdaQueryWrapper<T>> consumer) {
+        return baseMapper.countByWrapper(consumer);
+    }
+
+    @Override
+    public <F> List<F> getFieldByWrapper(Consumer<LambdaQueryWrapper<T>> consumer, SFunction<T, F> function) {
+        return baseMapper.getFieldByWrapper(consumer,function);
     }
 }

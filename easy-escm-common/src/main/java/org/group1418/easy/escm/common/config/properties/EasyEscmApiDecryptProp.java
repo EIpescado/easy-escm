@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "easy.escm.api-decrypt-config")
 @Data
 @Component
-public class EasyEscmApiDecryptConfig {
+public class EasyEscmApiDecryptProp {
     /**
      * 前端传递的AES加密头标识 由前端生成AES密钥 -> base64编码 -> 使用公钥加密密钥
      * 请求参数 使用AES加密,

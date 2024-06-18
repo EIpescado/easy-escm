@@ -7,9 +7,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 基础租户Entity
  *
- * @author yq
- * @date 2024年3月8日 14:36:47
- * @since V1.0.0
+ * @author yq 2024年3月8日 14:36:47
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -17,8 +15,8 @@ public class TenantEntity extends BaseEntity {
 
     private static final long serialVersionUID = -288721751309015311L;
     /**
-     * 租户ID
+     * 租户编码
      */
-    private Long tenantId;
+    private String tenantId;
 
 }

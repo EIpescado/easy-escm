@@ -1,5 +1,6 @@
 package org.group1418.easy.escm.common.base;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -31,7 +32,7 @@ public interface BaseService<T extends BaseEntity> extends IService<T> {
      * @param consumer LambdaQueryWrapper消费者
      * @return boolean
      */
-    boolean haveMatchData(Consumer<LambdaQueryWrapperX<T>> consumer);
+    boolean haveMatchData(Consumer<LambdaQueryWrapper<T>> consumer);
 
     /**
      * 获取单个字段为指定值的实体
@@ -48,7 +49,7 @@ public interface BaseService<T extends BaseEntity> extends IService<T> {
      * @param consumer LambdaQueryWrapper消费者
      * @return T
      */
-    T getOneByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer);
+    T getOneByWrapper(Consumer<LambdaQueryWrapper<T>> consumer);
 
     /**
      * 获取所有字段为指定值的实体
@@ -65,7 +66,7 @@ public interface BaseService<T extends BaseEntity> extends IService<T> {
      * @param consumer LambdaQueryWrapper消费者
      * @return 实体集合
      */
-    List<T> getByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer);
+    List<T> getByWrapper(Consumer<LambdaQueryWrapper<T>> consumer);
 
     /**
      * 删除所有指定字段为指定值的数据
@@ -83,7 +84,7 @@ public interface BaseService<T extends BaseEntity> extends IService<T> {
      * @param consumer LambdaUpdateWrapper消费者
      * @return 删除行数
      */
-    Integer deleteByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer);
+    Integer deleteByWrapper(Consumer<LambdaQueryWrapper<T>> consumer);
 
     /**
      * 更新实体
@@ -98,5 +99,14 @@ public interface BaseService<T extends BaseEntity> extends IService<T> {
      * @param consumer LambdaUpdateWrapper消费者
      * @return 数量
      */
-    Long countByWrapper(Consumer<LambdaQueryWrapperX<T>> consumer);
+    Long countByWrapper(Consumer<LambdaQueryWrapper<T>> consumer);
+
+    /**
+     * 根据wrapper获取指定属性
+     * @param consumer LambdaQueryWrapper消费者
+     * @param function 实体属性function
+     * @return 实体属性集合
+     * @param <F> 属性类型
+     */
+    <F> List<F>  getFieldByWrapper(Consumer<LambdaQueryWrapper<T>> consumer, SFunction<T, F> function);
 }

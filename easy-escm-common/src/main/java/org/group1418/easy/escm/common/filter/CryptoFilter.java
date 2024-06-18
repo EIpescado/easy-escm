@@ -6,7 +6,7 @@ import cn.hutool.crypto.CryptoException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
-import org.group1418.easy.escm.common.config.properties.EasyEscmApiDecryptConfig;
+import org.group1418.easy.escm.common.config.properties.EasyEscmApiDecryptProp;
 import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
 import org.group1418.easy.escm.common.filter.wrapper.DecryptRequestBodyWrapper;
 import org.group1418.easy.escm.common.filter.wrapper.EncryptResponseBodyWrapper;
@@ -38,7 +38,7 @@ import java.io.IOException;
 @Slf4j
 public class CryptoFilter implements Filter {
 
-    private final EasyEscmApiDecryptConfig apiDecryptConfig;
+    private final EasyEscmApiDecryptProp apiDecryptConfig;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

@@ -4,11 +4,11 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.plugins.InterceptorIgnoreHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.constant.GlobalConstants;
-import org.redisson.api.NameMapper;
+import org.group1418.easy.escm.common.tenant.TenantHelper;
 
 /**
  * TenantRedisKeyPrefixNameMapper
- * redis 缓存key前缀处理
+ * redis 缓存key前缀处理, 区分不同租户的缓存
  *
  * @author yq 2024/6/11 13:48
  */
@@ -30,16 +30,17 @@ public class TenantRedisKeyPrefixNameMapper extends RedisKeyPrefixNameMapper {
         if (StrUtil.isBlank(name)) {
             return null;
         }
+        //全局缓存
+        if (StrUtil.startWith(name, GlobalConstants.GLOBAL_REDIS_KEY)) {
+            return super.map(name);
+        }
+        //支持忽略租户
         if (InterceptorIgnoreHelper.willIgnoreTenantLine("")) {
             return super.map(name);
         }
-        if (StrUtil.contains(name, GlobalConstants.GLOBAL_REDIS_KEY)) {
-            return super.map(name);
-        }
-//        String tenantId = TenantHelper.getTenantId();
-        String tenantId = "";
+        String tenantId = TenantHelper.getTenantId();
         if (StrUtil.isBlank(tenantId)) {
-            log.error("无法获取有效的租户id -> Null");
+            log.error("[{}]无法获取有效的租户编码",name);
         }
         if (StrUtil.isNotBlank(tenantId) && StrUtil.startWith(name, tenantId)) {
             // 如果存在则直接返回
@@ -59,16 +60,17 @@ public class TenantRedisKeyPrefixNameMapper extends RedisKeyPrefixNameMapper {
         if (StrUtil.isBlank(unmap)) {
             return null;
         }
+        //全局缓存
+        if (StrUtil.startWith(name, GlobalConstants.GLOBAL_REDIS_KEY)) {
+            return super.unmap(name);
+        }
+        //支持忽略租户
         if (InterceptorIgnoreHelper.willIgnoreTenantLine("")) {
             return super.unmap(name);
         }
-        if (StrUtil.contains(name, GlobalConstants.GLOBAL_REDIS_KEY)) {
-            return super.unmap(name);
-        }
-//        String tenantId = TenantHelper.getTenantId();
-        String tenantId = "";
+        String tenantId = TenantHelper.getTenantId();
         if (StrUtil.isBlank(tenantId)) {
-            log.error("无法获取有效的租户id -> Null");
+            log.error("[{}]无法获取有效的租户编码",name);
         }
         if (StrUtil.isNotBlank(tenantId) && StrUtil.startWith(unmap, tenantId)) {
             // 如果存在则删除

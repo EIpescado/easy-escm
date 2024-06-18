@@ -15,9 +15,9 @@ public class CurrentUser {
     private Long id;
 
     /**
-     * 租户ID
+     * 租户编码
      */
-    private Long tenantId;
+    private String tenantId;
 
     /**
      * 昵称

@@ -19,7 +19,8 @@ public class FastJson2JsonRedissonCodec extends JSONCodec {
 
     static final Filter AUTO_TYPE_FILTER = JSONReader.autoTypeFilter(
             // 按需加上需要支持自动类型的类名前缀，范围越小越安全
-            "org.group1418"
+            "org.group1418",
+            "cn.dev33.satoken"
     );
 
     private final Encoder encoder;

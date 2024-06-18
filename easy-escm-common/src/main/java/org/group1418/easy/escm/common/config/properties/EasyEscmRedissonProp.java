@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "easy.escm.redisson-config")
 @Data
 @Component
-public class EasyEscmRedissonConfig {
+public class EasyEscmRedissonProp {
     /**
      * redis缓存key前缀
      */

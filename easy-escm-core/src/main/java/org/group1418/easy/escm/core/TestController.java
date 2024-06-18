@@ -7,8 +7,8 @@ import cn.dev33.satoken.util.SaResult;
 import com.alibaba.fastjson2.JSONObject;
 import org.group1418.easy.escm.common.annotation.ApiEncrypt;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfig;
-import org.group1418.easy.escm.common.saToken.CurrentUserHelper;
+import org.group1418.easy.escm.common.config.properties.EasyEscmProp;
+import org.group1418.easy.escm.common.saToken.UserHelper;
 import org.group1418.easy.escm.common.utils.ExcelUtil;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.group1418.easy.escm.core.system.entity.SystemClient;
@@ -35,7 +35,7 @@ import java.util.List;
 public class TestController {
 
     @Autowired
-    private EasyEscmConfig easyEscmConfig;
+    private EasyEscmProp easyEscmProp;
     @Autowired
     private TestService testService;
     @Autowired
@@ -66,7 +66,7 @@ public class TestController {
     // 查询 Token 信息  ---- http://localhost:8081/acc/tokenInfo
     @GetMapping("tokenInfo")
     public SaResult tokenInfo() {
-        return SaResult.data(CurrentUserHelper.currentUser());
+        return SaResult.data(UserHelper.currentUser());
     }
 
     // 测试注销  ---- http://localhost:8081/acc/logout

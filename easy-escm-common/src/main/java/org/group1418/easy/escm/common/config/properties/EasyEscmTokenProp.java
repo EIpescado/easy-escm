@@ -22,7 +22,7 @@ import java.util.List;
 @Accessors(chain = true)
 @ConfigurationProperties(prefix = "easy.escm.token-config")
 @Component
-public class EasyEscmTokenConfig extends SaTokenConfig {
+public class EasyEscmTokenProp extends SaTokenConfig {
     private static final long serialVersionUID = 8721863946149596295L;
     /**
      * token 名称 （同时也是： cookie 名称、提交 token 时参数的名称、存储 token 时的 key 前缀）
@@ -30,15 +30,15 @@ public class EasyEscmTokenConfig extends SaTokenConfig {
     private String tokenName = "easy-auth";
 
     /**
-     * token 有效期（单位：秒） 默认30天，-1 代表永久有效
+     * token 有效期（单位：秒） 默认1天，-1 代表永久有效
      */
-    private long timeout = 60 * 60 * 24 * 30;
+    private long timeout = 60 * 60 * 24;
 
     /**
      * token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
      * （例如可以设置为 1800 代表 30 分钟内无操作就冻结）
      */
-    private long activeTimeout = -1;
+    private long activeTimeout = 30 * 60;
 
     /**
      * 是否启用动态 activeTimeout 功能，如不需要请设置为 false，节省缓存请求次数

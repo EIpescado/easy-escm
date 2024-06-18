@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
+import org.group1418.easy.escm.common.tenant.TenantHelper;
 import org.group1418.easy.escm.common.utils.PudgeUtil;
 import org.group1418.easy.escm.common.utils.ValidateUtils;
 import org.group1418.easy.escm.core.system.entity.SystemUser;
@@ -35,6 +36,7 @@ public class PasswordAuthStrategy implements IAuthStrategy {
         //todo 验证码相关校验
         String username = loginFo.getUsername();
         String password = loginFo.getPassword();
+        //动态插入登录的租户
         SystemUser user = systemUserService.getUserByUsername(username);
         if (user == null) {
             log.info("用户[{}]不存在", username);

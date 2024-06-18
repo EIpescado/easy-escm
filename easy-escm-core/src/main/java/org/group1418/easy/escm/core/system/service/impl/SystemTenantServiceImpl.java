@@ -1,10 +1,12 @@
 package org.group1418.easy.escm.core.system.service.impl;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
+import org.group1418.easy.escm.common.constant.GlobalConstants;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.utils.DateTimeUtil;
@@ -37,15 +39,17 @@ public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper,
     private final RedisCacheService redisCacheService;
 
     @Override
-    public void check(Long tenantId) {
-        if (tenantId == null) {
+    public void check(String tenantId) {
+        if (StrUtil.isBlank(tenantId)) {
             throw EasyEscmException.i18n("tenant.required");
         }
         //租户不存在
         SystemTenantVo tenant = get(tenantId);
         if (tenant == null) {
+            log.info("租户[{}]不存在",tenantId);
             throw EasyEscmException.i18n("tenant.invalid");
         }
+        log.info("租户[{}]过期时间[{}]",tenantId,DateTimeUtil.formatTime(tenant.getExpireTime()));
         //租户被禁用
         if (AbleStateEnum.OFF == tenant.getState()) {
             throw EasyEscmException.i18n("tenant.disabled");
@@ -75,7 +79,12 @@ public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper,
 
     @Override
     public SystemTenantVo get(Long id) {
-        return redisCacheService.hashRound(CacheConstant.Hashs.SYSTEM_TENANT, Long.toString(id), () -> baseMapper.get(id), null);
+        return baseMapper.get(id);
+    }
+
+    @Override
+    public SystemTenantVo get(String tenantId) {
+        return redisCacheService.hashRound(GlobalConstants.Hashs.SYSTEM_TENANT, tenantId, () -> baseMapper.getByTenantId(tenantId), null);
     }
 
     @Override

@@ -6,10 +6,9 @@ import org.group1418.easy.escm.common.base.obj.TenantEntity;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 
 /**
- * @author yq
- * @date 2020/09/21 14:11
- * @description 角色
- * @since V1.0.0
+ * 角色
+ *
+ * @author yq 2020/09/21 14:11
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

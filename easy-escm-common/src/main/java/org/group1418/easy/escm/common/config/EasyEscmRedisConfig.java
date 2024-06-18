@@ -6,13 +6,14 @@ import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSeria
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.cache.TenantRedisKeyPrefixNameMapper;
-import org.group1418.easy.escm.common.config.properties.EasyEscmRedissonConfig;
+import org.group1418.easy.escm.common.config.properties.EasyEscmRedissonProp;
 import org.group1418.easy.escm.common.serializer.FastJson2JsonRedissonCodec;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.codec.CompositeCodec;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.spring.starter.RedissonAutoConfigurationCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
@@ -38,11 +39,32 @@ import java.util.List;
 @EnableConfigurationProperties({RedisProperties.class})
 public class EasyEscmRedisConfig extends CachingConfigurerSupport {
 
-    private final EasyEscmRedissonConfig easyEscmRedissonConfig;
+    private final EasyEscmRedissonProp easyEscmRedissonProp;
 
-    public EasyEscmRedisConfig(EasyEscmRedissonConfig easyEscmRedissonConfig) {
-        this.easyEscmRedissonConfig = easyEscmRedissonConfig;
+    public EasyEscmRedisConfig(EasyEscmRedissonProp easyEscmRedissonProp) {
+        this.easyEscmRedissonProp = easyEscmRedissonProp;
     }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "redisTemplate")
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        log.info("注入自定义 redisTemplate<String,Object>");
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        GenericFastJsonRedisSerializer fastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
+        // value值的序列化采用fastJsonRedisSerializer
+        template.setValueSerializer(fastJsonRedisSerializer);
+        template.setHashValueSerializer(fastJsonRedisSerializer);
+        // key的序列化采用StringRedisSerializer
+        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        template.setKeySerializer(stringRedisSerializer);
+        template.setHashKeySerializer(stringRedisSerializer);
+
+        template.setDefaultSerializer(fastJsonRedisSerializer);
+        template.setConnectionFactory(redisConnectionFactory);
+        template.afterPropertiesSet();
+        return template;
+    }
+
 
     @Bean
     public RedisCacheService customRedisCacheService(RedissonClient redissonClient) {
@@ -93,19 +115,19 @@ public class EasyEscmRedisConfig extends CachingConfigurerSupport {
             CompositeCodec codec = new CompositeCodec(StringCodec.INSTANCE, fastJson2Codec, fastJson2Codec);
             //数据序列化和反序列化
             config.setCodec(codec)
-                    .setThreads(easyEscmRedissonConfig.getThreads())
-                    .setNettyThreads(easyEscmRedissonConfig.getNettyThreads())
+                    .setThreads(easyEscmRedissonProp.getThreads())
+                    .setNettyThreads(easyEscmRedissonProp.getNettyThreads())
                     //LUA脚本缓存
                     .setUseScriptCache(true);
             //redis cluster
-            if (easyEscmRedissonConfig.getClusterServersConfig() != null) {
+            if (easyEscmRedissonProp.getClusterServersConfig() != null) {
                 List<String> nodes = redisProperties.getCluster().getNodes();
                 ClusterServersConfig clusterServersConfig = config.useClusterServers();
                 if (CollUtil.isNotEmpty(nodes)) {
                     nodes.forEach(node -> clusterServersConfig.addNodeAddress(buildNodeAddress(node, redisProperties.isSsl())));
                 }
                 clusterServersConfig.setPassword(redisProperties.getPassword())
-                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(easyEscmRedissonConfig.getKeyPrefix()))
+                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(easyEscmRedissonProp.getKeyPrefix()))
                         .setTimeout(clusterServersConfig.getTimeout())
                         .setClientName(clusterServersConfig.getClientName())
                         .setIdleConnectionTimeout(clusterServersConfig.getIdleConnectionTimeout())
@@ -118,13 +140,13 @@ public class EasyEscmRedisConfig extends CachingConfigurerSupport {
                         .setSubscriptionMode(clusterServersConfig.getSubscriptionMode());
 
             } else {
-                EasyEscmRedissonConfig.SingleServerConfig singleServerConfig = easyEscmRedissonConfig.getSingleServerConfig();
+                EasyEscmRedissonProp.SingleServerConfig singleServerConfig = easyEscmRedissonProp.getSingleServerConfig();
                 //单节点
                 config.useSingleServer()
                         .setAddress(buildNodeAddress(redisProperties.getHost(), redisProperties.getPort(), redisProperties.isSsl()))
                         .setDatabase(redisProperties.getDatabase())
                         .setPassword(redisProperties.getPassword())
-                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(easyEscmRedissonConfig.getKeyPrefix()))
+                        .setNameMapper(new TenantRedisKeyPrefixNameMapper(easyEscmRedissonProp.getKeyPrefix()))
                         .setTimeout(singleServerConfig.getTimeout())
                         .setClientName(singleServerConfig.getClientName())
                         .setIdleConnectionTimeout(singleServerConfig.getIdleConnectionTimeout())
@@ -160,21 +182,4 @@ public class EasyEscmRedisConfig extends CachingConfigurerSupport {
         return StrUtil.format(format, node);
     }
 
-
-    public static RedisTemplate<String, Object> getDefaultRedisTemplate(RedisConnectionFactory connectionFactory,
-                                                                        GenericFastJsonRedisSerializer fastJsonRedisSerializer) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        // value值的序列化采用fastJsonRedisSerializer
-        template.setValueSerializer(fastJsonRedisSerializer);
-        template.setHashValueSerializer(fastJsonRedisSerializer);
-        // key的序列化采用StringRedisSerializer
-        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        template.setKeySerializer(stringRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-
-        template.setDefaultSerializer(fastJsonRedisSerializer);
-        template.setConnectionFactory(connectionFactory);
-        template.afterPropertiesSet();
-        return template;
-    }
 }

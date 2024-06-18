@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
-import org.group1418.easy.escm.common.config.properties.EasyEscmConfig;
+import org.group1418.easy.escm.common.config.properties.EasyEscmProp;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
 import org.group1418.easy.escm.common.saToken.obj.CurrentUser;
@@ -35,7 +35,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, SystemUser> implements ISystemUserService {
 
-    private final EasyEscmConfig easyEscmConfig;
+    private final EasyEscmProp easyEscmProp;
     private final ICoreRelationService coreRelationService;
 
     @Override
@@ -60,7 +60,7 @@ public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, Sys
         SystemUser user = new SystemUser();
         BeanUtils.copyProperties(fo, user);
         //给予初始密码
-        user.setPassword(PudgeUtil.encodePwd(easyEscmConfig.getUserDefaultPassword()));
+        user.setPassword(PudgeUtil.encodePwd(easyEscmProp.getUserDefaultPassword()));
         //正常
         user.setState(UserStateEnum.NORMAL);
         baseMapper.insert(user);
@@ -134,6 +134,6 @@ public class SystemUserServiceImpl extends BaseServiceImpl<SystemUserMapper, Sys
     }
 
     private String getDefaultPassword() {
-        return PudgeUtil.encodePwd(easyEscmConfig.getUserDefaultPassword());
+        return PudgeUtil.encodePwd(easyEscmProp.getUserDefaultPassword());
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "easy.escm")
 @Data
 @Component
-public class EasyEscmConfig {
+public class EasyEscmProp {
 
     /**
      * 系统名称
@@ -54,6 +54,6 @@ public class EasyEscmConfig {
     /**
      * 异步线程池配置, 自动注入spring上下文,系统中止自动关闭, 注入使用需配合@Lazy
      */
-    private List<EasyEscmAsyncConfig> asyncConfigs;
+    private List<EasyEscmAsyncProp> asyncConfigs;
 
 }

@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.group1418.easy.escm.common.base.impl.BaseServiceImpl;
 import org.group1418.easy.escm.common.base.obj.BasePageQo;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
+import org.group1418.easy.escm.common.constant.GlobalConstants;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
-import org.group1418.easy.escm.core.constant.CacheConstant;
 import org.group1418.easy.escm.core.system.entity.SystemClient;
 import org.group1418.easy.escm.core.system.mapper.SystemClientMapper;
 import org.group1418.easy.escm.core.system.pojo.fo.SystemClientFo;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * system client
+ *
  * @author yq 2021-04-22 15:09:29
  */
 @Service
@@ -57,7 +58,7 @@ public class SystemClientServiceImpl extends BaseServiceImpl<SystemClientMapper,
 
     @Override
     public SystemClientVo getByClientId(String clientId) {
-        return redisCacheService.hashRound(CacheConstant.Hashs.SYSTEM_CLIENT, clientId, () -> baseMapper.getByClientId(clientId), null);
+        return redisCacheService.hashRound(GlobalConstants.Hashs.SYSTEM_CLIENT, clientId, () -> baseMapper.getByClientId(clientId), null);
     }
 
 }

@@ -4,7 +4,7 @@ import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.SaTokenException;
 import cn.hutool.core.map.MapBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.group1418.easy.escm.common.config.properties.EasyEscmTokenConfig;
+import org.group1418.easy.escm.common.config.properties.EasyEscmTokenProp;
 import org.group1418.easy.escm.common.enums.EasyEscmTipEnum;
 import org.group1418.easy.escm.common.wrapper.R;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +37,7 @@ public class SaTokenConfig {
 
     @Bean
     @Primary
-    public cn.dev33.satoken.config.SaTokenConfig getSaTokenConfigPrimary(EasyEscmTokenConfig tokenConfig) {
+    public cn.dev33.satoken.config.SaTokenConfig getSaTokenConfigPrimary(EasyEscmTokenProp tokenConfig) {
         return tokenConfig;
     }
 

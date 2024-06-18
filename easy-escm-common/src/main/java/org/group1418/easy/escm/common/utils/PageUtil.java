@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
+ * PageUtil 分页查询工具
  * @author yq 2024/1/2 14:54
- * @description PageUtil 分页查询工具
  */
 public class PageUtil {
 

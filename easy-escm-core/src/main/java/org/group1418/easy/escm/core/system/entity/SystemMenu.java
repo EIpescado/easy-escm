@@ -2,7 +2,7 @@ package org.group1418.easy.escm.core.system.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.group1418.easy.escm.common.base.obj.TenantEntity;
+import org.group1418.easy.escm.common.base.obj.BaseEntity;
 
 /**
  * 菜单
@@ -11,7 +11,7 @@ import org.group1418.easy.escm.common.base.obj.TenantEntity;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class SystemMenu extends TenantEntity {
+public class SystemMenu extends BaseEntity {
     private static final long serialVersionUID = 5786814160655628952L;
 
     /**

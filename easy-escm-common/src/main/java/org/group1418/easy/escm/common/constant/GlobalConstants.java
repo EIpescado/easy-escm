@@ -13,6 +13,39 @@ public interface GlobalConstants {
     String GLOBAL_REDIS_KEY = "global:";
 
 
+    interface Strings {
+        /**
+         * 动态租户
+         */
+        String DYNAMIC_TENANT_KEY = GlobalConstants.GLOBAL_REDIS_KEY + "dynamic_tenant";
+    }
+
+    interface Hashs {
+        /**
+         * 系统客户端
+         */
+        String SYSTEM_CLIENT = GLOBAL_REDIS_KEY + "system_client";
+
+        /**
+         * 系统菜单
+         */
+        String SYSTEM_MENU = GLOBAL_REDIS_KEY + "system_menu";
+
+        /**
+         * 系统按钮
+         */
+        String SYSTEM_BUTTON = GLOBAL_REDIS_KEY + "system_button";
+
+        /**
+         * 租户
+         */
+        String SYSTEM_TENANT = GLOBAL_REDIS_KEY + "system_tenant";
+    }
+
+    interface Lists {
+    }
+
+
     /**
      * 验证码 redis key
      */

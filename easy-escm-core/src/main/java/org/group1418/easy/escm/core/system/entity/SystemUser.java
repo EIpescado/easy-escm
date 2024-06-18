@@ -4,7 +4,6 @@ package org.group1418.easy.escm.core.system.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import org.group1418.easy.escm.common.base.obj.BaseEntity;
 import org.group1418.easy.escm.common.base.obj.TenantEntity;
 import org.group1418.easy.escm.common.enums.system.UserStateEnum;
 
