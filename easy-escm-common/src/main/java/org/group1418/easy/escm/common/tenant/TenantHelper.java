@@ -1,5 +1,6 @@
 package org.group1418.easy.escm.common.tenant;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.ttl.TransmittableThreadLocal;
 import com.baomidou.mybatisplus.core.plugins.IgnoreStrategy;
@@ -9,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.constant.GlobalConstants;
-import org.group1418.easy.escm.common.saToken.UserHelper;
 import org.group1418.easy.escm.common.spring.SpringContextHolder;
 
 import java.util.function.Supplier;
@@ -84,23 +84,16 @@ public class TenantHelper {
      */
     public static void setDynamic(boolean isLogin, String tenantId, boolean global) {
         if (!isLogin || !global) {
-            log.info("setDynamic 未登录,线程缓存[{}]", tenantId);
             TEMP_DYNAMIC_TENANT.set(tenantId);
             return;
         }
-        REDIS_CACHE_SERVICE.set(GlobalConstants.Strings.DYNAMIC_TENANT_KEY, getUserId(), () -> tenantId, null);
-    }
-
-    private static String getUserId() {
-        Long id = UserHelper.id(false);
-        return id == null ? StrUtil.EMPTY : id.toString();
+        REDIS_CACHE_SERVICE.set(GlobalConstants.Strings.DYNAMIC_TENANT_KEY, StpUtil.getTokenValue(), () -> tenantId, null);
     }
 
     /**
      * 获取动态租户(一直有效 需要手动清理)
      * <p>
      * 如果为未登录状态下 那么只在当前线程内生效
-     *
      */
     public static String getDynamic() {
         // 如果线程内有值 优先返回
@@ -108,7 +101,14 @@ public class TenantHelper {
         if (StrUtil.isNotBlank(tenantId)) {
             return tenantId;
         }
-        tenantId = REDIS_CACHE_SERVICE.get(GlobalConstants.Strings.DYNAMIC_TENANT_KEY, getUserId());
+        String tokenValue = StpUtil.getTokenValue();
+        // 全局动态租户
+        tenantId = REDIS_CACHE_SERVICE.get(GlobalConstants.Strings.DYNAMIC_TENANT_KEY, tokenValue);
+        if (StrUtil.isNotBlank(tenantId)) {
+            return tenantId;
+        }
+        // token登录租户
+        tenantId = REDIS_CACHE_SERVICE.get(GlobalConstants.Strings.TOKEN_TENANT, tokenValue);
         return tenantId;
     }
 
@@ -123,7 +123,7 @@ public class TenantHelper {
             return;
         }
         TEMP_DYNAMIC_TENANT.remove();
-        REDIS_CACHE_SERVICE.del(GlobalConstants.Strings.DYNAMIC_TENANT_KEY, getUserId());
+        REDIS_CACHE_SERVICE.del(GlobalConstants.Strings.DYNAMIC_TENANT_KEY, StpUtil.getTokenValue());
     }
 
     /**
@@ -159,14 +159,28 @@ public class TenantHelper {
     }
 
     /**
+     * 设置token对应的租户ID
+     *
+     * @param token    凭证
+     * @param tenantId 租户ID
+     */
+    public static void setCurrentTokenTenant(String token, String tenantId) {
+        REDIS_CACHE_SERVICE.set(GlobalConstants.Strings.TOKEN_TENANT, token, () -> tenantId, null);
+    }
+
+    /**
      * 获取当前租户id(动态租户优先)
      */
     public static String getTenantId() {
-        String tenantId = TenantHelper.getDynamic();
-        if (StrUtil.isBlank(tenantId)) {
-            tenantId = UserHelper.tenantId(false);
-        }
-        return tenantId;
+        return TenantHelper.getDynamic();
+    }
+
+    /**
+     * 获取当前凭证对应租户并放入线程上下文
+     */
+    public static void setLocal() {
+        String tenantId = REDIS_CACHE_SERVICE.get(GlobalConstants.Strings.TOKEN_TENANT, StpUtil.getTokenValue());
+        TEMP_DYNAMIC_TENANT.set(tenantId);
     }
 
 }

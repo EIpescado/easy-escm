@@ -38,6 +38,7 @@ public class TenantRedisKeyPrefixNameMapper extends RedisKeyPrefixNameMapper {
         if (InterceptorIgnoreHelper.willIgnoreTenantLine("")) {
             return super.map(name);
         }
+        //为缓存key添加租户前缀
         String tenantId = TenantHelper.getTenantId();
         if (StrUtil.isBlank(tenantId)) {
             log.error("[{}]无法获取有效的租户编码",name);
@@ -68,6 +69,7 @@ public class TenantRedisKeyPrefixNameMapper extends RedisKeyPrefixNameMapper {
         if (InterceptorIgnoreHelper.willIgnoreTenantLine("")) {
             return super.unmap(name);
         }
+        //为缓存key移除租户前缀
         String tenantId = TenantHelper.getTenantId();
         if (StrUtil.isBlank(tenantId)) {
             log.error("[{}]无法获取有效的租户编码",name);

@@ -39,7 +39,7 @@ public interface IAuthStrategy {
             throw EasyEscmException.i18n("auth.grant.type.not.support");
         }
         IAuthStrategy instance = SpringContextHolder.getBean(beanName, IAuthStrategy.class);
-        return TenantHelper.dynamic(false,tenantId, () -> {
+        return TenantHelper.dynamic(false, tenantId, () -> {
             //登录返回user
             SystemUser user = instance.login(body, client);
             ISystemUserService systemUserService = SpringContextHolder.getBean(ISystemUserService.class);
@@ -60,6 +60,8 @@ public interface IAuthStrategy {
             loginVo.setAccessToken(StpUtil.getTokenValue());
             loginVo.setExpireIn(StpUtil.getTokenTimeout());
             loginVo.setClientId(client.getClientId());
+            //设置token 租户
+            TenantHelper.setCurrentTokenTenant(loginVo.getAccessToken(), tenantId);
             return loginVo;
         });
     }

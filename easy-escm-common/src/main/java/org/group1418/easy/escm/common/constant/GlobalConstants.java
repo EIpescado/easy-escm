@@ -18,6 +18,10 @@ public interface GlobalConstants {
          * 动态租户
          */
         String DYNAMIC_TENANT_KEY = GlobalConstants.GLOBAL_REDIS_KEY + "dynamic_tenant";
+        /**
+         * token对应的租户
+         */
+        String TOKEN_TENANT = GlobalConstants.GLOBAL_REDIS_KEY + "token_tenant";
     }
 
     interface Hashs {

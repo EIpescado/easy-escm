@@ -25,4 +25,9 @@ public class EasyEscmTenantProp {
      */
     private List<String> excludes;
 
+    /**
+     * 租户ID字段名
+     */
+    private String tenantIdColumn = "tenant_id";
+
 }

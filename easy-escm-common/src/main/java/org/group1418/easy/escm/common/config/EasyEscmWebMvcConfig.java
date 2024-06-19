@@ -14,6 +14,7 @@ import org.group1418.easy.escm.common.config.properties.EasyEscmTokenProp;
 import org.group1418.easy.escm.common.enums.IBaseEnum;
 import org.group1418.easy.escm.common.serializer.BaseEnum2KeyWriter;
 import org.group1418.easy.escm.common.serializer.LocalDateWriter;
+import org.group1418.easy.escm.common.tenant.TenantHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -72,13 +73,15 @@ public class EasyEscmWebMvcConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册 Sa-Token 拦截器，打开注解式鉴权功能,除开 @SaIgnore 标识和 配置所有接口需登录,
+        // 注册 Sa-Token 拦截器，打开注解式鉴权功能,除开 @SaIgnore 标识和 配置,其他所有接口需登录,
         registry.addInterceptor(new SaInterceptor(handle ->
                 SaRouter.match("/**")
                         .notMatch(easyEscmTokenProp.getNotCheckLoginPaths())
                         .check(r -> {
+                            //将租户设置到线程上下文,提高效率
+                            TenantHelper.setLocal();
+                            //检查是否登录
                             StpUtil.checkLogin();
-                            //todo 检查header或参数中的clientId与token一致
                         }))
         ).addPathPatterns("/**");
     }

@@ -25,13 +25,18 @@ public class EasyEscmTenantLineHandler implements TenantLineHandler {
     private final EasyEscmTenantProp easyEscmTenantProp;
 
     @Override
+    public String getTenantIdColumn() {
+        return easyEscmTenantProp.getTenantIdColumn();
+    }
+
+    @Override
     public Expression getTenantId() {
         String tenantId = TenantHelper.getTenantId();
         if (StrUtil.isBlank(tenantId)) {
             log.error("当前上下文无有效租户编码");
             return new NullValue();
         }
-        log.info("LineHandler getTenantId [{}]",tenantId);
+        log.info("tenantId [{}]",tenantId);
         // 返回固定租户
         return new StringValue(tenantId);
     }

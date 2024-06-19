@@ -37,23 +37,23 @@ public class BaseTo implements Serializable {
     /**
      * 创建用户ID
      */
-    private Long createUserId;
+    private Long creatorId;
     /**
      * 创建用户
      */
-    private String createUser;
+    private String creator;
 
     /**
      * 最后修改用户ID
      */
-    private Long updateUserId;
+    private Long updaterId;
     /**
      * 最后修改用户
      */
-    private String updateUser;
+    private String updater;
 
     /**
      * 租户ID
      */
-    private Long tenantId;
+    private String tenantId;
 }

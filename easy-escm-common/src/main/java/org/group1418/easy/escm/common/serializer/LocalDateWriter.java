@@ -21,8 +21,7 @@ public class LocalDateWriter implements ObjectWriter<LocalDate> {
         if (value == null) {
             jsonWriter.writeNull();
         } else {
-            String dateFormat = jsonWriter.getContext().getDateFormat();
-            DateTimeFormatter dateFormatter = jsonWriter.getContext().getDateFormatter();
+            //todo 支持@DateTimeFormat
             jsonWriter.writeString(DateTimeUtil.formatDate(value));
         }
     }
