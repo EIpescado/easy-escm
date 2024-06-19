@@ -61,7 +61,7 @@ public interface IAuthStrategy {
             loginVo.setExpireIn(StpUtil.getTokenTimeout());
             loginVo.setClientId(client.getClientId());
             //设置token 租户
-            TenantHelper.setCurrentTokenTenant(loginVo.getAccessToken(), tenantId);
+            TenantHelper.setTokenTenant(loginVo.getAccessToken(), tenantId, client.getTimeout());
             return loginVo;
         });
     }

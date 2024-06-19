@@ -1,8 +1,5 @@
 package org.group1418.easy.escm.common.config;
 
-import cn.dev33.satoken.interceptor.SaInterceptor;
-import cn.dev33.satoken.router.SaRouter;
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson2.JSON;
@@ -12,9 +9,9 @@ import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageCo
 import lombok.extern.slf4j.Slf4j;
 import org.group1418.easy.escm.common.config.properties.EasyEscmTokenProp;
 import org.group1418.easy.escm.common.enums.IBaseEnum;
+import org.group1418.easy.escm.common.interceptor.EasyEscmSaInterceptor;
 import org.group1418.easy.escm.common.serializer.BaseEnum2KeyWriter;
 import org.group1418.easy.escm.common.serializer.LocalDateWriter;
-import org.group1418.easy.escm.common.tenant.TenantHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -74,16 +71,7 @@ public class EasyEscmWebMvcConfig extends WebMvcConfigurationSupport {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册 Sa-Token 拦截器，打开注解式鉴权功能,除开 @SaIgnore 标识和 配置,其他所有接口需登录,
-        registry.addInterceptor(new SaInterceptor(handle ->
-                SaRouter.match("/**")
-                        .notMatch(easyEscmTokenProp.getNotCheckLoginPaths())
-                        .check(r -> {
-                            //将租户设置到线程上下文,提高效率
-                            TenantHelper.setLocal();
-                            //检查是否登录
-                            StpUtil.checkLogin();
-                        }))
-        ).addPathPatterns("/**");
+        registry.addInterceptor(new EasyEscmSaInterceptor(easyEscmTokenProp)).addPathPatterns("/**");
     }
 
     @Override

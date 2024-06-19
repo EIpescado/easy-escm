@@ -36,7 +36,6 @@ public class EasyEscmTenantLineHandler implements TenantLineHandler {
             log.error("当前上下文无有效租户编码");
             return new NullValue();
         }
-        log.info("tenantId [{}]",tenantId);
         // 返回固定租户
         return new StringValue(tenantId);
     }
@@ -51,12 +50,12 @@ public class EasyEscmTenantLineHandler implements TenantLineHandler {
             List<String> excludes = easyEscmTenantProp.getExcludes();
             // 非业务表
             List<String> tables = ListUtil.toList();
-            if(CollUtil.isNotEmpty(excludes)){
+            if (CollUtil.isNotEmpty(excludes)) {
                 tables.addAll(excludes);
             }
             ignore = tables.contains(tableName);
         }
-        log.info("ignoreTable [{}],[{}],ignore[{}]",tableName,tenantId,ignore);
+        log.info("table [{}],tenant[{}],ignore[{}]", tableName, tenantId, ignore);
         return ignore;
     }
 

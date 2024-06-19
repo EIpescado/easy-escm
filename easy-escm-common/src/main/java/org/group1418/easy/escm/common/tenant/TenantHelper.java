@@ -163,9 +163,10 @@ public class TenantHelper {
      *
      * @param token    凭证
      * @param tenantId 租户ID
+     * @param ttl      有效时间 单位秒
      */
-    public static void setCurrentTokenTenant(String token, String tenantId) {
-        REDIS_CACHE_SERVICE.set(GlobalConstants.Strings.TOKEN_TENANT, token, () -> tenantId, null);
+    public static void setTokenTenant(String token, String tenantId, long ttl) {
+        REDIS_CACHE_SERVICE.set(GlobalConstants.Strings.TOKEN_TENANT, token, ttl, () -> tenantId, null);
     }
 
     /**
@@ -181,6 +182,15 @@ public class TenantHelper {
     public static void setLocal() {
         String tenantId = REDIS_CACHE_SERVICE.get(GlobalConstants.Strings.TOKEN_TENANT, StpUtil.getTokenValue());
         TEMP_DYNAMIC_TENANT.set(tenantId);
+        log.info("set local tenant[{}]",tenantId);
+    }
+
+    /**
+     * 移除当前凭证对应租户并放入线程上下文
+     */
+    public static void clearLocal() {
+        TEMP_DYNAMIC_TENANT.remove();
+        log.info("remove local tenant");
     }
 
 }

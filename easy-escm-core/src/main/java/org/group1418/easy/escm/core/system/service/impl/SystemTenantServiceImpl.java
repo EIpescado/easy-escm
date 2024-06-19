@@ -9,6 +9,7 @@ import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.constant.GlobalConstants;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
+import org.group1418.easy.escm.common.tenant.TenantHelper;
 import org.group1418.easy.escm.common.utils.DateTimeUtil;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
@@ -95,6 +96,6 @@ public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper,
 
     @Override
     public PageR<SystemTenantTo> search(SystemTenantQo qo) {
-        return PageUtil.select(qo, baseMapper::search);
+        return TenantHelper.ignore(() -> PageUtil.select(qo, baseMapper::search));
     }
 }
