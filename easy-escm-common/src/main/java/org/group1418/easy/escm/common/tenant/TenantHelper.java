@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 public class TenantHelper {
 
     private static final ThreadLocal<String> TEMP_DYNAMIC_TENANT = new TransmittableThreadLocal<>();
+    private static final ThreadLocal<String> CURRENT_LOGIN_TENANT = new TransmittableThreadLocal<>();
 
     private static final RedisCacheService REDIS_CACHE_SERVICE = SpringContextHolder.getBean(RedisCacheService.class);
 
@@ -69,8 +70,8 @@ public class TenantHelper {
         }
     }
 
-    public static void setDynamic(boolean isLogin, String tenantId) {
-        setDynamic(isLogin, tenantId, false);
+    public static void setDynamic(String tenantId) {
+        setDynamic(tenantId, false);
     }
 
     /**
@@ -78,12 +79,12 @@ public class TenantHelper {
      * <p>
      * 如果为未登录状态下 那么只在当前线程内生效
      *
-     * @param isLogin  是否登录
      * @param tenantId 租户id
      * @param global   是否全局生效
      */
-    public static void setDynamic(boolean isLogin, String tenantId, boolean global) {
-        if (!isLogin || !global) {
+    public static void setDynamic(String tenantId, boolean global) {
+        log.info("set dynamic tenant [{}],global[{}]",tenantId,global);
+        if (!global) {
             TEMP_DYNAMIC_TENANT.set(tenantId);
             return;
         }
@@ -107,6 +108,11 @@ public class TenantHelper {
         if (StrUtil.isNotBlank(tenantId)) {
             return tenantId;
         }
+        //当前登录租户 即token对应的租户
+        tenantId = CURRENT_LOGIN_TENANT.get();
+        if (StrUtil.isNotBlank(tenantId)) {
+            return tenantId;
+        }
         // token登录租户
         tenantId = REDIS_CACHE_SERVICE.get(GlobalConstants.Strings.TOKEN_TENANT, tokenValue);
         return tenantId;
@@ -114,47 +120,42 @@ public class TenantHelper {
 
     /**
      * 清除动态租户
-     *
-     * @param isLogin 是否已登录
+     * @param global 是否全局
      */
-    public static void clearDynamic(boolean isLogin) {
-        if (!isLogin) {
+    public static void clearDynamic(boolean global) {
+        if(!global){
             TEMP_DYNAMIC_TENANT.remove();
-            return;
         }
-        TEMP_DYNAMIC_TENANT.remove();
         REDIS_CACHE_SERVICE.del(GlobalConstants.Strings.DYNAMIC_TENANT_KEY, StpUtil.getTokenValue());
     }
 
     /**
      * 在动态租户中执行
      *
-     * @param isLogin  是否登录
      * @param tenantId 租户ID
      * @param handle   处理执行方法
      */
-    public static void dynamic(boolean isLogin, String tenantId, Runnable handle) {
-        setDynamic(isLogin, tenantId);
+    public static void dynamic(String tenantId, Runnable handle) {
+        setDynamic(tenantId);
         try {
             handle.run();
         } finally {
-            clearDynamic(isLogin);
+            clearDynamic(false);
         }
     }
 
     /**
      * 在动态租户中执行
      *
-     * @param isLogin  是否已登录
      * @param tenantId 租户编码
      * @param handle   处理执行方法
      */
-    public static <T> T dynamic(boolean isLogin, String tenantId, Supplier<T> handle) {
-        setDynamic(isLogin, tenantId);
+    public static <T> T dynamic(String tenantId, Supplier<T> handle) {
+        setDynamic(tenantId);
         try {
             return handle.get();
         } finally {
-            clearDynamic(isLogin);
+            clearDynamic(false);
         }
     }
 
@@ -181,15 +182,15 @@ public class TenantHelper {
      */
     public static void setLocal() {
         String tenantId = REDIS_CACHE_SERVICE.get(GlobalConstants.Strings.TOKEN_TENANT, StpUtil.getTokenValue());
-        TEMP_DYNAMIC_TENANT.set(tenantId);
-        log.info("set local tenant[{}]",tenantId);
+        CURRENT_LOGIN_TENANT.set(tenantId);
+        log.info("set local tenant [{}]", tenantId);
     }
 
     /**
      * 移除当前凭证对应租户并放入线程上下文
      */
     public static void clearLocal() {
-        TEMP_DYNAMIC_TENANT.remove();
+        CURRENT_LOGIN_TENANT.remove();
         log.info("remove local tenant");
     }
 

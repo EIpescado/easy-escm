@@ -9,11 +9,9 @@ import org.group1418.easy.escm.common.cache.RedisCacheService;
 import org.group1418.easy.escm.common.constant.GlobalConstants;
 import org.group1418.easy.escm.common.enums.system.AbleStateEnum;
 import org.group1418.easy.escm.common.exception.EasyEscmException;
-import org.group1418.easy.escm.common.tenant.TenantHelper;
 import org.group1418.easy.escm.common.utils.DateTimeUtil;
 import org.group1418.easy.escm.common.utils.PageUtil;
 import org.group1418.easy.escm.common.wrapper.PageR;
-import org.group1418.easy.escm.core.constant.CacheConstant;
 import org.group1418.easy.escm.core.system.entity.SystemTenant;
 import org.group1418.easy.escm.core.system.mapper.SystemTenantMapper;
 import org.group1418.easy.escm.core.system.pojo.fo.SystemTenantFo;
@@ -47,10 +45,10 @@ public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper,
         //租户不存在
         SystemTenantVo tenant = get(tenantId);
         if (tenant == null) {
-            log.info("租户[{}]不存在",tenantId);
+            log.info("租户[{}]不存在", tenantId);
             throw EasyEscmException.i18n("tenant.invalid");
         }
-        log.info("租户[{}]过期时间[{}]",tenantId,DateTimeUtil.formatTime(tenant.getExpireTime()));
+        log.info("租户[{}]过期时间[{}]", tenantId, DateTimeUtil.formatTime(tenant.getExpireTime()));
         //租户被禁用
         if (AbleStateEnum.OFF == tenant.getState()) {
             throw EasyEscmException.i18n("tenant.disabled");
@@ -96,6 +94,6 @@ public class SystemTenantServiceImpl extends BaseServiceImpl<SystemTenantMapper,
 
     @Override
     public PageR<SystemTenantTo> search(SystemTenantQo qo) {
-        return TenantHelper.ignore(() -> PageUtil.select(qo, baseMapper::search));
+        return PageUtil.select(qo, baseMapper::search);
     }
 }

@@ -39,7 +39,7 @@ public interface IAuthStrategy {
             throw EasyEscmException.i18n("auth.grant.type.not.support");
         }
         IAuthStrategy instance = SpringContextHolder.getBean(beanName, IAuthStrategy.class);
-        return TenantHelper.dynamic(false, tenantId, () -> {
+        return TenantHelper.dynamic(tenantId, () -> {
             //登录返回user
             SystemUser user = instance.login(body, client);
             ISystemUserService systemUserService = SpringContextHolder.getBean(ISystemUserService.class);

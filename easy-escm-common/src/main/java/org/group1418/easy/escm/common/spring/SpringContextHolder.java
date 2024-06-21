@@ -269,6 +269,14 @@ public class SpringContextHolder implements BeanFactoryPostProcessor, Applicatio
     }
 
     /**
+     * 获取aop代理对象
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getAopProxyBean(T invoker) {
+        return (T) getBean(invoker.getClass());
+    }
+
+    /**
      * spring上下文初始化前回调,用于初始化一些配置
      *
      * @author yq
